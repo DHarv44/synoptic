@@ -108,6 +108,21 @@ dependency order. Check boxes as slices land.
   values, e.g. from Open-Meteo point queries at the same spot), then fix
   decode or assembly accordingly. Layer defaultEnabled:false until fixed.
 
+## Phase 4 — Sounding Suite (core complete)
+
+- [x] Open-Meteo pressure-level adapter (19 levels; Magnus dewpoint from RH),
+  hour picked from the global timeline; fixture recorded.
+- [x] Science core in `core/met` with 19 vitest reference cases: Bolton
+  LCL, pseudoadiabatic parcel lift, SBCAPE/CIN/LI/PWAT, bulk shear,
+  Bunkers right-mover, SRH. (Stated simplification: no virtual-temp
+  correction.)
+- [x] Skew-T log-p (isobars/skewed isotherms/dry adiabats, T/Td traces,
+  parcel path, CAPE shading), hodograph (height-colored, RM marker),
+  indices table with plain-language tooltips.
+- Deferred to polish: interactive parcel drag, real radiosonde (00z/12z)
+  overlay, moist adiabat/mixing-ratio background lines, 3D column view
+  (Phase 6 R3F), ML/MU parcels.
+
 ## Phase 3+ (coarse; slice when reached)
 
 Wind particles (FBO sim → levels → time-lerp) · Sounding suite (skew-T → indices →
