@@ -43,6 +43,8 @@ export interface FeatureManifest {
   /** Analysis dock panels this feature contributes. */
   panels?: PanelContribution[]
   settings: SettingField[]
+  /** Health-strip source ids this feature consumes (drives rail badges). */
+  sourceIds?: string[]
   defaultEnabled?: boolean
   /** Core capabilities (e.g. units) that expose settings but can't be disabled. */
   alwaysOn?: boolean

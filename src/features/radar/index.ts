@@ -8,6 +8,7 @@ registerFeature({
   description: 'Global composite precipitation radar (RainViewer, 10-min updates).',
   layer: true,
   layerComponent: RadarLayer,
+  sourceIds: ['rainviewer', 'iem-nexrad'],
   defaultEnabled: true,
   settings: [
     {
@@ -23,6 +24,12 @@ registerFeature({
       defaultValue: '6',
     },
     { kind: 'boolean', key: 'smooth', label: 'Smoothing', defaultValue: false },
+    {
+      kind: 'boolean',
+      key: 'conus',
+      label: 'CONUS high-res (IEM NEXRAD)',
+      defaultValue: true,
+    },
     {
       kind: 'number',
       key: 'opacity',

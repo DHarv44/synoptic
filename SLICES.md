@@ -56,16 +56,20 @@ dependency order. Check boxes as slices land.
 
 **Phase 1 exit:** PLAN.md §6 Phase 1 acceptance met; commit tagged `phase-1`.
 
-## Phase 2 — Live Layers (slice list, detail when Phase 1 closes)
+## Phase 2 — Live Layers
 
-- [ ] S10 — Tile-drape engine (slippy tiles on sphere, LOD, fade-in; the risk slice)
-- [ ] S11 — RainViewer global radar layer + trailing-2h loop on the timeline
-- [ ] S12 — MRMS 2-min CONUS mosaic (via proxy) + seamless swap at zoom
-- [ ] S13 — GIBS satellite layers (true color / IR / water vapor)
-- [ ] S14 — Blitzortung lightning websocket + strike pulse shader + density
-- [ ] S15 — METAR station-model plots with zoom clustering
-- [ ] S16 — NWS alert polygons + alert panel + ticker
-- [ ] S17 — Layer rail v2: opacity, ordering, per-layer age badges, failure states
+- [x] S10 — Tile-drape engine (slippy tiles on sphere, LOD, fade-in; the risk slice)
+- [x] S11 — RainViewer global radar layer + trailing-2h loop on the timeline
+- [x] S12 — CONUS high-res mosaic: IEM NEXRAD n0q tiles (5-min, −50 min archive
+  steps), auto-shown over CONUS. Raw MRMS via proxy moves to Phase 6.
+- [x] S13 — GIBS satellite layers (VIIRS true color + IR; GOES sub-daily later)
+- [x] S14 — Blitzortung lightning websocket (LZW decode, flash-decay shader;
+  density layer + strike-rate later)
+- [x] S15 — METAR station-model plots (canvas sprites, grid thinning; via proxy —
+  aviationweather.gov blocks CORS)
+- [x] S16 — NWS alert polygons + alert panel (ticker deferred to a polish slice)
+- [x] S17 — Layer rail v2: opacity sliders, per-layer health badges, failure
+  dimming (manual re-ordering deferred; renderOrder is fixed by design)
 
 ## Phase 3+ (coarse; slice when reached)
 

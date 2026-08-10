@@ -42,6 +42,18 @@ Free sources only; keyless preferred; free-tier keys allowed but live in `server
 (proxy) — never in client code. Respect cadences (per-source schedulers, backoff).
 Fixture mode (`?fixture=<case>`) must keep the whole app bootable offline.
 
+## Toolchain pins & gotchas
+
+- **Vite is pinned to v7 (rollup)** — Vite 8's rolldown optimizer produced duplicate
+  fiber/React chunks ("invalid hook call" at boot). Keep the `resolve.dedupe` +
+  `optimizeDeps.include` config in vite.config.ts.
+- **Hidden Mantine tab panels defer updates** (React 19 `<Activity>`): a hidden
+  tabpanel's DOM can show stale content until its tab is selected. This is correct
+  behavior — do NOT chase it as a state bug, and don't verify panel reactivity by
+  reading hidden panels headlessly; select the tab first.
+- `aviationweather.gov` blocks browser CORS → `/proxy/metar` (vite dev proxy; the
+  prod Express proxy must serve the same route).
+
 ## Dev/verify
 
 - `window.__wx` — dev hook; stores attach themselves (inspect state, set time headlessly).

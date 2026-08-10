@@ -14,6 +14,8 @@ import {
   tileUrl,
   type RainViewerMaps,
 } from '@/features/radar/service'
+import { IEM, iemProduct, iemTileUrl, overConus } from '@/features/radar/iem'
+import { useCameraLatLon } from '@/scene/useCameraLatLon'
 
 const POLL_MS = 120_000
 const LAYER_RADIUS = GLOBE_RADIUS * 1.0008
@@ -40,17 +42,34 @@ export function RadarLayer() {
     })
   }, [])
 
+  const view = useCameraLatLon()
+  const conusEnabled = useFeatureOption<boolean>('radar', 'conus')
+
   if (!maps) return null
   const frame = pickFrame(allFrames(maps), simTime)
   if (!frame) return null
 
+  const product = iemProduct(simTime, Date.now())
+  const showIem = conusEnabled && product !== null && overConus(view.lat, view.lon)
+
   return (
-    <TileLayer
-      urlFor={(z, x, y) => tileUrl(maps, frame, z, x, y, scheme, smooth)}
-      radius={LAYER_RADIUS}
-      opacity={opacity / 100}
-      renderOrder={RENDER_ORDER.tiles}
-      source={RAINVIEWER}
-    />
+    <>
+      <TileLayer
+        urlFor={(z, x, y) => tileUrl(maps, frame, z, x, y, scheme, smooth)}
+        radius={LAYER_RADIUS}
+        opacity={opacity / 100}
+        renderOrder={RENDER_ORDER.tiles}
+        source={RAINVIEWER}
+      />
+      {showIem && (
+        <TileLayer
+          urlFor={(z, x, y) => iemTileUrl(product, z, x, y)}
+          radius={LAYER_RADIUS * 1.0002}
+          opacity={opacity / 100}
+          renderOrder={RENDER_ORDER.tilesOverlay}
+          source={IEM}
+        />
+      )}
+    </>
   )
 }

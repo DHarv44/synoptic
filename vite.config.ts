@@ -17,5 +17,14 @@ export default defineConfig({
   },
   server: {
     port: 5192,
+    // Dev-time CORS shim for endpoints that block browser origins.
+    // The production Express proxy serves the same /proxy/* routes.
+    proxy: {
+      '/proxy/metar': {
+        target: 'https://aviationweather.gov',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/proxy/metar', '/api/data/metar'),
+      },
+    },
   },
 })
