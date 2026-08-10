@@ -1,7 +1,7 @@
 import { useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
 import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
-import { gibsDate, gibsTileUrl, PRODUCTS } from '@/features/satellite/service'
+import { gibsDate, gibsTileTemplate, PRODUCTS } from '@/features/satellite/service'
 
 /** NASA GIBS satellite imagery under the radar layers. */
 export function SatelliteLayer() {
@@ -15,7 +15,7 @@ export function SatelliteLayer() {
       const p = PRODUCTS[product] ?? PRODUCTS.truecolor
       map.addSource('satellite', {
         type: 'raster',
-        tiles: [gibsTileUrl(product, date, 0, 0, 0).replace('/0/0/0.', '/{z}/{y}/{x}.')],
+        tiles: [gibsTileTemplate(product, date)],
         tileSize: 256,
         maxzoom: p.maxZoom,
         attribution: 'Imagery © NASA GIBS',

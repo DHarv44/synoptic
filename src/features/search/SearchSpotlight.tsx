@@ -3,7 +3,7 @@ import { Spotlight } from '@mantine/spotlight'
 import { useDebouncedValue } from '@mantine/hooks'
 import { fetchJson } from '@/core/data/fetchJson'
 import { useProbe } from '@/core/probe/store'
-import { useCameraStore } from '@/scene/cameraStore'
+import { useCameraStore } from '@/map/cameraStore'
 import {
   GEOCODING,
   describeResult,

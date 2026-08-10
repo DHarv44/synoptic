@@ -37,14 +37,8 @@ export function gibsDate(simTimeMs: number, nowMs: number): string {
   return new Date(t).toISOString().slice(0, 10)
 }
 
-export function gibsTileUrl(
-  productKey: string,
-  date: string,
-  z: number,
-  x: number,
-  y: number,
-): string {
-  // Scene tile selection caps at z=6, below every product's maxZoom.
+/** XYZ template (note GIBS path order is z/y/x). */
+export function gibsTileTemplate(productKey: string, date: string): string {
   const p = PRODUCTS[productKey] ?? PRODUCTS.truecolor
-  return `${BASE}/${p.id}/default/${date}/${p.matrixSet}/${z}/${y}/${x}.${p.ext}`
+  return `${BASE}/${p.id}/default/${date}/${p.matrixSet}/{z}/{y}/{x}.${p.ext}`
 }

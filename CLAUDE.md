@@ -14,7 +14,8 @@ Blitzortung…), R3F globe, pro analysis tools (skew-T, radar interrogation), ch
 - **No monoliths:** ~250-line soft cap per file, one component per file, no `utils.ts`
   dumping grounds. Split by responsibility when a file grows.
 - **Layering:** `ui` (dumb primitives) → `features/<x>` (manifest, components, hooks,
-  service, types) → `core` (data, time, settings, units) → `scene`. **Features never
+  service, types) → `core` (data, time, settings, units) → `map` (MapLibre surface;
+  a `scene/` dir returns in Phase 6 for R3F 3D views). **Features never
   import other features** — they meet only through core stores and the registry.
 - **Services are pure TypeScript** (no React) — adapters, decoders, science math live in
   plain functions/classes; hooks wrap them. Science math gets vitest tests against

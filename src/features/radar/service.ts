@@ -33,14 +33,12 @@ export function pickFrame(frames: RadarFrame[], simTimeMs: number): RadarFrame |
   return best
 }
 
-export function tileUrl(
+/** XYZ tile URL template for a frame (maplibre raster `tiles` entry). */
+export function tileUrlTemplate(
   maps: RainViewerMaps,
   frame: RadarFrame,
-  z: number,
-  x: number,
-  y: number,
   scheme: string,
   smooth: boolean,
 ): string {
-  return `${maps.host}${frame.path}/256/${z}/${x}/${y}/${scheme}/${smooth ? '1' : '0'}_1.png`
+  return `${maps.host}${frame.path}/256/{z}/{x}/{y}/${scheme}/${smooth ? '1' : '0'}_1.png`
 }

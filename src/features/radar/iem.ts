@@ -24,6 +24,6 @@ export function iemProduct(simTimeMs: number, nowMs: number): string | null {
   return `nexrad-n0q-900913-m${String(step).padStart(2, '0')}m`
 }
 
-export function iemTileUrl(product: string, z: number, x: number, y: number): string {
-  return `${BASE}/${product}/${z}/${x}/${y}.png`
+export function iemTileTemplate(product: string): string {
+  return `${BASE}/${product}/{z}/{x}/{y}.png`
 }

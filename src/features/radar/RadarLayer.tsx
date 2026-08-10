@@ -10,10 +10,10 @@ import {
   WEATHER_MAPS_URL,
   allFrames,
   pickFrame,
-  tileUrl,
+  tileUrlTemplate,
   type RainViewerMaps,
 } from '@/features/radar/service'
-import { iemProduct, iemTileUrl, CONUS } from '@/features/radar/iem'
+import { iemProduct, iemTileTemplate, CONUS } from '@/features/radar/iem'
 
 const POLL_MS = 120_000
 
@@ -42,8 +42,7 @@ export function RadarLayer() {
   }, [])
 
   const frame = maps ? pickFrame(allFrames(maps), simTime) : null
-  const rvTiles =
-    maps && frame ? tileUrl(maps, frame, 0, 0, 0, scheme, smooth).replace('/0/0/0/', '/{z}/{x}/{y}/') : null
+  const rvTiles = maps && frame ? tileUrlTemplate(maps, frame, scheme, smooth) : null
   const product = iemProduct(simTime, Date.now())
 
   // RainViewer global composite
@@ -92,7 +91,7 @@ export function RadarLayer() {
       if (!conusEnabled || product === null) return
       map.addSource('radar-iem', {
         type: 'raster',
-        tiles: [iemTileUrl(product, 0, 0, 0).replace('/0/0/0.png', '/{z}/{x}/{y}.png')],
+        tiles: [iemTileTemplate(product)],
         tileSize: 256,
         maxzoom: 12,
         bounds: [CONUS.lonMin, CONUS.latMin, CONUS.lonMax, CONUS.latMax],

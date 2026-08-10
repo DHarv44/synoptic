@@ -9,7 +9,7 @@ setWorkerUrl(workerUrl)
 import { useComputedColorScheme } from '@mantine/core'
 import { styleUrl } from '@/map/style'
 import { useProbe } from '@/core/probe/store'
-import { useCameraStore } from '@/scene/cameraStore'
+import { useCameraStore } from '@/map/cameraStore'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
 import { attachDevStore } from '@/dev/wx'
