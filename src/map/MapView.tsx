@@ -10,6 +10,7 @@ import { useComputedColorScheme } from '@mantine/core'
 import { styleUrl } from '@/map/style'
 import { useProbe } from '@/core/probe/store'
 import { useCameraStore } from '@/map/cameraStore'
+import { useMapView } from '@/map/viewStore'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
 import { attachDevStore } from '@/dev/wx'
@@ -63,6 +64,12 @@ export function MapView() {
     map.on('click', (e: MapMouseEvent) => {
       setPoint({ lat: e.lngLat.lat, lon: e.lngLat.lng })
     })
+    const publishBounds = (): void => {
+      const b = map.getBounds()
+      useMapView.getState().setBounds([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()])
+    }
+    map.on('moveend', publishBounds)
+    map.on('load', publishBounds)
     attachDevStore('map', map)
     return () => {
       map.remove()
@@ -77,13 +84,25 @@ export function MapView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- ctx identity churn
   }, [scheme])
 
-  // Fly-to requests from search/panels.
+  // Fly-to / fit-bounds requests from search/panels.
   const flyTarget = useCameraStore((s) => s.target)
+  const fitTarget = useCameraStore((s) => s.fit)
   useEffect(() => {
     if (!ctx || !flyTarget) return
     ctx.map.flyTo({ center: [flyTarget.lon, flyTarget.lat], zoom: Math.max(ctx.map.getZoom(), 7) })
     useCameraStore.getState().consume()
   }, [ctx, flyTarget])
+  useEffect(() => {
+    if (!ctx || !fitTarget) return
+    ctx.map.fitBounds(
+      [
+        [fitTarget[0], fitTarget[1]],
+        [fitTarget[2], fitTarget[3]],
+      ],
+      { padding: 60, maxZoom: 9 },
+    )
+    useCameraStore.getState().consumeFit()
+  }, [ctx, fitTarget])
 
   const layerFeatures = listFeatures().filter((f) => f.layerComponent)
 

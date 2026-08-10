@@ -68,6 +68,10 @@ dependency order. Check boxes as slices land.
 - [x] S15 — METAR station-model plots (canvas sprites, grid thinning; via proxy —
   aviationweather.gov blocks CORS)
 - [x] S16 — NWS alert polygons + alert panel (ticker deferred to a polish slice)
+  - [x] Panel filters to viewport; click a mapped alert → map zooms to its polygon.
+  - Note: zone-based alerts (no polygon in the feed) can't be located without
+    fetching each zone's geometry from api.weather.gov/zones — they sit behind an
+    "unmapped" switch for now; zone-geometry resolution is a future polish item.
 - [x] S17 — Layer rail v2: opacity sliders, per-layer health badges, failure
   dimming (manual re-ordering deferred; renderOrder is fixed by design)
 
