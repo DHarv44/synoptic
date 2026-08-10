@@ -135,10 +135,24 @@ dependency order. Check boxes as slices land.
 - Review note: MeteogramChart and ModelsChart share axis/grid/now-cursor
   boilerplate — extract a chart frame when a third d3 chart appears.
 
-## Phase 3+ (coarse; slice when reached)
+## Phase 6 — Radar Suite (in progress)
 
-Wind particles (FBO sim → levels → time-lerp) · Sounding suite (skew-T → indices →
-hodograph → 3D column → radiosonde overlay) · Models/ensembles · Historical mode ·
-Radar suite (chunks ingest → polar render → tilts/probe → SRV/dealias → L3 products →
-cell table/trends → volume 3D) · Chase HUD (PWA → GPS → warnings → intercept/escape →
-placefiles → trainer).
+- [x] R1 — L2 access + decode: /proxy/nexrad shim to the
+  `unidata-nexrad-level2-chunks` bucket; pure-TS MSG31 decoder
+  (seek-bzip records → radials with REF/VEL/SW/ZDR/PHI/RHO moment blocks),
+  5 vitest cases against a committed real KTLX chunk. seek-bzip audited
+  before install (7.3M dl/wk, clean).
+- [ ] R2 — Site selector + volume assembly: latest volume chunks → radials
+  per elevation; site list w/ nearest-to-camera default.
+- [ ] R3 — Polar renderer: reflectivity sweep as a custom WebGL layer
+  (radial texture, native gates, NWS color table), sweep painting as
+  chunks arrive.
+- [ ] R4 — Tilt control + gate probe (all moments + beam height).
+- [ ] R5 — Velocity + SRV (dealiasing with raw toggle).
+- [ ] R6 — Level 3 products: meso/TVS/tracks/hail icons + storm cell table.
+- [ ] R7 — All-Tilts, cross-section, cell trend charts.
+- [ ] R8 — 3D volume (R3F returns; raymarch/isosurface).
+
+## Phase 7 (coarse; slice when reached)
+
+Chase HUD: PWA → GPS → warnings → intercept/escape → placefiles → trainer.

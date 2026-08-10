@@ -37,6 +37,13 @@ color ramps must be checked in both schemes. Monospace numerics, UTC-first clock
 data-age badges everywhere, no layer ever renders blank on failure (degraded state +
 data-health strip instead).
 
+## Dependency policy
+
+Audit before adding: `npm audit`, weekly downloads, maintainer provenance, and
+install-script check (`npm query ':attr(scripts, [postinstall])'`). Flagged:
+`grib2class` (~33 dl/wk) — server-side only, pinned; prime suspect in the pinned
+wind decode bug and a candidate for replacement.
+
 ## Data policy
 
 Free sources only; keyless preferred; free-tier keys allowed but live in `server/.env`
