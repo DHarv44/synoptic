@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { attachDevStore } from '@/dev/wx'
 
-export const PAST_RANGE_MS = 48 * 3600_000 // −48h; forecast side extends later
+export const PAST_RANGE_MS = 48 * 3600_000 // −48h
+export const FUTURE_RANGE_MS = 16 * 24 * 3600_000 // +16d (forecast region)
 
 /**
  * The one clock every layer obeys (PLAN.md §3.11). simTime is UTC ms.
@@ -29,8 +30,8 @@ export const useTimeline = create<TimelineState>((set) => ({
   setSimTime: (ms) =>
     set(() => {
       const now = Date.now()
-      const clamped = Math.min(Math.max(ms, now - PAST_RANGE_MS), now)
-      return { simTime: clamped, isLive: clamped >= now - 1000, playing: false }
+      const clamped = Math.min(Math.max(ms, now - PAST_RANGE_MS), now + FUTURE_RANGE_MS)
+      return { simTime: clamped, isLive: Math.abs(clamped - now) < 60_000, playing: false }
     }),
   goLive: () => set({ simTime: Date.now(), isLive: true, playing: false }),
   setPlaying: (playing) => set({ playing }),
@@ -41,8 +42,8 @@ export const useTimeline = create<TimelineState>((set) => ({
       if (!s.playing) return s
       const now = Date.now()
       const next = s.simTime + elapsedMs * s.speed
-      if (next >= now) return { simTime: now, isLive: true, playing: false }
-      return { simTime: next }
+      if (next >= now + FUTURE_RANGE_MS) return { simTime: now + FUTURE_RANGE_MS, playing: false }
+      return { simTime: next, isLive: Math.abs(next - now) < 60_000 }
     }),
 }))
 

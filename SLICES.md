@@ -123,6 +123,18 @@ dependency order. Check boxes as slices land.
   overlay, moist adiabat/mixing-ratio background lines, 3D column view
   (Phase 6 R3F), ML/MU parcels.
 
+## Phase 5 — Models & Time (core complete)
+
+- [x] Timeline v2: forecast side to +16d (hatched region + now tick on the
+  scrubber); play runs into the forecast; probe panels (skew-T, meteogram,
+  models cursor) follow the scrubbed hour.
+- [x] Models panel: GFS/ECMWF/ICON/GEM/UKMO spaghetti for temp/precip/wind
+  (10 days), GFS ensemble members underlay (temp), timeline cursor.
+- Deferred: run-to-run dProg/dt, forecast verification mode, historical
+  archive mode (1940+, whole-workstation replay), workspace/share URLs.
+- Review note: MeteogramChart and ModelsChart share axis/grid/now-cursor
+  boilerplate — extract a chart frame when a third d3 chart appears.
+
 ## Phase 3+ (coarse; slice when reached)
 
 Wind particles (FBO sim → levels → time-lerp) · Sounding suite (skew-T → indices →
