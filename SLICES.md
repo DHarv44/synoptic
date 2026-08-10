@@ -6,12 +6,12 @@ dependency order. Check boxes as slices land.
 
 ## Phase 1 — Foundation
 
-- [ ] **S1 — Repo bootstrap.** Vite + React + TS (strict) scaffold, folder skeleton
+- [x] **S1 — Repo bootstrap.** Vite + React + TS (strict) scaffold, folder skeleton
   (`app/ core/ scene/ features/ panels/ ui/ server/`), Mantine installed, CLAUDE.md
   (conventions charter), .gitignore, git init + first commit, port 5192 launch config.
   *Done: `npm run dev` serves a Mantine page; `tsc --noEmit` clean.*
 
-- [ ] **S2 — Shell & theme.** App frame: top bar, collapsible layer rail (left),
+- [x] **S2 — Shell & theme.** App frame: top bar, collapsible layer rail (left),
   collapsible analysis dock (right), timeline bar (bottom), viewport center. Custom
   Mantine theme (instrument tokens, monospace numerics), dark+light with
   `defaultColorScheme="auto"`, scheme toggle in top bar. `window.__wx` dev hook skeleton.
