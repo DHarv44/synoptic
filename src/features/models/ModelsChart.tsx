@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { scaleLinear, scaleTime } from 'd3-scale'
 import { line } from 'd3-shape'
 import { useTimeline } from '@/core/time/timelineStore'
+import { DayTicks, NowCursor, YGrid } from '@/ui/chart/frame'
 import {
   MODELS,
   ensembleMembers,
@@ -68,31 +69,15 @@ export function ModelsChart({ data, ensemble, varKey }: ModelsChartProps) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }}>
-      {chart.yTicks.map(({ v, y: yy }) => (
-        <g key={v}>
-          <line x1={ML} x2={W - MR} y1={yy} y2={yy} stroke="var(--mantine-color-default-border)" strokeWidth={0.5} />
-          <text x={ML - 4} y={yy + 3} fontSize={8} fill="var(--mantine-color-dimmed)" textAnchor="end">
-            {v}
-          </text>
-        </g>
-      ))}
-      {chart.dayTicks.map(({ t, x: xx }) => (
-        <g key={t}>
-          <line x1={xx} x2={xx} y1={MT} y2={H - MB} stroke="var(--mantine-color-default-border)" strokeWidth={0.5} />
-          <text x={xx + 2} y={H - 6} fontSize={7} fill="var(--mantine-color-dimmed)">
-            {new Date(t).toISOString().slice(5, 10)}
-          </text>
-        </g>
-      ))}
+      <YGrid ticks={chart.yTicks} x1={ML} x2={W - MR} />
+      <DayTicks ticks={chart.dayTicks} y1={MT} y2={H - MB} labelY={H - 6} />
       {chart.memberPaths.map((d, i) => (
         <path key={i} d={d} fill="none" stroke="var(--mantine-color-gray-6)" strokeWidth={0.5} opacity={0.35} />
       ))}
       {chart.modelPaths.map(({ color, d }, i) => (
         <path key={i} d={d} fill="none" stroke={color} strokeWidth={1.4} />
       ))}
-      {nowX >= ML && nowX <= W - MR && (
-        <line x1={nowX} x2={nowX} y1={MT} y2={H - MB} stroke="var(--mantine-color-orange-6)" strokeWidth={1} />
-      )}
+      <NowCursor x={nowX} xMin={ML} xMax={W - MR} y1={MT} y2={H - MB} />
     </svg>
   )
 }

@@ -1,8 +1,8 @@
 import { Group, Stack, Text } from '@mantine/core'
 import { useProbe } from '@/core/probe/store'
-import { fmtLatLon } from '@/core/units/format'
 import { fmtUtcDateTime } from '@/core/time/format'
 import { PanelGuard } from '@/ui/PanelGuard'
+import { PanelHeader } from '@/ui/PanelHeader'
 import { useSounding } from '@/features/sounding/useSounding'
 import { SkewT } from '@/features/sounding/SkewT'
 import { Hodograph } from '@/features/sounding/Hodograph'
@@ -17,14 +17,7 @@ export function SoundingPanel() {
     <PanelGuard error={error} loading={loading || (point !== null && sounding === null)}>
       {point && sounding && (
         <Stack gap="xs">
-          <Group justify="space-between">
-            <Text size="sm" fw={600}>
-              {point.name ?? fmtLatLon(point.lat, point.lon)}
-            </Text>
-            <Text size="xs" ff="monospace" c="dimmed">
-              {fmtUtcDateTime(sounding.timeMs)}
-            </Text>
-          </Group>
+          <PanelHeader right={fmtUtcDateTime(sounding.timeMs)} />
           <SkewT sounding={sounding} />
           <Group align="flex-start" gap="xs" wrap="nowrap">
             <Hodograph sounding={sounding} />

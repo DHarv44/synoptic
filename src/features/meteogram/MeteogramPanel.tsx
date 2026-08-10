@@ -1,23 +1,13 @@
 import { useMemo } from 'react'
-import { Group, Stack, Text } from '@mantine/core'
+import { Group, Stack } from '@mantine/core'
 import { PanelGuard } from '@/ui/PanelGuard'
+import { PanelHeader } from '@/ui/PanelHeader'
+import { LegendDot } from '@/ui/LegendDot'
 import { useProbe } from '@/core/probe/store'
 import { useForecast } from '@/core/data/openMeteo/useForecast'
 import { useTempUnit } from '@/core/units/useUnitSystem'
-import { fmtLatLon } from '@/core/units/format'
 import { toSeries } from '@/features/meteogram/series'
 import { MeteogramChart } from '@/features/meteogram/MeteogramChart'
-
-function LegendDot({ color, label }: { color: string; label: string }) {
-  return (
-    <Group gap={4} wrap="nowrap">
-      <div style={{ width: 8, height: 2, background: color }} />
-      <Text size="xs" c="dimmed">
-        {label}
-      </Text>
-    </Group>
-  )
-}
 
 /** 7-day meteogram for the probed point. */
 export function MeteogramPanel() {
@@ -30,9 +20,7 @@ export function MeteogramPanel() {
     <PanelGuard error={error} loading={loading || !series}>
       {point && series && (
         <Stack gap="xs">
-          <Text size="sm" fw={600}>
-            {point.name ?? fmtLatLon(point.lat, point.lon)} · 7 days
-          </Text>
+          <PanelHeader suffix="7 days" />
           <MeteogramChart series={series} tempUnit={tempUnit} />
           <Group gap="sm">
             <LegendDot color="var(--mantine-color-red-6)" label="Temp" />

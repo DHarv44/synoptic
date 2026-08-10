@@ -5,6 +5,7 @@ import type { MeteogramSeries } from '@/features/meteogram/series'
 import { WindBarb } from '@/features/meteogram/WindBarb'
 import type { TempUnit } from '@/core/units/useUnitSystem'
 import { useTimeline } from '@/core/time/timelineStore'
+import { DayTicks, NowCursor, YGrid } from '@/ui/chart/frame'
 
 const W = 320
 const H = 300
@@ -85,24 +86,18 @@ export function MeteogramChart({ series, tempUnit }: MeteogramChartProps) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }}>
-      {/* temp gridlines + ticks */}
-      {tempTicks.map((t) => (
-        <g key={t}>
-          <line x1={ML} x2={W - MR} y1={yT(t)} y2={yT(t)} stroke={COL.grid} strokeWidth={0.5} />
-          <text x={ML - 4} y={yT(t) + 3} fontSize={8} fill={COL.text} textAnchor="end">
-            {t}°
-          </text>
-        </g>
-      ))}
-      {/* day boundaries */}
-      {dayTicks.map((t) => (
-        <g key={t}>
-          <line x1={x(t)} x2={x(t)} y1={TEMP_TOP} y2={PRECIP_BOT} stroke={COL.grid} strokeWidth={0.5} />
-          <text x={x(t) + 2} y={AXIS_Y} fontSize={8} fill={COL.text}>
-            {new Date(t).toISOString().slice(5, 10)}
-          </text>
-        </g>
-      ))}
+      <YGrid
+        ticks={tempTicks.map((t) => ({ v: t, y: yT(t) }))}
+        x1={ML}
+        x2={W - MR}
+        label={(v) => `${v}°`}
+      />
+      <DayTicks
+        ticks={dayTicks.map((t) => ({ t, x: x(t) }))}
+        y1={TEMP_TOP}
+        y2={PRECIP_BOT}
+        labelY={AXIS_Y}
+      />
       {/* cloud cover strip */}
       {series.cloud.map((c, i) => (
         <rect
@@ -146,10 +141,7 @@ export function MeteogramChart({ series, tempUnit }: MeteogramChartProps) {
           />
         ) : null,
       )}
-      {/* now cursor */}
-      {nowX >= ML && nowX <= W - MR && (
-        <line x1={nowX} x2={nowX} y1={TEMP_TOP} y2={PRECIP_BOT} stroke={COL.now} strokeWidth={1} />
-      )}
+      <NowCursor x={nowX} xMin={ML} xMax={W - MR} y1={TEMP_TOP} y2={PRECIP_BOT} />
     </svg>
   )
 }

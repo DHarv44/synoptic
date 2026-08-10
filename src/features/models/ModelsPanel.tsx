@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Group, SegmentedControl, Stack, Switch, Text } from '@mantine/core'
 import { useProbe } from '@/core/probe/store'
-import { fmtLatLon } from '@/core/units/format'
 import { PanelGuard } from '@/ui/PanelGuard'
+import { PanelHeader } from '@/ui/PanelHeader'
+import { LegendDot } from '@/ui/LegendDot'
 import { MODELS, MODEL_VARS } from '@/features/models/service'
 import { useEnsemble, useModels } from '@/features/models/useModels'
 import { ModelsChart } from '@/features/models/ModelsChart'
@@ -19,9 +20,7 @@ export function ModelsPanel() {
     <PanelGuard error={models.error} loading={models.loading || (point !== null && !models.data)}>
       {point && models.data && (
         <Stack gap="xs">
-          <Text size="sm" fw={600}>
-            {point.name ?? fmtLatLon(point.lat, point.lon)} · 10 days
-          </Text>
+          <PanelHeader suffix="10 days" />
           <SegmentedControl
             size="xs"
             fullWidth
@@ -36,12 +35,7 @@ export function ModelsPanel() {
           />
           <Group gap="sm">
             {MODELS.map((m) => (
-              <Group key={m.key} gap={4} wrap="nowrap">
-                <div style={{ width: 10, height: 2, background: m.color }} />
-                <Text size="xs" c="dimmed">
-                  {m.label}
-                </Text>
-              </Group>
+              <LegendDot key={m.key} color={m.color} label={m.label} />
             ))}
           </Group>
           <Switch

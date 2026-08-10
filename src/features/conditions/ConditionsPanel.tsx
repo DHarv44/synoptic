@@ -1,8 +1,8 @@
-import { Group, Stack, Table, Text } from '@mantine/core'
+import { Stack, Table, Text } from '@mantine/core'
 import { useProbe } from '@/core/probe/store'
 import { useTempUnit, useUnitSystem } from '@/core/units/useUnitSystem'
+import { PanelHeader } from '@/ui/PanelHeader'
 import {
-  fmtLatLon,
   fmtPercent,
   fmtPressure,
   fmtPrecip,
@@ -25,14 +25,7 @@ export function ConditionsPanel() {
     <PanelGuard error={error} loading={loading || !data}>
       {point && data && (
         <Stack gap="xs">
-          <Group justify="space-between">
-            <Text size="sm" fw={600}>
-              {point.name ?? fmtLatLon(point.lat, point.lon)}
-            </Text>
-            <Text size="xs" ff="monospace" c="dimmed">
-              {data.current.time.slice(11, 16)}Z
-            </Text>
-          </Group>
+          <PanelHeader right={`${data.current.time.slice(11, 16)}Z`} />
           <Text size="sm">{wmoText(data.current.weather_code)}</Text>
           <Table
             withRowBorders={false}
