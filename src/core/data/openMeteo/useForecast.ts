@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { fetchJson } from '@/core/data/fetchJson'
 import { cacheGet, cachePut } from '@/core/data/cache'
 import { useProbe } from '@/core/probe/store'
-import { forecastUrl, OPEN_METEO } from '@/features/conditions/service'
-import type { OpenMeteoForecast } from '@/features/conditions/types'
+import { forecastUrl, OPEN_METEO } from '@/core/data/openMeteo/forecast'
+import type { OpenMeteoForecast } from '@/core/data/openMeteo/types'
 
 const CACHE_MAX_AGE_MS = 10 * 60_000
 

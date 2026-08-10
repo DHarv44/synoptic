@@ -41,16 +41,16 @@ dependency order. Check boxes as slices land.
   Scene colors read Mantine scheme. *Done: globe spins at 60fps, terminator correct for
   current UTC, click logs coordinates.*
 
-- [ ] **S7 — Probe + first data feature.** `probe` store (click sets probe point, marker
+- [x] **S7 — Probe + first data feature.** `probe` store (click sets probe point, marker
   on globe); **`features/conditions`** — Open-Meteo adapter (current + hourly), analysis
   dock panel: current conditions readout with units service (metric/imperial), data age.
   First real registry-registered feature. *Done: click anywhere on Earth → readout <2s;
   works from fixture too.*
 
-- [ ] **S8 — Geocoding search.** Open-Meteo geocoding in top bar (Spotlight-integrated),
+- [x] **S8 — Geocoding search.** Open-Meteo geocoding in top bar (Spotlight-integrated),
   recents, fly-to + probe on select. *Done: type "Norman, OK" → globe flies, probe set.*
 
-- [ ] **S9 — Meteogram v1.** `features/meteogram` dock panel: d3-drawn temp/dewpoint
+- [x] **S9 — Meteogram v1.** `features/meteogram` dock panel: d3-drawn temp/dewpoint
   band, precip bars, wind barbs, cloud cover — 7 days from the probe's hourly data,
   timeline-aware cursor. *Done: readable in both schemes; probe move redraws.*
 

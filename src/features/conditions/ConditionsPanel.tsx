@@ -10,8 +10,8 @@ import {
   fmtWind,
   fmtWindDir,
 } from '@/core/units/format'
-import { useForecast } from '@/features/conditions/useForecast'
-import { wmoText } from '@/features/conditions/service'
+import { useForecast } from '@/core/data/openMeteo/useForecast'
+import { wmoText } from '@/core/data/openMeteo/forecast'
 
 /** Current conditions readout for the probed point. */
 export function ConditionsPanel() {
