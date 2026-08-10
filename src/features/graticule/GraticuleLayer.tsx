@@ -3,6 +3,7 @@ import { GLOBE_RADIUS } from '@/scene/geo'
 import { graticuleSegmentPositions } from '@/scene/lineGeometry'
 import { useFeatureOption } from '@/core/settings/store'
 import { useSceneColors } from '@/scene/colors'
+import { RENDER_ORDER } from '@/scene/renderOrder'
 
 const LINE_RADIUS = GLOBE_RADIUS * 1.0005
 
@@ -16,7 +17,7 @@ export function GraticuleLayer() {
   )
 
   return (
-    <lineSegments>
+    <lineSegments renderOrder={RENDER_ORDER.graticule}>
       <bufferGeometry key={spacing}>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>

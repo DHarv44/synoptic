@@ -4,6 +4,7 @@ import { Globe } from '@/scene/Globe'
 import { Coastlines } from '@/scene/Coastlines'
 import { ProbeMarker } from '@/scene/ProbeMarker'
 import { CameraRig } from '@/scene/CameraRig'
+import { SceneDevHook } from '@/scene/SceneDevHook'
 import { useSceneColors } from '@/scene/colors'
 import { useProbe } from '@/core/probe/store'
 import { listFeatures } from '@/core/settings/registry'
@@ -37,6 +38,7 @@ export function GlobeCanvas() {
       ))}
       <ProbeMarker color={colors.probe} />
       <CameraRig />
+      <SceneDevHook />
       <OrbitControls
         enableDamping
         dampingFactor={0.08}

@@ -3,6 +3,7 @@ import * as topojson from 'topojson-client'
 import land110m from 'world-atlas/land-110m.json'
 import { GLOBE_RADIUS } from '@/scene/geo'
 import { linesToSegmentPositions } from '@/scene/lineGeometry'
+import { RENDER_ORDER } from '@/scene/renderOrder'
 
 const LINE_RADIUS = GLOBE_RADIUS * 1.001
 
@@ -22,7 +23,7 @@ export function Coastlines({ color }: CoastlinesProps) {
   }, [])
 
   return (
-    <lineSegments>
+    <lineSegments renderOrder={RENDER_ORDER.coastlines}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>

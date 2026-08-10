@@ -7,6 +7,8 @@ export interface PollerOptions {
   /** Polling pauses (and reports disabled) while this returns false. */
   enabled: () => boolean
   run: () => Promise<void>
+  /** Skip cycles while the tab is hidden (use for heavy fetches only). */
+  pauseWhenHidden?: boolean
 }
 
 const MAX_BACKOFF_FACTOR = 8
@@ -28,7 +30,7 @@ export function startPoller(opts: PollerOptions): () => void {
       schedule(opts.cadenceMs)
       return
     }
-    if (document.hidden) {
+    if (opts.pauseWhenHidden === true && document.hidden) {
       schedule(opts.cadenceMs)
       return
     }
@@ -47,9 +49,19 @@ export function startPoller(opts: PollerOptions): () => void {
     timer = setTimeout(() => void cycle(), delayMs)
   }
 
+  // Fast-resume: a hidden-paused poller runs promptly when the tab returns.
+  const onVisible = (): void => {
+    if (!document.hidden && opts.pauseWhenHidden === true) {
+      if (timer !== undefined) clearTimeout(timer)
+      void cycle()
+    }
+  }
+  document.addEventListener('visibilitychange', onVisible)
+
   void cycle()
   return () => {
     stopped = true
     if (timer !== undefined) clearTimeout(timer)
+    document.removeEventListener('visibilitychange', onVisible)
   }
 }

@@ -5,5 +5,6 @@
 import '@/features/units'
 import '@/features/search'
 import '@/features/graticule'
+import '@/features/radar'
 import '@/features/conditions'
 import '@/features/meteogram'
