@@ -1,12 +1,12 @@
-import type { UnitSystem } from '@/core/units/useUnitSystem'
+import type { TempUnit, UnitSystem } from '@/core/units/useUnitSystem'
 
 /**
  * The single source for unit conversion + display (PLAN.md §4.2).
  * All inputs are SI-ish: °C, m/s, hPa, mm.
  */
 
-export function fmtTemp(celsius: number, system: UnitSystem): string {
-  if (system === 'imperial') return `${Math.round((celsius * 9) / 5 + 32)}°F`
+export function fmtTemp(celsius: number, unit: TempUnit): string {
+  if (unit === 'F') return `${Math.round((celsius * 9) / 5 + 32)}°F`
   return `${Math.round(celsius)}°C`
 }
 

@@ -1,6 +1,6 @@
 import { Alert, Group, Loader, Stack, Table, Text } from '@mantine/core'
 import { useProbe } from '@/core/probe/store'
-import { useUnitSystem } from '@/core/units/useUnitSystem'
+import { useTempUnit, useUnitSystem } from '@/core/units/useUnitSystem'
 import {
   fmtLatLon,
   fmtPercent,
@@ -17,6 +17,7 @@ import { wmoText } from '@/features/conditions/service'
 export function ConditionsPanel() {
   const point = useProbe((s) => s.point)
   const units = useUnitSystem()
+  const tempUnit = useTempUnit()
   const { data, loading, error } = useForecast()
 
   if (!point) {
@@ -39,9 +40,9 @@ export function ConditionsPanel() {
 
   const c = data.current
   const rows: Array<[string, string]> = [
-    ['Temperature', fmtTemp(c.temperature_2m, units)],
-    ['Feels like', fmtTemp(c.apparent_temperature, units)],
-    ['Dewpoint', fmtTemp(c.dew_point_2m, units)],
+    ['Temperature', fmtTemp(c.temperature_2m, tempUnit)],
+    ['Feels like', fmtTemp(c.apparent_temperature, tempUnit)],
+    ['Dewpoint', fmtTemp(c.dew_point_2m, tempUnit)],
     ['Humidity', fmtPercent(c.relative_humidity_2m)],
     ['Wind', `${fmtWindDir(c.wind_direction_10m)} ${fmtWind(c.wind_speed_10m, units)}`],
     ['Gusts', fmtWind(c.wind_gusts_10m, units)],

@@ -6,6 +6,7 @@ import { AnalysisDock } from '@/app/shell/AnalysisDock'
 import { TimelineBar } from '@/app/shell/TimelineBar'
 import { Viewport } from '@/app/shell/Viewport'
 import { SettingsModal } from '@/app/settings/SettingsModal'
+import { SearchSpotlight } from '@/features/search/SearchSpotlight'
 
 export function Shell() {
   const [railOpen, rail] = useDisclosure(true)
@@ -28,6 +29,7 @@ export function Shell() {
         />
       </AppShell.Header>
       <SettingsModal opened={settingsOpen} onClose={settings.close} />
+      <SearchSpotlight />
       <AppShell.Navbar>
         <LayerRail />
       </AppShell.Navbar>

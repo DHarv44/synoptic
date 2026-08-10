@@ -12,10 +12,21 @@ registerFeature({
       key: 'system',
       label: 'Unit system',
       options: [
-        { value: 'metric', label: 'Metric (°C, km/h, mm)' },
-        { value: 'imperial', label: 'Imperial (°F, mph, in)' },
+        { value: 'metric', label: 'Metric (km/h, mm)' },
+        { value: 'imperial', label: 'Imperial (mph, in)' },
       ],
       defaultValue: 'metric',
+    },
+    {
+      kind: 'select',
+      key: 'temperature',
+      label: 'Temperature',
+      options: [
+        { value: 'auto', label: 'Follow system' },
+        { value: 'celsius', label: 'Celsius (°C)' },
+        { value: 'fahrenheit', label: 'Fahrenheit (°F)' },
+      ],
+      defaultValue: 'auto',
     },
   ],
 })

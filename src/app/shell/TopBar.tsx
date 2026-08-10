@@ -1,4 +1,5 @@
 import { ActionIcon, Group, Text, Tooltip, useMantineColorScheme } from '@mantine/core'
+import { spotlight } from '@mantine/spotlight'
 import { UtcClock } from '@/ui/UtcClock'
 import { HealthStrip } from '@/app/shell/HealthStrip'
 
@@ -22,6 +23,16 @@ export function TopBar({ onToggleRail, onToggleDock, onOpenSettings }: TopBarPro
         <Text fw={700} size="sm" ff="monospace" tt="uppercase" lts={2}>
           Synoptic
         </Text>
+        <Tooltip label="Search locations (Ctrl+K)">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => spotlight.open()}
+            aria-label="Search locations"
+          >
+            🔍
+          </ActionIcon>
+        </Tooltip>
       </Group>
 
       <UtcClock />

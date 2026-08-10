@@ -3,5 +3,6 @@
  * Add new features here and nowhere else.
  */
 import '@/features/units'
+import '@/features/search'
 import '@/features/graticule'
 import '@/features/conditions'

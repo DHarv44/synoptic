@@ -3,6 +3,7 @@ import { OrbitControls } from '@react-three/drei'
 import { Globe } from '@/scene/Globe'
 import { Coastlines } from '@/scene/Coastlines'
 import { ProbeMarker } from '@/scene/ProbeMarker'
+import { CameraRig } from '@/scene/CameraRig'
 import { useSceneColors } from '@/scene/colors'
 import { useProbe } from '@/core/probe/store'
 import { listFeatures } from '@/core/settings/registry'
@@ -35,6 +36,7 @@ export function GlobeCanvas() {
         <FeatureLayer key={f.id} manifest={f} />
       ))}
       <ProbeMarker color={colors.probe} />
+      <CameraRig />
       <OrbitControls
         enableDamping
         dampingFactor={0.08}
