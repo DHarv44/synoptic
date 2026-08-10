@@ -1,14 +1,13 @@
 import { registerFeature } from '@/core/settings/registry'
+import { GraticuleLayer } from '@/features/graticule/GraticuleLayer'
 
-/**
- * Latitude/longitude grid on the globe. Layer component arrives with the
- * globe scene (S6); registered now as the registry's first real feature.
- */
+/** Latitude/longitude grid on the globe. */
 registerFeature({
   id: 'graticule',
   title: 'Graticule',
   description: 'Latitude/longitude grid lines on the globe.',
   layer: true,
+  layerComponent: GraticuleLayer,
   defaultEnabled: true,
   settings: [
     {

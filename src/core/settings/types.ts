@@ -1,3 +1,5 @@
+import type { ComponentType } from 'react'
+
 export type SettingValue = boolean | number | string
 
 export type SettingField =
@@ -35,6 +37,8 @@ export interface FeatureManifest {
   description: string
   /** Contributes a togglable viewport layer (entry in the layer rail). */
   layer?: boolean
+  /** R3F component rendered inside the globe scene while the feature is enabled. */
+  layerComponent?: ComponentType
   /** Analysis dock panels this feature contributes. */
   panels?: PanelContribution[]
   settings: SettingField[]

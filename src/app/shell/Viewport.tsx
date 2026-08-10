@@ -1,14 +1,10 @@
-import { Center, Text } from '@mantine/core'
+import { GlobeCanvas } from '@/scene/GlobeCanvas'
 
-/**
- * Center viewport. Hosts the R3F globe scene from S6 onward.
- */
+/** Center viewport: hosts the R3F globe scene. */
 export function Viewport() {
   return (
-    <Center flex={1} style={{ minWidth: 0 }}>
-      <Text ff="monospace" c="dimmed" size="sm">
-        [ globe scene — S6 ]
-      </Text>
-    </Center>
+    <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+      <GlobeCanvas />
+    </div>
   )
 }

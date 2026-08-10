@@ -17,13 +17,13 @@ dependency order. Check boxes as slices land.
   `defaultColorScheme="auto"`, scheme toggle in top bar. `window.__wx` dev hook skeleton.
   *Done: frame renders in both schemes; panels collapse; no feature code in shell.*
 
-- [ ] **S3 — Feature registry + settings.** `defineFeature()` manifest type, registry
+- [x] **S3 — Feature registry + settings.** `defineFeature()` manifest type, registry
   store, settings screen generated from registered manifests (Mantine modal/route,
   searchable), enable/disable wiring, localStorage persistence with schema version,
   presets scaffold (Workstation/Minimal). *Done: a dummy feature registers, appears in
   settings, toggles a rail entry live.*
 
-- [ ] **S4 — Timeline store (skeleton).** zustand slice: `simTime`, `now`, play/pause,
+- [x] **S4 — Timeline store (skeleton).** zustand slice: `simTime`, `now`, play/pause,
   speed, range clamp (−48h now; forecast later), bottom-bar UI with scrubber +
   transport, keyboard (space, ←/→). All layers will read time from here — nothing else.
   *Done: scrubbing updates `simTime`; `__wx.setTime()` works.*

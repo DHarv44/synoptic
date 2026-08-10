@@ -1,5 +1,6 @@
 import { ActionIcon, Group, Text, Tooltip, useMantineColorScheme } from '@mantine/core'
 import { UtcClock } from '@/ui/UtcClock'
+import { HealthStrip } from '@/app/shell/HealthStrip'
 
 interface TopBarProps {
   onToggleRail: () => void
@@ -26,6 +27,7 @@ export function TopBar({ onToggleRail, onToggleDock, onOpenSettings }: TopBarPro
       <UtcClock />
 
       <Group gap="xs" wrap="nowrap">
+        <HealthStrip />
         <Tooltip label={colorScheme === 'dark' ? 'Light mode' : 'Dark mode'}>
           <ActionIcon
             variant="subtle"
