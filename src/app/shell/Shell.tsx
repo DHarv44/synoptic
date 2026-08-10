@@ -5,10 +5,12 @@ import { LayerRail } from '@/app/shell/LayerRail'
 import { AnalysisDock } from '@/app/shell/AnalysisDock'
 import { TimelineBar } from '@/app/shell/TimelineBar'
 import { Viewport } from '@/app/shell/Viewport'
+import { SettingsModal } from '@/app/settings/SettingsModal'
 
 export function Shell() {
   const [railOpen, rail] = useDisclosure(true)
   const [dockOpen, dock] = useDisclosure(true)
+  const [settingsOpen, settings] = useDisclosure(false)
 
   return (
     <AppShell
@@ -19,8 +21,13 @@ export function Shell() {
       padding={0}
     >
       <AppShell.Header>
-        <TopBar onToggleRail={rail.toggle} onToggleDock={dock.toggle} />
+        <TopBar
+          onToggleRail={rail.toggle}
+          onToggleDock={dock.toggle}
+          onOpenSettings={settings.open}
+        />
       </AppShell.Header>
+      <SettingsModal opened={settingsOpen} onClose={settings.close} />
       <AppShell.Navbar>
         <LayerRail />
       </AppShell.Navbar>

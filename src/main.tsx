@@ -5,6 +5,7 @@ import '@mantine/spotlight/styles.css'
 import { createRoot } from 'react-dom/client'
 import { App } from '@/app/App'
 import { installDevHook } from '@/dev/wx'
+import '@/features'
 
 installDevHook()
 

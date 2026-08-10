@@ -4,9 +4,10 @@ import { UtcClock } from '@/ui/UtcClock'
 interface TopBarProps {
   onToggleRail: () => void
   onToggleDock: () => void
+  onOpenSettings: () => void
 }
 
-export function TopBar({ onToggleRail, onToggleDock }: TopBarProps) {
+export function TopBar({ onToggleRail, onToggleDock, onOpenSettings }: TopBarProps) {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
   return (
@@ -33,6 +34,11 @@ export function TopBar({ onToggleRail, onToggleDock }: TopBarProps) {
             aria-label="Toggle color scheme"
           >
             {colorScheme === 'dark' ? '☀' : '☾'}
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label="Settings">
+          <ActionIcon variant="subtle" color="gray" onClick={onOpenSettings} aria-label="Open settings">
+            ⚙
           </ActionIcon>
         </Tooltip>
         <Tooltip label="Analysis dock">
