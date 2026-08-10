@@ -86,6 +86,24 @@ dependency order. Check boxes as slices land.
 - Gotchas: maplibre's default blob worker dies silently in sandboxed webviews →
   CSP worker build with explicit `setWorkerUrl`; maplibre pinned to v5.
 
+## Phase 3 — Wind (built; PINNED BUG, layer off by default)
+
+- [x] Proxy: GFS via NOMADS **grib filter CGI** (OPeNDAP retired per SCN 25-81),
+  decoded with grib2class, 0.5° int8 payload, run auto-discovery, 30-min cache.
+- [x] Client: WebGL2 GPGPU particle system (RG32F ping-pong sim, equirect →
+  mercator draw through the map matrix), level select (10m→250hPa), particle
+  count + opacity settings, health wiring.
+- [ ] **PINNED BUG — wind field corruption.** A rectangular garbage patch (e.g.
+  ~74 m/s mean speed at 250 hPa off Baja, ~22N 120W) renders as a salmon
+  particle "block" (user-reported; confirmed by wind-layer A/B toggle). Facts so
+  far: server-side |UGRD| in that region ≈ 45 m/s from BOTH 0p25 and 0p50 files
+  (consistent), but client speed ≈ 74 → the v-component adds ~59 m/s, so the
+  prime suspects are (a) grib2class mis-decoding VGRD messages, (b) a u/v
+  assembly/offset bug in server payload or client parse. Next step when
+  resumed: run the VGRD region spike (compare grib2class VGRD vs known-good
+  values, e.g. from Open-Meteo point queries at the same spot), then fix
+  decode or assembly accordingly. Layer defaultEnabled:false until fixed.
+
 ## Phase 3+ (coarse; slice when reached)
 
 Wind particles (FBO sim → levels → time-lerp) · Sounding suite (skew-T → indices →

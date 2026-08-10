@@ -1,9 +1,32 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
+import { getWindPayload } from './server/gfsWind.mjs'
+
+/** Dev implementation of the data-proxy routes the prod Express server owns. */
+function windProxy(): Plugin {
+  return {
+    name: 'synoptic-wind-proxy',
+    configureServer(server) {
+      server.middlewares.use('/proxy/gfs-wind', (req, res) => {
+        const level = new URL(req.url ?? '', 'http://x').searchParams.get('level') ?? '10m'
+        getWindPayload(level)
+          .then((payload) => {
+            res.setHeader('Content-Type', 'application/octet-stream')
+            res.setHeader('Cache-Control', 'public, max-age=600')
+            res.end(payload)
+          })
+          .catch((e: unknown) => {
+            res.statusCode = 502
+            res.end(String(e))
+          })
+      })
+    },
+  }
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), windProxy()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
