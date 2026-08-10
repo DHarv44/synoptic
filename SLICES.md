@@ -28,14 +28,14 @@ dependency order. Check boxes as slices land.
   transport, keyboard (space, ←/→). All layers will read time from here — nothing else.
   *Done: scrubbing updates `simTime`; `__wx.setTime()` works.*
 
-- [ ] **S5 — Data core + fixtures.** Source-adapter interface (`subscribe(products) →
+- [x] **S5 — Data core + fixtures.** Source-adapter interface (`subscribe(products) →
   scheduler → cache → store`), fetch scheduler with per-source cadence/backoff +
   pause-when-disabled, IndexedDB cache (idb), **fixture mode** (`?fixture=<case>` swaps
   every adapter to bundled recordings), data-health store + top-bar strip (per-source
   dot + age). *Done: a fake adapter round-trips through scheduler→cache→store; fixture
   flag forces offline; health strip reflects a killed source.*
 
-- [ ] **S6 — Globe.** R3F canvas in viewport: sphere, Natural Earth coastlines/borders
+- [x] **S6 — Globe.** R3F canvas in viewport: sphere, Natural Earth coastlines/borders
   (world-atlas npm pkg, no downloads), graticule, day/night terminator from real solar
   position, inertial orbit + zoom, fly-to(lat/lon), click→lat/lon picking event.
   Scene colors read Mantine scheme. *Done: globe spins at 60fps, terminator correct for

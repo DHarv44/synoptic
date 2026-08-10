@@ -24,6 +24,7 @@ export type SettingField =
 export interface PanelContribution {
   id: string
   title: string
+  component: ComponentType
 }
 
 /**
@@ -43,4 +44,6 @@ export interface FeatureManifest {
   panels?: PanelContribution[]
   settings: SettingField[]
   defaultEnabled?: boolean
+  /** Core capabilities (e.g. units) that expose settings but can't be disabled. */
+  alwaysOn?: boolean
 }

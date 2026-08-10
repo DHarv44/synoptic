@@ -25,13 +25,15 @@ export function FeatureCard({ manifest }: FeatureCardProps) {
             {manifest.description}
           </Text>
         </div>
-        <Switch
-          checked={enabled}
-          onChange={(e) => setEnabled(manifest.id, e.currentTarget.checked)}
-          aria-label={`Enable ${manifest.title}`}
-        />
+        {!manifest.alwaysOn && (
+          <Switch
+            checked={enabled}
+            onChange={(e) => setEnabled(manifest.id, e.currentTarget.checked)}
+            aria-label={`Enable ${manifest.title}`}
+          />
+        )}
       </Group>
-      {enabled && manifest.settings.length > 0 && (
+      {(enabled || manifest.alwaysOn) && manifest.settings.length > 0 && (
         <Stack gap="xs" mt="sm">
           {manifest.settings.map((field) => (
             <SettingFieldInput
