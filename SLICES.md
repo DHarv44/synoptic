@@ -71,6 +71,21 @@ dependency order. Check boxes as slices land.
 - [x] S17 — Layer rail v2: opacity sliders, per-layer health badges, failure
   dimming (manual re-ordering deferred; renderOrder is fixed by design)
 
+## Phase 2.5 — Map Engine Swap (user feedback: fidelity, zoom, basemap, UI)
+
+- [x] Replace the custom R3F tile globe with **MapLibre GL v5** (globe projection):
+  deep zoom to street level, proper LOD (no holes/diamonds), inertial camera.
+- [x] **OpenFreeMap vector basemap** (keyless, no caps): cities, towns, roads,
+  rivers, labels — `dark` style for dark mode, `positron` for light.
+- [x] All layers ported: radar (RainViewer maxzoom-capped at 7 to avoid their
+  placeholder tiles + IEM bounds-limited raster), satellite, alerts (now filled
+  polygons), lightning (circle layers w/ age ramp), METAR (symbol layer with
+  **built-in decluttering + screen-fixed size**), graticule.
+- [x] Data layers insert **below basemap label layers** (labels stay readable).
+- [x] R3F/three retained for Phase 6 3D views; custom tile engine deleted.
+- Gotchas: maplibre's default blob worker dies silently in sandboxed webviews →
+  CSP worker build with explicit `setWorkerUrl`; maplibre pinned to v5.
+
 ## Phase 3+ (coarse; slice when reached)
 
 Wind particles (FBO sim → levels → time-lerp) · Sounding suite (skew-T → indices →

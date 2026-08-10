@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
+import type { RasterTileSource } from 'maplibre-gl'
 import { fetchJson } from '@/core/data/fetchJson'
 import { startPoller } from '@/core/data/scheduler'
 import { featureEnabled, useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
-import { TileLayer } from '@/scene/tiles/TileLayer'
-import { GLOBE_RADIUS } from '@/scene/geo'
-import { RENDER_ORDER } from '@/scene/renderOrder'
+import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
 import {
   RAINVIEWER,
   WEATHER_MAPS_URL,
@@ -14,19 +13,18 @@ import {
   tileUrl,
   type RainViewerMaps,
 } from '@/features/radar/service'
-import { IEM, iemProduct, iemTileUrl, overConus } from '@/features/radar/iem'
-import { useCameraLatLon } from '@/scene/useCameraLatLon'
+import { iemProduct, iemTileUrl, CONUS } from '@/features/radar/iem'
 
 const POLL_MS = 120_000
-const LAYER_RADIUS = GLOBE_RADIUS * 1.0008
 
-/** Global composite radar (RainViewer), animated by the timeline. */
+/** Global composite radar (RainViewer) + CONUS high-res (IEM), timeline-driven. */
 export function RadarLayer() {
   const [maps, setMaps] = useState<RainViewerMaps | null>(null)
   const simTime = useTimeline((s) => s.simTime)
   const scheme = useFeatureOption<string>('radar', 'scheme')
   const smooth = useFeatureOption<boolean>('radar', 'smooth')
   const opacity = useFeatureOption<number>('radar', 'opacity')
+  const conusEnabled = useFeatureOption<boolean>('radar', 'conus')
 
   useEffect(() => {
     return startPoller({
@@ -34,42 +32,88 @@ export function RadarLayer() {
       cadenceMs: POLL_MS,
       enabled: () => featureEnabled('radar'),
       run: async () => {
-        const data = await fetchJson<RainViewerMaps>(RAINVIEWER, WEATHER_MAPS_URL, {
-          fixture: 'rainviewer-maps',
-        })
-        setMaps(data)
+        setMaps(
+          await fetchJson<RainViewerMaps>(RAINVIEWER, WEATHER_MAPS_URL, {
+            fixture: 'rainviewer-maps',
+          }),
+        )
       },
     })
   }, [])
 
-  const view = useCameraLatLon()
-  const conusEnabled = useFeatureOption<boolean>('radar', 'conus')
-
-  if (!maps) return null
-  const frame = pickFrame(allFrames(maps), simTime)
-  if (!frame) return null
-
+  const frame = maps ? pickFrame(allFrames(maps), simTime) : null
+  const rvTiles =
+    maps && frame ? tileUrl(maps, frame, 0, 0, 0, scheme, smooth).replace('/0/0/0/', '/{z}/{x}/{y}/') : null
   const product = iemProduct(simTime, Date.now())
-  const showIem = conusEnabled && product !== null && overConus(view.lat, view.lon)
 
-  return (
-    <>
-      <TileLayer
-        urlFor={(z, x, y) => tileUrl(maps, frame, z, x, y, scheme, smooth)}
-        radius={LAYER_RADIUS}
-        opacity={opacity / 100}
-        renderOrder={RENDER_ORDER.tiles}
-        source={RAINVIEWER}
-      />
-      {showIem && (
-        <TileLayer
-          urlFor={(z, x, y) => iemTileUrl(product, z, x, y)}
-          radius={LAYER_RADIUS * 1.0002}
-          opacity={opacity / 100}
-          renderOrder={RENDER_ORDER.tilesOverlay}
-          source={IEM}
-        />
-      )}
-    </>
+  // RainViewer global composite
+  useMapLayer(
+    (map) => {
+      if (!rvTiles) return
+      map.addSource('radar-rv', {
+        type: 'raster',
+        tiles: [rvTiles],
+        tileSize: 256,
+        // RainViewer's composite stops at z7 — overzoom beyond instead of
+        // requesting their "Zoom Level Not Supported" placeholder tiles.
+        maxzoom: 7,
+        attribution: 'Radar © RainViewer',
+      })
+      map.addLayer(
+        {
+          id: 'radar-rv',
+          type: 'raster',
+          source: 'radar-rv',
+          paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
+        },
+        firstSymbolLayerId(map),
+      )
+      return () => {
+        if (map.getLayer('radar-rv')) map.removeLayer('radar-rv')
+        if (map.getSource('radar-rv')) map.removeSource('radar-rv')
+      }
+    },
+    [rvTiles === null],
   )
+
+  // Frame/opacity updates without source teardown
+  useMapLayer(
+    (map) => {
+      const src = map.getSource('radar-rv') as RasterTileSource | undefined
+      if (src && rvTiles) src.setTiles([rvTiles])
+      if (map.getLayer('radar-rv')) map.setPaintProperty('radar-rv', 'raster-opacity', opacity / 100)
+    },
+    [rvTiles, opacity],
+  )
+
+  // IEM CONUS high-res overlay (bounds-limited so no off-CONUS requests)
+  useMapLayer(
+    (map) => {
+      if (!conusEnabled || product === null) return
+      map.addSource('radar-iem', {
+        type: 'raster',
+        tiles: [iemTileUrl(product, 0, 0, 0).replace('/0/0/0.png', '/{z}/{x}/{y}.png')],
+        tileSize: 256,
+        maxzoom: 12,
+        bounds: [CONUS.lonMin, CONUS.latMin, CONUS.lonMax, CONUS.latMax],
+        attribution: 'NEXRAD © Iowa Environmental Mesonet',
+      })
+      map.addLayer(
+        {
+          id: 'radar-iem',
+          type: 'raster',
+          source: 'radar-iem',
+          paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
+        },
+        firstSymbolLayerId(map),
+      )
+      return () => {
+        if (map.getLayer('radar-iem')) map.removeLayer('radar-iem')
+        if (map.getSource('radar-iem')) map.removeSource('radar-iem')
+      }
+    },
+    [conusEnabled, product, opacity],
+  )
+
+  return null
 }

@@ -1,10 +1,10 @@
-import { GlobeCanvas } from '@/scene/GlobeCanvas'
+import { MapView } from '@/map/MapView'
 
-/** Center viewport: hosts the R3F globe scene. */
+/** Center viewport: the MapLibre map surface. */
 export function Viewport() {
   return (
     <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-      <GlobeCanvas />
+      <MapView />
     </div>
   )
 }

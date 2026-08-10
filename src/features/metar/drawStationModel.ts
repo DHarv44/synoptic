@@ -1,4 +1,3 @@
-import { CanvasTexture, SRGBColorSpace } from 'three'
 import { barbSpec } from '@/core/met/barbs'
 import type { Metar } from '@/features/metar/service'
 
@@ -12,8 +11,13 @@ interface SpriteColors {
   station: string
 }
 
-/** Draw a WMO-style station model (temp, dewpoint, wind barb) to a texture. */
-export function makeStationTexture(m: Metar, colors: SpriteColors): CanvasTexture {
+export const STATION_COLORS: Record<'dark' | 'light', SpriteColors> = {
+  dark: { temp: '#ff8787', dewp: '#63e6be', station: '#ced4da' },
+  light: { temp: '#c92a2a', dewp: '#087f5b', station: '#343a40' },
+}
+
+/** Draw a WMO-style station model (temp, dewpoint, wind barb) to a canvas. */
+export function makeStationCanvas(m: Metar, colors: SpriteColors): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = SIZE
   canvas.height = SIZE
@@ -73,7 +77,5 @@ export function makeStationTexture(m: Metar, colors: SpriteColors): CanvasTextur
     ctx.fillText(String(Math.round(m.dewp)), CX - 8, CY + 18)
   }
 
-  const tex = new CanvasTexture(canvas)
-  tex.colorSpace = SRGBColorSpace
-  return tex
+  return canvas
 }

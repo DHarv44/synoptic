@@ -1,26 +1,43 @@
 import { useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
-import { TileLayer } from '@/scene/tiles/TileLayer'
-import { GLOBE_RADIUS } from '@/scene/geo'
-import { RENDER_ORDER } from '@/scene/renderOrder'
-import { GIBS, gibsDate, gibsTileUrl } from '@/features/satellite/service'
+import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
+import { gibsDate, gibsTileUrl, PRODUCTS } from '@/features/satellite/service'
 
-const LAYER_RADIUS = GLOBE_RADIUS * 1.0004
-
-/** NASA GIBS satellite imagery draped under the radar layer. */
+/** NASA GIBS satellite imagery under the radar layers. */
 export function SatelliteLayer() {
   const simTime = useTimeline((s) => s.simTime)
   const product = useFeatureOption<string>('satellite', 'product')
   const opacity = useFeatureOption<number>('satellite', 'opacity')
   const date = gibsDate(simTime, Date.now())
 
-  return (
-    <TileLayer
-      urlFor={(z, x, y) => gibsTileUrl(product, date, z, x, y)}
-      radius={LAYER_RADIUS}
-      opacity={opacity / 100}
-      renderOrder={RENDER_ORDER.satellite}
-      source={GIBS}
-    />
+  useMapLayer(
+    (map) => {
+      const p = PRODUCTS[product] ?? PRODUCTS.truecolor
+      map.addSource('satellite', {
+        type: 'raster',
+        tiles: [gibsTileUrl(product, date, 0, 0, 0).replace('/0/0/0.', '/{z}/{y}/{x}.')],
+        tileSize: 256,
+        maxzoom: p.maxZoom,
+        attribution: 'Imagery © NASA GIBS',
+      })
+      // Below the radar layers if present, else below basemap labels.
+      const beforeId = map.getLayer('radar-rv') ? 'radar-rv' : firstSymbolLayerId(map)
+      map.addLayer(
+        {
+          id: 'satellite',
+          type: 'raster',
+          source: 'satellite',
+          paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
+        },
+        beforeId,
+      )
+      return () => {
+        if (map.getLayer('satellite')) map.removeLayer('satellite')
+        if (map.getSource('satellite')) map.removeSource('satellite')
+      }
+    },
+    [product, date, opacity],
   )
+
+  return null
 }

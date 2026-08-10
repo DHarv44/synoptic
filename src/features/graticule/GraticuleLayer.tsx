@@ -1,27 +1,62 @@
 import { useMemo } from 'react'
-import { GLOBE_RADIUS } from '@/scene/geo'
-import { graticuleSegmentPositions } from '@/scene/lineGeometry'
 import { useFeatureOption } from '@/core/settings/store'
-import { useSceneColors } from '@/scene/colors'
-import { RENDER_ORDER } from '@/scene/renderOrder'
+import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
 
-const LINE_RADIUS = GLOBE_RADIUS * 1.0005
+function graticuleGeojson(spacing: number): GeoJSON.FeatureCollection {
+  const features: GeoJSON.Feature[] = []
+  for (let lat = -80; lat <= 80; lat += spacing) {
+    const coords: [number, number][] = []
+    for (let lon = -180; lon <= 180; lon += 2) coords.push([lon, lat])
+    features.push({
+      type: 'Feature',
+      geometry: { type: 'LineString', coordinates: coords },
+      properties: {},
+    })
+  }
+  for (let lon = -180; lon < 180; lon += spacing) {
+    features.push({
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [
+          [lon, -85],
+          [lon, 85],
+        ],
+      },
+      properties: {},
+    })
+  }
+  return { type: 'FeatureCollection', features }
+}
 
-/** Lat/lon grid on the globe; spacing comes from feature settings. */
+/** Lat/lon grid lines over the basemap. */
 export function GraticuleLayer() {
   const spacing = Number(useFeatureOption<string>('graticule', 'spacing'))
-  const colors = useSceneColors()
-  const positions = useMemo(
-    () => graticuleSegmentPositions(spacing, LINE_RADIUS),
-    [spacing],
+  const data = useMemo(() => graticuleGeojson(spacing), [spacing])
+
+  useMapLayer(
+    (map) => {
+      map.addSource('graticule', { type: 'geojson', data })
+      map.addLayer(
+        {
+          id: 'graticule',
+          type: 'line',
+          source: 'graticule',
+          paint: {
+            'line-color': '#748496',
+            'line-opacity': 0.18,
+            'line-width': 0.75,
+          },
+        },
+        firstSymbolLayerId(map),
+      )
+      return () => {
+        if (map.getLayer('graticule')) map.removeLayer('graticule')
+        if (map.getSource('graticule')) map.removeSource('graticule')
+      }
+    },
+    [data],
   )
 
-  return (
-    <lineSegments renderOrder={RENDER_ORDER.graticule}>
-      <bufferGeometry key={spacing}>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <lineBasicMaterial color={colors.graticule} transparent opacity={0.35} />
-    </lineSegments>
-  )
+  return null
 }

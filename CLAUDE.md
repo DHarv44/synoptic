@@ -47,6 +47,15 @@ Fixture mode (`?fixture=<case>`) must keep the whole app bootable offline.
 - **Vite is pinned to v7 (rollup)** — Vite 8's rolldown optimizer produced duplicate
   fiber/React chunks ("invalid hook call" at boot). Keep the `resolve.dedupe` +
   `optimizeDeps.include` config in vite.config.ts.
+- **Map surface is MapLibre GL, pinned to v5** (globe projection), with the
+  **OpenFreeMap** vector basemap (keyless). MapLibre's default inlined-blob worker
+  fails SILENTLY in sandboxed webviews (vector tiles never load, raster fine) —
+  we use the CSP worker build via `setWorkerUrl` in MapView.tsx; keep it.
+- Data layers must be inserted **before the basemap's first symbol layer**
+  (`firstSymbolLayerId`) so labels render above radar/satellite. `setStyle` wipes
+  custom layers — all layer setup goes through `useMapLayer` (styleVersion-keyed).
+- R3F/three stays in the deps for Phase 6 3D views (volumetric radar, sounding
+  column); the map itself is MapLibre-only.
 - **Hidden Mantine tab panels defer updates** (React 19 `<Activity>`): a hidden
   tabpanel's DOM can show stale content until its tab is selected. This is correct
   behavior — do NOT chase it as a state bug, and don't verify panel reactivity by
