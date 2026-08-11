@@ -32,7 +32,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Cross-section | Shift+click A→B → RHI slice at true beam heights | ✅ |
 | 3D echo | Tilt surfaces in 3D, threshold + orbit | ✅ |
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
-| Level 2 quality pass | Clutter/noise suppression, smoothing, volume continuity | ⚠️ needs work |
+| Radar quality + resolution | Clutter suppression, seamless zoom handoff, multi-site blending | ⚠️ needs work |
 | Isosurface raymarch | Solid volume instead of tilt surfaces | 🔭 |
 | `.pal` color tables | Import GRLevelX community palettes | 🔭 |
 
@@ -216,8 +216,27 @@ probes that point. Works on desktop and mobile, in dark or light.
      the radar trend, and severe-parameter thresholds crossing. Needs a
      notification-permission flow, a background poll that survives a
      backgrounded tab, and strict de-duplication so a single warning fires once.
-4. **Level 2 radar quality pass** — the single-site layer works but reads
-   noisy and speckled next to the composite mosaics. Suspects, in order:
+4. **Radar quality and resolution** — the biggest gap between SYNOPTIC and the
+   paid apps is how radar *looks*, especially as you zoom in.
+
+   **Resolution.** The composite layers are pre-rendered raster tiles that
+   run out of detail well before the map does: RainViewer's global mosaic
+   stops around zoom 7 and is overzoomed (blurred) beyond it, and the IEM
+   CONUS mosaic tops out near zoom 12. Level 2 is the answer — it's true
+   super-resolution data (250 m gates, 0.5° azimuth) rendered natively in
+   polar coordinates, so it stays sharp at any zoom — but today it only
+   appears past zoom 6 as a separate layer you have to notice. Goals:
+   - **Seamless handoff** — one "Radar" layer that silently upgrades from
+     global composite → CONUS mosaic → single-site Level 2 as you zoom,
+     rather than three layers the user manages by hand.
+   - **Multi-site blending** — a single site leaves a cone of silence
+     overhead and degrades at long range as the beam climbs; nearby sites
+     should fill in, which is exactly what a proper mosaic does.
+   - Raise the per-source zoom ceilings and stop overzooming blurred tiles
+     where sharper data exists.
+
+   **Quality.** The single-site layer reads noisy and speckled next to the
+   composites. Suspects, in order:
    - **No clutter suppression.** Raw super-res base data includes ground
      clutter, biological returns (birds/insects — the big low-dBZ bloom
      around each site at night), anomalous propagation and interference

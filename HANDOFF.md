@@ -94,7 +94,15 @@ Single entry point for continuing SYNOPTIC. Read in this order:
    timings while streaming, long-session memory, bundle analysis, low-end
    mobile — which also de-risks the Chase HUD.
 5. **Phase 7 Chase HUD** — PLAN.md §3.14.
-6. **Historical mode** — needs a design pass before code (README has the
+6. **Radar quality + resolution** (README roadmap item 4). Two halves:
+   *resolution* — the three radar layers (RainViewer ~z7, IEM ~z12, Level 2)
+   are separate user-managed toggles that blur or run out as you zoom;
+   want one layer that hands off automatically, plus multi-site blending so
+   a single site's cone of silence and long-range beam climb are filled in.
+   *quality* — clutter/biological returns aren't suppressed (use the CC and
+   CFP fields we already decode), the display floor is too low, sampling is
+   nearest-neighbour, and partial sweeps show as wedges mid-volume.
+7. **Historical mode** — needs a design pass before code (README has the
    open questions): period picking (curated named events + free date entry),
    showing per-source coverage on the timeline (radar→1991, models→1940),
    prefetch/cache strategy for many frames, **user-uploaded datasets**
