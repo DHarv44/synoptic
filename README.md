@@ -152,6 +152,13 @@ probes that point.
      warnings" statement.
    - Discoverability fixes alongside: hint text on first run, and surfacing
      hidden gestures in the relevant panel rather than only in docs.
+   - **Teaching layer** *(later, after the structural work)* — the strongest
+     moat against paid apps for the enthusiast audience, who want the pro
+     tools *and* a ramp into them: contextual "why this matters" notes beside
+     each analysis tool, worked examples on real events, and short lessons
+     (reading a skew-T, spotting a hook echo, what a velocity couplet means).
+     Deliberately scoped after the structural UI work — it's content writing,
+     not layout, and it should attach to panels whose shape has settled.
 
    Also in scope: timeline affordances, information density, empty states,
    keyboard access (tab switching, Esc to dismiss drawers), and the deferred
