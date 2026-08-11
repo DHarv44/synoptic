@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { getFeature } from '@/core/settings/registry'
@@ -71,10 +72,26 @@ export function useFeatureOption<T extends SettingValue>(id: string, key: string
   )
 }
 
+/**
+ * Every option for a feature, manifest defaults filled in. For readers that
+ * need several at once — subscribing per key works, but restating the
+ * defaults alongside the manifest to do it does not.
+ */
+export function useFeatureOptions(id: string): Record<string, SettingValue> {
+  const stored = useSettings((s) => s.features[id]?.options)
+  return useMemo(() => ({ ...defaultsFor(id).options, ...stored }), [id, stored])
+}
+
 /** Non-hook accessor for services/workers. */
 export function featureEnabled(id: string): boolean {
   const s = useSettings.getState()
   return s.features[id]?.enabled ?? defaultsFor(id).enabled
+}
+
+/** Non-hook option read, for services outside the React tree. */
+export function featureOption<T extends SettingValue>(id: string, key: string): T {
+  const s = useSettings.getState()
+  return (s.features[id]?.options[key] ?? defaultsFor(id).options[key]) as T
 }
 
 attachDevStore('settings', useSettings)

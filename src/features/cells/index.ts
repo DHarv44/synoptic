@@ -16,5 +16,18 @@ registerFeature({
   sourceIds: ['iem-attr'],
   panels: [{ id: 'cells', title: 'Cells', component: CellsPanel, group: 'nearby', order: 1, summary: CellsSummary }],
   defaultEnabled: true,
-  settings: [],
+  settings: [
+    {
+      kind: 'select',
+      key: 'minSeverity',
+      label: 'Show cells',
+      options: [
+        { value: '0', label: 'All tracked cells' },
+        { value: '1', label: 'Hail or large cells' },
+        { value: '2', label: 'Rotating (meso) and above' },
+        { value: '3', label: 'Tornado signatures only' },
+      ],
+      defaultValue: '0',
+    },
+  ],
 })

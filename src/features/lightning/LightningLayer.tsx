@@ -3,7 +3,7 @@ import type { GeoJSONSource } from 'maplibre-gl'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { useMapContext } from '@/map/MapView'
-import { STRIKE_TTL_MS, connectLightning, strikeBuffer } from '@/features/lightning/service'
+import { connectLightning, strikeBuffer, strikeTtlMs } from '@/features/lightning/service'
 import { makeBoltImage } from '@/features/lightning/boltIcon'
 
 const UPDATE_MS = 1000
@@ -20,7 +20,7 @@ function toGeojson(nowMs: number): GeoJSON.FeatureCollection {
     features: strikeBuffer.strikes.map((s) => ({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
-      properties: { age: (nowMs - s.timeMs) / STRIKE_TTL_MS },
+      properties: { age: (nowMs - s.timeMs) / strikeTtlMs() },
     })),
   }
 }

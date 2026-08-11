@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { bboxIntersects, useMapView } from '@/map/viewStore'
-import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
+import { useFilteredAlerts } from '@/features/alerts/useFilteredAlerts'
 import { alertBbox, type AlertFeature } from '@/features/alerts/service'
 
 export interface VisibleAlert {
@@ -13,14 +13,16 @@ export interface VisibleAlert {
  * collapsed summary so the two can't disagree about what "in view" means.
  */
 export function useVisibleAlerts(includeUnmapped = false): {
+  /** Everything active, before the user's filters. */
   all: AlertFeature[]
+  /** Passing the filters, before the viewport. */
+  shown: AlertFeature[]
   visible: VisibleAlert[]
 } {
-  const all = useAlertsData()
+  const { all, shown } = useFilteredAlerts()
   const bounds = useMapView((s) => s.bounds)
-  useEffect(() => acquireAlertsFeed(), [])
 
-  const withBoxes = useMemo(() => all.map((a) => ({ a, bbox: alertBbox(a) })), [all])
+  const withBoxes = useMemo(() => shown.map((a) => ({ a, bbox: alertBbox(a) })), [shown])
   const visible = useMemo(() => {
     const mapped = withBoxes.filter(
       ({ bbox }) => bbox !== null && (bounds === null || bboxIntersects(bbox, bounds)),
@@ -30,5 +32,5 @@ export function useVisibleAlerts(includeUnmapped = false): {
       : mapped
   }, [withBoxes, bounds, includeUnmapped])
 
-  return { all, visible }
+  return { all, shown, visible }
 }

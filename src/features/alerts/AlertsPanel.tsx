@@ -56,7 +56,8 @@ function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
  */
 export function AlertsPanel() {
   const [showUnmapped, setShowUnmapped] = useState(false)
-  const { all: alerts, visible } = useVisibleAlerts(showUnmapped)
+  const { all: alerts, shown, visible } = useVisibleAlerts(showUnmapped)
+  const filteredOut = alerts.length - shown.length
 
   if (alerts.length === 0) {
     return (
@@ -69,8 +70,10 @@ export function AlertsPanel() {
   return (
     <Stack gap={6}>
       <Text size="xs" c="dimmed">
-        {visible.length} in view · {alerts.length} active US-wide · not a substitute for
-        official warnings
+        {visible.length} in view · {shown.length} active US-wide
+        {/* Say so, rather than letting a filter look like a quiet day. */}
+        {filteredOut > 0 && ` · ${filteredOut} hidden by filters`} · not a substitute
+        for official warnings
       </Text>
       <Switch
         size="xs"

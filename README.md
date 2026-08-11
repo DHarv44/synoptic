@@ -159,18 +159,23 @@ probes that point. Works on desktop and mobile, in dark or light.
    **Deeper settings** — the registry already generates the settings UI from
    each feature's manifest, so new controls are cheap to add; the discipline
    is choosing ones that earn their place. Priority order:
-   - **Alert filtering by event type + severity floor** — the biggest noise
-     win available (Special Marine Warnings routinely make up the large
-     majority of active alerts; inland users should be able to retire them).
+   - **Alert filtering by event type + severity floor** ✅ — a severity floor
+     plus per-category switches (flood, tropical, winter, heat, marine and
+     coastal, other advisories). Marine defaults to off, which on a sample
+     afternoon hid 104 of 274 active alerts — 38% of the list. Tornado and
+     thunderstorm warnings deliberately have no switch. The panel says how
+     many are hidden, so a filter can't be mistaken for a quiet day, and one
+     filter drives the map, the list and the summary alike.
+   - **Storm-cell display threshold** ✅ (all / hail-and-large / rotating /
+     tornado signatures) and **lightning fade window** ✅ (2–30 min).
    - **Decoupled units** — wind in kt/mph/km-h/m-s, pressure in hPa/inHg,
      heights in m/ft/kft, distance in km/mi/nm, independent of the metric /
      imperial system switch, the way professional tools do it.
-   - **Level 2 defaults** — default moment and tilt, site lock (manual pick
-     vs auto-nearest), range rings, dealiasing default.
+   - **Level 2 defaults** — default moment and tilt, range rings, dealiasing
+     default. (Site lock shipped with the radar picker.)
    - **Radar loop behavior** — loop length (30 min / 1 h / 2 h), speed,
      end-frame dwell.
-   - **Lightning fade window**, **storm-cell display thresholds** (min dBZ /
-     VIL, or TVS-and-meso only), **METAR content + density**, satellite
+   - Remaining smaller ones: **METAR content + density**, satellite
      product/band expansion, wind trail length and color-by, timeline
      defaults (range, arrow-key step, auto-return-to-live), basemap style
      and label density, per-source refresh cadence for bandwidth/battery.

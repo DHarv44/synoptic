@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { ExpressionSpecification, GeoJSONSource } from 'maplibre-gl'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { alertColor, alertWeight, withGeometry } from '@/features/alerts/service'
-import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
+import { useFilteredAlerts } from '@/features/alerts/useFilteredAlerts'
 
 /**
  * Zoom-interpolated outline width, scaled by the per-event weight and
@@ -30,8 +30,7 @@ function strokeWidth(pad = 0): ExpressionSpecification {
  * into a red storm core is worse than no boundary at all.
  */
 export function AlertsLayer() {
-  const alerts = useAlertsData()
-  useEffect(() => acquireAlertsFeed(), [])
+  const { shown: alerts } = useFilteredAlerts()
 
   const geojson = useMemo(
     () => ({

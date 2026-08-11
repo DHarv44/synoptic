@@ -1,5 +1,6 @@
 import { reportError, reportOk } from '@/core/data/healthStore'
 import { fixtureActive } from '@/core/data/fixtures'
+import { featureOption } from '@/core/settings/store'
 import type { SourceRef } from '@/core/data/types'
 
 export const BLITZORTUNG: SourceRef = { id: 'blitzortung', label: 'Blitzortung' }
@@ -11,7 +12,11 @@ export interface Strike {
 }
 
 export const MAX_STRIKES = 4096
-export const STRIKE_TTL_MS = 10 * 60_000
+
+/** How long a strike stays on the map, from the Lightning settings. */
+export function strikeTtlMs(): number {
+  return featureOption<number>('lightning', 'fadeMinutes') * 60_000
+}
 
 const HOSTS = ['wss://ws1.blitzortung.org', 'wss://ws7.blitzortung.org', 'wss://ws8.blitzortung.org']
 
@@ -52,7 +57,7 @@ class StrikeBuffer {
   }
 
   prune(nowMs: number): void {
-    const cutoff = nowMs - STRIKE_TTL_MS
+    const cutoff = nowMs - strikeTtlMs()
     let firstLive = 0
     while (firstLive < this.strikes.length && this.strikes[firstLive].timeMs < cutoff) firstLive++
     if (firstLive > 0) {

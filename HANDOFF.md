@@ -94,11 +94,16 @@ off and on moves it to the top (this is how radar came to cover warnings).
      Alerts and cells should contribute counts the same way.
    - Typographic pass (values should dominate labels), timeline as an
      information display, desktop panel resize, keyboard access.
-   - **Deeper per-feature settings** (README has the full priority list):
-     alert event-type/severity filtering first (marine warnings swamp the
-     list), decoupled units (kt/inHg/kft/nm independent of metric-imperial),
-     L2 defaults + site lock, radar loop length/speed, lightning fade
-     window, cell display thresholds, METAR content/density, timeline
+   - **Deeper per-feature settings**: alert filtering, cell threshold and
+     lightning fade window are done. Two patterns to copy: filtering lives
+     in one hook that the layer, panel and summary all read
+     (`useFilteredAlerts`, `useVisibleCells`) so surfaces can't disagree,
+     and whatever is hidden gets counted back to the user, so a filter never
+     reads as a quiet feed. `useFeatureOptions(id)` gives all of a feature's
+     options with manifest defaults filled in; `featureOption(id, key)` is
+     the non-hook version for services. Still open (README has the list):
+     decoupled units (kt/inHg/kft/nm independent of metric-imperial), L2
+     defaults, radar loop length/speed, METAR content/density, timeline
      defaults, per-source cadence. Then **presets** (PLAN §3.13a, never
      built) and settings search. Adding fields is cheap — they're declared
      in `FeatureManifest.settings` and the UI generates itself.

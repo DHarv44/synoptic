@@ -1,14 +1,13 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { cellSeverity, SEVERITY_COLORS } from '@/features/cells/service'
-import { acquireCellsFeed, useCellsData } from '@/features/cells/store'
+import { useVisibleCells } from '@/features/cells/useVisibleCells'
 
 /** Storm cell markers: colored by severity, storm-id labels when zoomed. */
 export function CellsLayer() {
-  const cells = useCellsData()
-  useEffect(() => acquireCellsFeed(), [])
+  const { shown: cells } = useVisibleCells()
 
   const geojson = useMemo(
     () => ({

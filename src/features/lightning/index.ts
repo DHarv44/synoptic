@@ -13,5 +13,15 @@ registerFeature({
   layerComponent: LightningLayer,
   sourceIds: ['blitzortung'],
   defaultEnabled: true,
-  settings: [],
+  settings: [
+    {
+      kind: 'number',
+      key: 'fadeMinutes',
+      label: 'Keep strikes for (minutes)',
+      min: 2,
+      max: 30,
+      step: 1,
+      defaultValue: 10,
+    },
+  ],
 })

@@ -59,6 +59,51 @@ export function alertWeight(event: string): number {
   return 1
 }
 
+/**
+ * Broad families of NWS product, for filtering. The list is long and
+ * lopsided — a quiet day is mostly small craft advisories and beach hazard
+ * statements — so the point is to let people mute what they don't work on.
+ */
+export type AlertCategory =
+  | 'convective'
+  | 'tropical'
+  | 'marine'
+  | 'flood'
+  | 'winter'
+  | 'heat'
+  | 'other'
+
+/** Settings key that hides a category, or null for ones we never hide. */
+export const CATEGORY_SETTING: Record<AlertCategory, string | null> = {
+  convective: null,
+  tropical: 'showTropical',
+  marine: 'showMarine',
+  flood: 'showFlood',
+  winter: 'showWinter',
+  heat: 'showHeat',
+  other: 'showOther',
+}
+
+/**
+ * Order matters. Coastal Flood is a coastal product, not a river flood, and
+ * a Tropical Storm Warning is not a marine bulletin — the earlier tests win.
+ * Tornado and thunderstorm warnings are deliberately uncategorised for
+ * hiding: burying those behind a preference is not a feature.
+ */
+export function alertCategory(event: string): AlertCategory {
+  if (/Tornado|Severe Thunderstorm|Dust Storm|Extreme Wind/.test(event)) return 'convective'
+  if (/Hurricane(?! Force)|Tropical|Typhoon|Storm Surge/.test(event)) return 'tropical'
+  if (/Marine|Small Craft|Gale|Hurricane Force|Beach Hazards|Rip Current|Coastal|Lakeshore|Sea|Ashfall/.test(event)) {
+    return 'marine'
+  }
+  if (/Flood|Hydrologic|Dam |Seiche/.test(event)) return 'flood'
+  if (/Winter|Snow|Ice |Icy|Blizzard|Freez|Frost|Wind Chill|Sleet|Avalanche|Cold/.test(event)) {
+    return 'winter'
+  }
+  if (/Heat/.test(event)) return 'heat'
+  return 'other'
+}
+
 /** Polygon-bearing alerts only (zone-referenced alerts render in the panel list). */
 export function withGeometry(features: AlertFeature[]): AlertFeature[] {
   return features.filter((f) => f.geometry?.type === 'Polygon')
