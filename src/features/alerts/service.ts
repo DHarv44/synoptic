@@ -47,6 +47,17 @@ export function alertColor(event: string): string {
   return '#868e96'
 }
 
+/**
+ * Outline weight multiplier. Not everything with a polygon deserves equal
+ * ink: a tornado warning has to read instantly against a loud reflectivity
+ * field, while a frost advisory should stay quiet.
+ */
+export function alertWeight(event: string): number {
+  if (event.includes('Tornado')) return 1.6
+  if (event.includes('Severe Thunderstorm') || event.includes('Flash Flood')) return 1.25
+  return 1
+}
+
 /** Polygon-bearing alerts only (zone-referenced alerts render in the panel list). */
 export function withGeometry(features: AlertFeature[]): AlertFeature[] {
   return features.filter((f) => f.geometry?.type === 'Polygon')

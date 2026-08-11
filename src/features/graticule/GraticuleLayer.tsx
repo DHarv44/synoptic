@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useFeatureOption } from '@/core/settings/store'
-import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
+import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 
 function graticuleGeojson(spacing: number): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = []
@@ -37,7 +38,8 @@ export function GraticuleLayer() {
   useMapLayer(
     (map) => {
       map.addSource('graticule', { type: 'geojson', data })
-      map.addLayer(
+      addDataLayer(
+        map,
         {
           id: 'graticule',
           type: 'line',
@@ -48,7 +50,7 @@ export function GraticuleLayer() {
             'line-width': 0.75,
           },
         },
-        firstSymbolLayerId(map),
+        'graticule',
       )
       return () => {
         if (map.getLayer('graticule')) map.removeLayer('graticule')

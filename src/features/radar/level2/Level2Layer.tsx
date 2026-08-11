@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react'
 import { useHotkeys } from '@mantine/hooks'
 import type { MapMouseEvent } from 'maplibre-gl'
 import { useMapContext } from '@/map/MapView'
-import { useMapLayer, firstSymbolLayerId } from '@/map/useMapLayer'
+import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 import { useMapView } from '@/map/viewStore'
 import { useFeatureOption, featureEnabled } from '@/core/settings/store'
 import { reportError, reportOk } from '@/core/data/healthStore'
@@ -78,7 +79,7 @@ export function Level2Layer() {
   useMapLayer((m) => {
     const layer = new SweepGlLayer()
     layerRef.current = layer
-    m.addLayer(layer, firstSymbolLayerId(m))
+    addDataLayer(m, layer, 'radar-level2')
     return () => {
       if (m.getLayer(layer.id)) m.removeLayer(layer.id)
       layerRef.current = null
@@ -109,12 +110,16 @@ export function Level2Layer() {
           : [],
       }
       m.addSource('l2-section', { type: 'geojson', data })
-      m.addLayer({
-        id: 'l2-section',
-        type: 'line',
-        source: 'l2-section',
-        paint: { 'line-color': '#ffd43b', 'line-width': 2, 'line-dasharray': [2, 1] },
-      })
+      addDataLayer(
+        m,
+        {
+          id: 'l2-section',
+          type: 'line',
+          source: 'l2-section',
+          paint: { 'line-color': '#ffd43b', 'line-width': 2, 'line-dasharray': [2, 1] },
+        },
+        'annotation',
+      )
       return () => {
         if (m.getLayer('l2-section')) m.removeLayer('l2-section')
         if (m.getSource('l2-section')) m.removeSource('l2-section')

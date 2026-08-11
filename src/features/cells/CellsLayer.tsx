@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 import { cellSeverity, SEVERITY_COLORS } from '@/features/cells/service'
 import { acquireCellsFeed, useCellsData } from '@/features/cells/store'
 
@@ -28,7 +29,7 @@ export function CellsLayer() {
   useMapLayer(
     (map) => {
       map.addSource('cells', { type: 'geojson', data: geojson })
-      map.addLayer({
+      addDataLayer(map, {
         id: 'cells',
         type: 'circle',
         source: 'cells',
@@ -39,8 +40,8 @@ export function CellsLayer() {
           'circle-stroke-color': ['get', 'color'],
           'circle-stroke-width': 1.5,
         },
-      })
-      map.addLayer({
+      }, 'cells')
+      addDataLayer(map, {
         id: 'cells-label',
         type: 'symbol',
         source: 'cells',
@@ -52,7 +53,7 @@ export function CellsLayer() {
           'text-font': ['Noto Sans Regular'],
         },
         paint: { 'text-color': ['get', 'color'] },
-      })
+      }, 'cells')
       return () => {
         for (const id of ['cells', 'cells-label']) {
           if (map.getLayer(id)) map.removeLayer(id)

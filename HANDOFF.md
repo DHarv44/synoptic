@@ -36,6 +36,11 @@ Three surfaces, split by kind, not by topic:
 Radar state is centralised in `features/radar/level2/store.ts` — the map layer
 is the only writer; bench, workbench and readouts all read from it.
 
+**Map layer stacking** is declared once in `map/layerOrder.ts`. Always add
+map layers with `addDataLayer(map, spec, slot)`, never `map.addLayer` — the
+order otherwise depends on which feature mounted last, and toggling a layer
+off and on moves it to the top (this is how radar came to cover warnings).
+
 ## Where things stand (2026-08-11)
 
 - **Done & verified live**: Phases 1, 2, 2.5, 4, 5 (tags) and the whole radar

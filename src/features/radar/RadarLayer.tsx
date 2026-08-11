@@ -4,7 +4,8 @@ import { fetchJson } from '@/core/data/fetchJson'
 import { startPoller } from '@/core/data/scheduler'
 import { featureEnabled, useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
-import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
+import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 import {
   RAINVIEWER,
   WEATHER_MAPS_URL,
@@ -58,14 +59,15 @@ export function RadarLayer() {
         maxzoom: 7,
         attribution: 'Radar © RainViewer',
       })
-      map.addLayer(
+      addDataLayer(
+        map,
         {
           id: 'radar-rv',
           type: 'raster',
           source: 'radar-rv',
           paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
         },
-        firstSymbolLayerId(map),
+        'radar',
       )
       return () => {
         if (map.getLayer('radar-rv')) map.removeLayer('radar-rv')
@@ -97,14 +99,15 @@ export function RadarLayer() {
         bounds: [CONUS.lonMin, CONUS.latMin, CONUS.lonMax, CONUS.latMax],
         attribution: 'NEXRAD © Iowa Environmental Mesonet',
       })
-      map.addLayer(
+      addDataLayer(
+        map,
         {
           id: 'radar-iem',
           type: 'raster',
           source: 'radar-iem',
           paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
         },
-        firstSymbolLayerId(map),
+        'radar-conus',
       )
       return () => {
         if (map.getLayer('radar-iem')) map.removeLayer('radar-iem')

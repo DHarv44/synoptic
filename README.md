@@ -178,8 +178,11 @@ probes that point. Works on desktop and mobile, in dark or light.
      radar tilt/moment/SRV all reset on reload. Restore them, add the
      shareable workspace URL from PLAN.md §3.12, and offer export/import.
    - Deliberately *not* exposing per-layer draw order — the stacking is
-     meaningful (labels over radar over satellite) and mostly offers users a
-     way to break their own display.
+     meaningful and mostly offers users a way to break their own display.
+     It is declared once in `map/layerOrder.ts`: imagery, then radar by
+     resolution (global composite → CONUS mosaic → single-site Level 2),
+     fields, the warning wash, then basemap labels, then point data, then
+     warning outlines and annotations on top.
 
    **Help & About** — nothing currently explains the app to a newcomer, and
    several controls are undiscoverable. Add:

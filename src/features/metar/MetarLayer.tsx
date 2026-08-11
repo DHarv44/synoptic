@@ -5,6 +5,7 @@ import { featureEnabled } from '@/core/settings/store'
 import { startPoller } from '@/core/data/scheduler'
 import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 import { METAR_SOURCE, metarUrl, thinStations, type Metar } from '@/features/metar/service'
 import { makeStationCanvas, STATION_COLORS } from '@/features/metar/drawStationModel'
 
@@ -76,7 +77,7 @@ export function MetarLayer() {
           })),
         },
       })
-      m.addLayer({
+      addDataLayer(m, {
         id: 'metar',
         type: 'symbol',
         source: 'metar',
@@ -86,7 +87,7 @@ export function MetarLayer() {
           'icon-allow-overlap': false, // built-in decluttering
           'icon-size': 1,
         },
-      })
+      }, 'metar')
       return () => {
         if (m.getLayer('metar')) m.removeLayer('metar')
         if (m.getSource('metar')) m.removeSource('metar')

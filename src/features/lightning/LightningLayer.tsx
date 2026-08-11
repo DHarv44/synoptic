@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 import { useMapContext } from '@/map/MapView'
 import { STRIKE_TTL_MS, connectLightning, strikeBuffer } from '@/features/lightning/service'
 import { makeBoltImage } from '@/features/lightning/boltIcon'
@@ -35,7 +36,7 @@ export function LightningLayer() {
       if (!m.hasImage('bolt-flash')) m.addImage('bolt-flash', makeBoltImage('#ffffff', '#ffe066'), { pixelRatio: 2 })
       m.addSource('lightning', { type: 'geojson', data: toGeojson(Date.now()) })
       // Aging strikes: amber bolts fading/shrinking over the 10-min TTL.
-      m.addLayer({
+      addDataLayer(m, {
         id: 'lightning',
         type: 'symbol',
         source: 'lightning',
@@ -49,9 +50,9 @@ export function LightningLayer() {
         paint: {
           'icon-opacity': ['interpolate', ['linear'], ['get', 'age'], 0.04, 0.9, 1, 0.15],
         },
-      })
+      }, 'lightning')
       // Fresh strikes (< ~25s): larger white flash bolt.
-      m.addLayer({
+      addDataLayer(m, {
         id: 'lightning-flash',
         type: 'symbol',
         source: 'lightning',
@@ -62,7 +63,7 @@ export function LightningLayer() {
           'icon-ignore-placement': true,
           'icon-size': 0.8,
         },
-      })
+      }, 'lightning')
       return () => {
         for (const id of ['lightning', 'lightning-flash']) {
           if (m.getLayer(id)) m.removeLayer(id)

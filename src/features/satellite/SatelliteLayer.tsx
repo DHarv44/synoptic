@@ -1,6 +1,7 @@
 import { useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
-import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
+import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 import { gibsDate, gibsTileTemplate, PRODUCTS } from '@/features/satellite/service'
 
 /** NASA GIBS satellite imagery under the radar layers. */
@@ -20,16 +21,15 @@ export function SatelliteLayer() {
         maxzoom: p.maxZoom,
         attribution: 'Imagery © NASA GIBS',
       })
-      // Below the radar layers if present, else below basemap labels.
-      const beforeId = map.getLayer('radar-rv') ? 'radar-rv' : firstSymbolLayerId(map)
-      map.addLayer(
+      addDataLayer(
+        map,
         {
           id: 'satellite',
           type: 'raster',
           source: 'satellite',
           paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
         },
-        beforeId,
+        'satellite',
       )
       return () => {
         if (map.getLayer('satellite')) map.removeLayer('satellite')

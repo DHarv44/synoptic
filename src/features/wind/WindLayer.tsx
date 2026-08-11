@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import type { CustomLayerInterface, Map as MLMap } from 'maplibre-gl'
 import { useMapContext } from '@/map/MapView'
-import { useMapLayer, firstSymbolLayerId } from '@/map/useMapLayer'
+import { useMapLayer } from '@/map/useMapLayer'
+import { addDataLayer } from '@/map/layerOrder'
 import { useFeatureOption } from '@/core/settings/store'
 import { ParticleSystem } from '@/features/wind/ParticleSystem'
 import { fetchWindField } from '@/features/wind/service'
@@ -58,7 +59,7 @@ export function WindLayer() {
     (m) => {
       const layer = makeLayer(countK * 1000)
       layerRef.current = layer
-      m.addLayer(layer, firstSymbolLayerId(m))
+      addDataLayer(m, layer, 'wind')
       // Continuous repaint while the layer lives (throttled to rAF).
       const tick = (): void => {
         m.triggerRepaint()
