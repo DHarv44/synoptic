@@ -14,7 +14,7 @@ import { fetchChunk, findCurrentVolume, listVolumeChunks } from '@/features/rada
 import { RANGE_M, SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
 import { Level2Control } from '@/features/radar/level2/Level2Control'
 import { useRadar } from '@/features/radar/level2/store'
-import { distanceKm, sampleLine, toAzRange, type LatLon } from '@/features/radar/level2/geometry'
+import { distanceKm, sampleLine, toAzRange } from '@/features/radar/level2/geometry'
 import { emitVolume, setLevel2Worker } from '@/features/radar/level2/bridge'
 import type {
   ColumnResultMessage,
@@ -54,7 +54,6 @@ export function Level2Layer() {
   const layerRef = useRef<SweepGlLayer | null>(null)
   const workerRef = useRef<Worker | null>(null)
   const lastClickRef = useRef<{ azDeg: number; rangeM: number } | null>(null)
-  const sectionARef = useRef<LatLon | null>(null)
   const sectionRangesRef = useRef<{ ranges: number[]; lengthKm: number } | null>(null)
 
   // Nearest site to view centre while zoomed in.
@@ -115,6 +114,35 @@ export function Level2Layer() {
     [sectionLine],
   )
 
+  // Cross-section drawing: crosshair cursor, rubber-band line, Esc cancels.
+  const drawing = useRadar((s) => s.drawing)
+  useEffect(() => {
+    if (!drawing) {
+      map.getCanvas().style.cursor = ''
+      return
+    }
+    map.getCanvas().style.cursor = 'crosshair'
+
+    const onMove = (e: MapMouseEvent): void => {
+      const start = useRadar.getState().drawStart
+      if (start) {
+        useRadar.getState().set({
+          sectionLine: [start, { lat: e.lngLat.lat, lon: e.lngLat.lng }],
+        })
+      }
+    }
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') useRadar.getState().cancelDraw()
+    }
+    map.on('mousemove', onMove)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      map.getCanvas().style.cursor = ''
+      map.off('mousemove', onMove)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [drawing, map])
+
   // Storm motion (Bunkers right-mover) from the model sounding at the site.
   useEffect(() => {
     if (!site) return
@@ -170,22 +198,21 @@ export function Level2Layer() {
 
     const onClick = (e: MapMouseEvent): void => {
       const here = { lat: e.lngLat.lat, lon: e.lngLat.lng }
+      const state = useRadar.getState()
 
-      // Shift+click: first sets the section start, second draws the slice.
-      if (e.originalEvent.shiftKey) {
-        const a = sectionARef.current
+      // Cross-section drawing: first click anchors, second completes.
+      if (state.drawing) {
+        const a = state.drawStart
         if (!a) {
-          sectionARef.current = here
-          useRadar.getState().set({ sectionLine: [here, here] })
+          state.set({ drawStart: here, sectionLine: [here, here] })
           return
         }
         const azRanges = sampleLine(a, here, SECTION_SAMPLES).map((p) => toAzRange(activeSite, p))
-        sectionARef.current = null
         sectionRangesRef.current = {
           ranges: azRanges.map((s) => s.rangeM),
           lengthKm: distanceKm(a, here),
         }
-        useRadar.getState().set({ sectionLine: [a, here] })
+        state.set({ sectionLine: [a, here], drawing: false, drawStart: null })
         worker.postMessage({ type: 'section', samples: azRanges })
         return
       }

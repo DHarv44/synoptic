@@ -1,4 +1,5 @@
-import { Group, Stack, Text } from '@mantine/core'
+import { Button, Group, Stack, Text } from '@mantine/core'
+import { IconLineDashed } from '@tabler/icons-react'
 import { dbzToCss } from '@/features/radar/level2/colormap'
 import { useRadar } from '@/features/radar/level2/store'
 
@@ -23,17 +24,54 @@ function beamKft(rangeM: number, elevDeg: number): number {
  */
 export function SectionPlot() {
   const section = useRadar((s) => s.section)
+  const drawing = useRadar((s) => s.drawing)
+  const drawStart = useRadar((s) => s.drawStart)
+  const site = useRadar((s) => s.site)
+  const startDraw = useRadar((s) => s.startDraw)
+  const cancelDraw = useRadar((s) => s.cancelDraw)
 
-  if (!section) {
+  if (drawing) {
     return (
-      <Stack gap={4} p="sm">
+      <Stack gap="xs" p="sm">
         <Text size="sm" fw={600}>
           Cross-section
         </Text>
         <Text size="xs" c="dimmed">
-          Shift-click two points on the map to slice through a storm. The panel
-          plots reflectivity at each tilt's true beam height along that line.
+          {drawStart
+            ? 'Click the far end of the slice. Press Esc to cancel.'
+            : 'Click the start of the slice on the map.'}
         </Text>
+        <Button size="xs" variant="default" onClick={cancelDraw} style={{ alignSelf: 'start' }}>
+          Cancel
+        </Button>
+      </Stack>
+    )
+  }
+
+  if (!section) {
+    return (
+      <Stack gap="xs" p="sm">
+        <Text size="sm" fw={600}>
+          Cross-section
+        </Text>
+        <Text size="xs" c="dimmed">
+          Slice vertically through a storm: reflectivity is plotted at each
+          tilt's true beam height along the line you draw.
+        </Text>
+        <Button
+          size="xs"
+          leftSection={<IconLineDashed size={15} stroke={1.7} />}
+          onClick={startDraw}
+          disabled={site === null}
+          style={{ alignSelf: 'start' }}
+        >
+          Draw cross-section
+        </Button>
+        {site === null && (
+          <Text size="xs" c="dimmed">
+            Zoom in past z6 to attach a radar site first.
+          </Text>
+        )}
       </Stack>
     )
   }
@@ -44,12 +82,22 @@ export function SectionPlot() {
   return (
     <Stack gap={4} p="xs" h="100%" style={{ minHeight: 0 }}>
       <Group justify="space-between" wrap="nowrap">
-        <Text size="sm" fw={600}>
-          Cross-section
-        </Text>
-        <Text size="xs" c="dimmed" ff="monospace">
-          {lengthKm.toFixed(0)} km
-        </Text>
+        <Group gap="xs" wrap="nowrap">
+          <Text size="sm" fw={600}>
+            Cross-section
+          </Text>
+          <Text size="xs" c="dimmed" ff="monospace">
+            {lengthKm.toFixed(0)} km
+          </Text>
+        </Group>
+        <Button
+          size="compact-xs"
+          variant="subtle"
+          leftSection={<IconLineDashed size={14} stroke={1.7} />}
+          onClick={startDraw}
+        >
+          Redraw
+        </Button>
       </Group>
       <svg
         viewBox={`0 0 ${W} ${H}`}

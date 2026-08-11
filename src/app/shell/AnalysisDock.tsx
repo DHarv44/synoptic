@@ -3,7 +3,7 @@ import { listFeatures } from '@/core/settings/registry'
 import { useSettings } from '@/core/settings/store'
 import { useProbe } from '@/core/probe/store'
 import { fmtLatLon } from '@/core/units/format'
-import { applyOrder, useDock, type DockTab } from '@/app/shell/dockStore'
+import { useDock, type DockTab } from '@/app/shell/dockStore'
 import { RAIL_TABS } from '@/app/shell/DockRail'
 import { DockSection } from '@/app/shell/DockSection'
 import { SettingsPanel } from '@/app/settings/SettingsPanel'
@@ -37,14 +37,7 @@ export function ContextHeader({ tab }: { tab: DockTab }) {
 }
 
 function SectionStack({ tab, panels }: { tab: PanelGroup; panels: PanelContribution[] }) {
-  const savedOrder = useDock((s) => s.order[tab])
-  const ids = applyOrder(
-    savedOrder,
-    panels.map((p) => p.id),
-  )
-  const ordered = ids
-    .map((id) => panels.find((p) => p.id === id))
-    .filter((p): p is PanelContribution => p !== undefined)
+  const ordered = panels
 
   if (ordered.length === 0) {
     return (
@@ -60,13 +53,7 @@ function SectionStack({ tab, panels }: { tab: PanelGroup; panels: PanelContribut
         const Panel = p.component
         const Summary = p.summary
         return (
-          <DockSection
-            key={p.id}
-            id={p.id}
-            tab={tab}
-            title={p.title}
-            hint={Summary ? <Summary /> : undefined}
-          >
+          <DockSection key={p.id} id={p.id} title={p.title} hint={Summary ? <Summary /> : undefined}>
             <Panel />
           </DockSection>
         )

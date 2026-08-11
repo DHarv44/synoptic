@@ -31,8 +31,13 @@ interface RadarState {
   column: ColumnEntry[] | null
   section: SectionData | null
   sectionLine: LatLon[] | null
+  /** Cross-section drawing mode: awaiting two map clicks. */
+  drawing: boolean
+  drawStart: LatLon | null
   set: (patch: Partial<RadarState>) => void
   resetSite: (site: RadarSite | null) => void
+  startDraw: () => void
+  cancelDraw: () => void
 }
 
 /**
@@ -52,9 +57,22 @@ export const useRadar = create<RadarState>((set) => ({
   column: null,
   section: null,
   sectionLine: null,
+  drawing: false,
+  drawStart: null,
   set: (patch) => set(patch),
   resetSite: (site) =>
-    set({ site, tilts: [], probe: null, column: null, section: null, sectionLine: null }),
+    set({
+      site,
+      tilts: [],
+      probe: null,
+      column: null,
+      section: null,
+      sectionLine: null,
+      drawing: false,
+      drawStart: null,
+    }),
+  startDraw: () => set({ drawing: true, drawStart: null, sectionLine: null, section: null }),
+  cancelDraw: () => set({ drawing: false, drawStart: null, sectionLine: null }),
 }))
 
 attachDevStore('radar', useRadar)

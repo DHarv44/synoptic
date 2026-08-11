@@ -70,7 +70,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 |---|---|---|
 | Map-first shell | Edge-to-edge map; a right-edge icon rail carries navigation above, layer toggles below | ✅ |
 | Analysis dock | Location / Nearby / Radar / Settings — one scrolling column of collapsible sections | ✅ |
-| Section ordering | Drag or menu to reorder; order and expansion persist per tab | ✅ |
+| Section expansion | Collapse/expand per section, persisted | ✅ |
 | Settings | Registry-generated, searchable, with per-feature and global reset | ✅ |
 | Dark + light | Follows the OS by default; translucent map chrome with adjustable opacity | ✅ |
 | Units & time | Metric/imperial, independent temperature unit, local or UTC clock | ✅ |
@@ -133,6 +133,13 @@ probes that point. Works on desktop and mobile, in dark or light.
      sparkline for the probed point, so scrubbing has a visible purpose.
    - **Desktop panel resize** — 360 px is cramped for a skew-T; a drag handle
      would let it widen for analysis and narrow for monitoring.
+   - **Section reordering, done safely** — briefly shipped with native HTML5
+     drag and removed: a permanently draggable container swallows every
+     press inside it (canvases, sliders, map gestures), and arming the drag
+     from a grip still left it fragile and touch-hostile. If it returns it
+     should use a pointer-based library (`dnd-kit`) with a proper drag
+     handle, or sidestep dragging altogether with move-up/move-down
+     controls in an explicit "arrange" mode.
 
    **Deeper settings** — the registry already generates the settings UI from
    each feature's manifest, so new controls are cheap to add; the discipline

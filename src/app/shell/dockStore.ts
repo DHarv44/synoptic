@@ -15,8 +15,6 @@ interface DockState {
   setSheet: (sheet: SheetState) => void
   /** Mobile tab press: same tab cycles the sheet, a new tab opens it. */
   pressTab: (tab: DockTab) => void
-  /** Panel ids in user-chosen display order, per tab. */
-  order: Partial<Record<DockTab, string[]>>
   /** Section id → expanded. Absent means expanded (the default). */
   expanded: Record<string, boolean>
   setTab: (tab: DockTab) => void
@@ -25,9 +23,6 @@ interface DockState {
   /** Rail click: same tab collapses the panel, a different tab switches. */
   toggleTab: (tab: DockTab) => void
   toggleSection: (id: string) => void
-  moveSection: (tab: DockTab, id: string, delta: number) => void
-  reorder: (tab: DockTab, ids: string[]) => void
-  resetOrder: (tab: DockTab) => void
 }
 
 /**
@@ -41,7 +36,6 @@ export const useDock = create<DockState>()(
       tab: 'place',
       open: true,
       sheet: 'peek',
-      order: {},
       expanded: {},
       setSheet: (sheet) => set({ sheet }),
       pressTab: (tab) =>
@@ -57,34 +51,9 @@ export const useDock = create<DockState>()(
         set((s) => (s.open && s.tab === tab ? { open: false } : { tab, open: true })),
       toggleSection: (id) =>
         set((s) => ({ expanded: { ...s.expanded, [id]: !(s.expanded[id] ?? true) } })),
-      reorder: (tab, ids) => set((s) => ({ order: { ...s.order, [tab]: ids } })),
-      resetOrder: (tab) =>
-        set((s) => {
-          const next = { ...s.order }
-          delete next[tab]
-          return { order: next }
-        }),
-      moveSection: (tab, id, delta) =>
-        set((s) => {
-          const current = s.order[tab]
-          if (!current) return s
-          const from = current.indexOf(id)
-          const to = from + delta
-          if (from < 0 || to < 0 || to >= current.length) return s
-          const next = [...current]
-          next.splice(to, 0, ...next.splice(from, 1))
-          return { order: { ...s.order, [tab]: next } }
-        }),
     }),
-    { name: 'synoptic.dock', version: 1 },
+    { name: 'synoptic.dock', version: 2 },
   ),
 )
-
-/** Apply saved order to the available ids, appending anything new. */
-export function applyOrder(saved: string[] | undefined, available: string[]): string[] {
-  if (!saved) return available
-  const kept = saved.filter((id) => available.includes(id))
-  return [...kept, ...available.filter((id) => !kept.includes(id))]
-}
 
 attachDevStore('dock', useDock)
