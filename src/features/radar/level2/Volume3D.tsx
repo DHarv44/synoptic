@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Button, Group, Slider, Stack, Text } from '@mantine/core'
@@ -6,6 +6,7 @@ import { DoubleSide } from 'three'
 import { currentSite, onVolume, requestVolume } from '@/features/radar/level2/bridge'
 import { buildTiltMesh } from '@/features/radar/level2/volumeGeometry'
 import { GroundPlane } from '@/features/radar/level2/GroundPlane'
+import { CameraBearing, ViewCompass, ViewLoading } from '@/features/radar/level2/ViewCompass'
 import type { VolumeTilt } from '@/features/radar/level2/worker'
 
 const VERTICAL_EXAGGERATION = 4
@@ -48,28 +49,46 @@ export function Volume3D() {
   const [threshold, setThreshold] = useState(30)
   const [groundOpacity, setGroundOpacity] = useState(55)
   const [msg, setMsg] = useState<string | null>(null)
+  const [bearing, setBearing] = useState(0)
+  const [volumeLoading, setVolumeLoading] = useState(false)
+  const [groundLoading, setGroundLoading] = useState(false)
+  const stallRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  /** Ask the worker for a volume, showing the spinner until it answers. */
+  const ask = useCallback((): boolean => {
+    if (!requestVolume()) return false
+    setVolumeLoading(true)
+    // The worker owns no timeout of its own; don't spin forever if it never answers.
+    clearTimeout(stallRef.current)
+    stallRef.current = setTimeout(() => setVolumeLoading(false), 20_000)
+    return true
+  }, [])
 
   useEffect(() => {
     const off = onVolume((m) => {
+      clearTimeout(stallRef.current)
+      setVolumeLoading(false)
       setTilts(m.tilts)
       setMsg(m.tilts.length === 0 ? 'No sweeps retained yet — waiting for radials.' : null)
     })
     // The layer's worker may not exist yet (site still resolving) — retry.
     let tries = 0
     const timer = setInterval(() => {
-      if (requestVolume() || tries++ > 10) {
+      if (ask() || tries++ > 10) {
         clearInterval(timer)
         if (tries > 10) setMsg('Zoom in past z6 so a Level 2 site is active.')
       }
     }, 1500)
-    if (requestVolume()) clearInterval(timer)
+    if (ask()) clearInterval(timer)
     return () => {
       clearInterval(timer)
+      clearTimeout(stallRef.current)
       off()
     }
-  }, [])
+  }, [ask])
 
   const site = currentSite()
+  const busy = volumeLoading || groundLoading
 
   return (
     <Stack gap="xs" h="100%" p="xs" style={{ minHeight: 0 }}>
@@ -81,7 +100,7 @@ export function Volume3D() {
           size="compact-xs"
           variant="light"
           onClick={() => {
-            if (!requestVolume()) setMsg('Zoom in past z6 so a Level 2 site is active.')
+            if (!ask()) setMsg('Zoom in past z6 so a Level 2 site is active.')
           }}
         >
           Refresh
@@ -122,11 +141,24 @@ export function Volume3D() {
           label={(v) => `${v}%`}
         />
       </Group>
-      <div style={{ flex: 1, minHeight: 220, borderRadius: 4, overflow: 'hidden' }}>
+      <div
+        style={{
+          position: 'relative',
+          flex: 1,
+          minHeight: 220,
+          borderRadius: 4,
+          overflow: 'hidden',
+        }}
+      >
         <Canvas camera={{ position: [0, 150, 200], fov: 45, far: 4000 }} dpr={[1, 2]}>
           <color attach="background" args={['#0b0e12']} />
-          <GroundPlane radiusKm={GROUND_RADIUS_KM} opacity={groundOpacity / 100} />
+          <GroundPlane
+            radiusKm={GROUND_RADIUS_KM}
+            opacity={groundOpacity / 100}
+            onLoadingChange={setGroundLoading}
+          />
           <TiltSurfaces tilts={tilts} threshold={threshold} />
+          <CameraBearing onChange={setBearing} />
           {/* Left drag orbits, right drag pans across the ground, wheel zooms. */}
           <OrbitControls
             enablePan
@@ -135,6 +167,8 @@ export function Volume3D() {
             maxDistance={900}
           />
         </Canvas>
+        <ViewCompass bearing={bearing} />
+        {busy && <ViewLoading />}
       </div>
       <Text size="xs" c="dimmed">
         Surfaces are the radar's actual beam cones (vertical ×{VERTICAL_EXAGGERATION});

@@ -44,7 +44,16 @@ function RangeRings({ color }: { color: string }) {
  * laid flat at true ground level, dimmed so it orients without competing
  * with the reflectivity colours, plus range rings at 50/100/150 km.
  */
-export function GroundPlane({ radiusKm, opacity }: { radiusKm: number; opacity: number }) {
+export function GroundPlane({
+  radiusKm,
+  opacity,
+  onLoadingChange,
+}: {
+  radiusKm: number
+  opacity: number
+  /** Reports the basemap render, which is the slowest part of this view. */
+  onLoadingChange?: (loading: boolean) => void
+}) {
   const site = useRadar((s) => s.site)
   const scheme = useComputedColorScheme('dark')
   const [image, setImage] = useState<GroundImage | null>(null)
@@ -52,18 +61,24 @@ export function GroundPlane({ radiusKm, opacity }: { radiusKm: number; opacity: 
   useEffect(() => {
     if (!site) {
       setImage(null)
+      onLoadingChange?.(false)
       return
     }
     let cancelled = false
+    onLoadingChange?.(true)
+    const done = (img: GroundImage | null): void => {
+      if (cancelled) return
+      if (img) setImage(img)
+      onLoadingChange?.(false)
+    }
     void renderGroundImage(site, radiusKm, scheme)
-      .then((img) => {
-        if (!cancelled) setImage(img)
-      })
-      .catch(() => undefined)
+      .then(done)
+      .catch(() => done(null))
     return () => {
       cancelled = true
+      onLoadingChange?.(false)
     }
-  }, [site, radiusKm, scheme])
+  }, [site, radiusKm, scheme, onLoadingChange])
 
   const texture = useMemo(() => {
     if (!image) return null
