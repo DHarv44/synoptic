@@ -25,6 +25,8 @@ uniform float u_offsetV;
 uniform float u_lutMin;
 uniform float u_lutMax;
 uniform float u_opacity;
+uniform float u_srv;    // 1 = subtract storm motion (VEL only)
+uniform vec2 u_storm;   // storm motion u,v (m/s)
 in vec2 v_offset;
 out vec4 o_color;
 
@@ -33,11 +35,14 @@ void main() {
   float range = length(m);
   float u = (range - u_firstGateM) / u_gateSpanM;
   if (u < 0.0 || u > 1.0) discard;
-  float az = degrees(atan(m.x, m.y)); // 0 = north, clockwise
+  float azR = atan(m.x, m.y); // 0 = north, clockwise
+  float az = degrees(azR);
   float v = fract(az / 360.0);
   float raw = texture(u_sweep, vec2(u, v)).r * 255.0;
   if (raw < 2.0) discard;
   float value = (raw - u_offsetV) / u_scale;
+  // storm-relative: remove the along-beam component of storm motion
+  value -= u_srv * (u_storm.x * sin(azR) + u_storm.y * cos(azR));
   float idx = clamp((value - u_lutMin) / (u_lutMax - u_lutMin) * 255.0, 0.0, 255.0);
   vec4 c = texture(u_lut, vec2((idx + 0.5) / 256.0, 0.5));
   if (c.a < 0.01) discard;

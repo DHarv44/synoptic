@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Paper, SegmentedControl, Stack, Text } from '@mantine/core'
+import { ActionIcon, Chip, Group, Paper, SegmentedControl, Stack, Text } from '@mantine/core'
 import type { TiltInfo } from '@/features/radar/level2/worker'
 
 export interface ProbeReadout {
@@ -16,6 +16,12 @@ interface Level2ControlProps {
   moment: string
   onSelect: (elevNum: number, moment: string) => void
   probe: ProbeReadout | null
+  srv: boolean
+  raw: boolean
+  onSrv: (on: boolean) => void
+  onRaw: (on: boolean) => void
+  /** "245°/18 kt" style storm-motion annotation, when known */
+  stormMotion: string | null
 }
 
 function fmtValue(moment: string, v: number): string {
@@ -35,6 +41,11 @@ export function Level2Control({
   moment,
   onSelect,
   probe,
+  srv,
+  raw,
+  onSrv,
+  onRaw,
+  stormMotion,
 }: Level2ControlProps) {
   const available = tilts.filter((t) => t.moments.includes(moment))
   const idx = available.findIndex((t) => t.num === elevNum)
@@ -87,6 +98,21 @@ export function Level2Control({
             data={['REF', 'VEL']}
           />
         </Group>
+        {moment === 'VEL' && (
+          <Group gap={6} wrap="nowrap">
+            <Chip size="xs" checked={srv} onChange={() => onSrv(!srv)} disabled={stormMotion === null}>
+              SRV
+            </Chip>
+            <Chip size="xs" checked={raw} onChange={() => onRaw(!raw)} color="orange">
+              RAW
+            </Chip>
+            {stormMotion && (
+              <Text size="xs" c="dimmed" ff="monospace">
+                storm {stormMotion}
+              </Text>
+            )}
+          </Group>
+        )}
         {probe && (
           <Text size="xs" ff="monospace" c="dimmed">
             {Math.round(probe.azDeg)}° / {(probe.rangeM / 1000).toFixed(0)} km · beam{' '}

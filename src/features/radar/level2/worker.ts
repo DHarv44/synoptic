@@ -61,10 +61,79 @@ interface SweepState {
 
 const sweeps = new Map<string, SweepState>()
 const tiltDegs = new Map<number, number>()
-let selected = { elevNum: 1, moment: 'REF' }
+const prevVelRows = new Map<number, Uint8Array>()
+let selected = { elevNum: 1, moment: 'REF', raw: false }
 
 function key(elevNum: number, moment: string): string {
   return `${elevNum}:${moment}`
+}
+
+/**
+ * Gate-continuity dealiasing of one 8-bit velocity row: unfold each gate
+ * to within the Nyquist of the previous gate (or the previous radial's
+ * gate as the seed). Imperfect by design — the RAW toggle shows folded data.
+ */
+function dealiasRow(
+  row: Uint8Array,
+  prevRow: Uint8Array | undefined,
+  nyq: number,
+  scale: number,
+  offset: number,
+): Uint8Array {
+  const out = new Uint8Array(row.length)
+  if (nyq <= 0) {
+    out.set(row)
+    return out
+  }
+  let ref: number | null = null
+  for (let i = 0; i < row.length; i++) {
+    const raw = row[i]
+    if (raw < 2) {
+      out[i] = raw
+      continue
+    }
+    let v = (raw - offset) / scale
+    let seed = ref
+    if (seed === null && prevRow && prevRow[i] >= 2) seed = (prevRow[i] - offset) / scale
+    if (seed !== null) {
+      while (v - seed > nyq) v -= 2 * nyq
+      while (seed - v > nyq) v += 2 * nyq
+    }
+    ref = v
+    out[i] = Math.max(2, Math.min(255, Math.round(v * scale + offset)))
+  }
+  return out
+}
+
+function writeRow(k: string, template: { gates: number; firstGateM: number; gateSpacingM: number; scale: number; offset: number }, elevDeg: number, azDeg: number, row: Uint8Array): void {
+  let s = sweeps.get(k)
+  if (!s || s.gates < template.gates) {
+    const prev = s
+    s = {
+      tex: new Uint8Array(AZ_BINS * template.gates),
+      gates: template.gates,
+      firstGateM: template.firstGateM,
+      gateSpacingM: template.gateSpacingM,
+      scale: template.scale,
+      offset: template.offset,
+      elevationDeg: elevDeg,
+    }
+    if (prev) {
+      for (let az = 0; az < AZ_BINS; az++) {
+        s.tex.set(prev.tex.subarray(az * prev.gates, (az + 1) * prev.gates), az * s.gates)
+      }
+    }
+    sweeps.set(k, s)
+  }
+  const bin = Math.round(azDeg * 2) % AZ_BINS
+  const trimmed = row.subarray(0, s.gates)
+  s.tex.set(trimmed, bin * s.gates)
+  s.tex.set(trimmed, ((bin + 1) % AZ_BINS) * s.gates)
+}
+
+function selectedKey(): string {
+  const m = selected.moment === 'VEL' && selected.raw ? 'VEL_RAW' : selected.moment
+  return key(selected.elevNum, m)
 }
 
 function ingest(buf: ArrayBuffer, isStart: boolean): boolean {
@@ -77,30 +146,15 @@ function ingest(buf: ArrayBuffer, isStart: boolean): boolean {
         ALL_TILT_MOMENTS.has(name) ||
         (LOW_TILT_MOMENTS.has(name) && r.elevationNumber <= LOW_TILT_MAX)
       if (!keep) continue
-      const k = key(r.elevationNumber, name)
-      let s = sweeps.get(k)
-      if (!s || s.gates < m.gates) {
-        const prev = s
-        s = {
-          tex: new Uint8Array(AZ_BINS * m.gates),
-          gates: m.gates,
-          firstGateM: m.firstGateM,
-          gateSpacingM: m.gateSpacingM,
-          scale: m.scale,
-          offset: m.offset,
-          elevationDeg: r.elevationDeg,
-        }
-        if (prev) {
-          for (let az = 0; az < AZ_BINS; az++) {
-            s.tex.set(prev.tex.subarray(az * prev.gates, (az + 1) * prev.gates), az * m.gates)
-          }
-        }
-        sweeps.set(k, s)
+      const row = m.data as Uint8Array
+      if (name === 'VEL') {
+        writeRow(key(r.elevationNumber, 'VEL_RAW'), m, r.elevationDeg, r.azimuthDeg, row)
+        const deal = dealiasRow(row, prevVelRows.get(r.elevationNumber), r.nyquistMs, m.scale, m.offset)
+        prevVelRows.set(r.elevationNumber, deal)
+        writeRow(key(r.elevationNumber, 'VEL'), m, r.elevationDeg, r.azimuthDeg, deal)
+      } else {
+        writeRow(key(r.elevationNumber, name), m, r.elevationDeg, r.azimuthDeg, row)
       }
-      const bin = Math.round(r.azimuthDeg * 2) % AZ_BINS
-      const row = (m.data as Uint8Array).subarray(0, s.gates)
-      s.tex.set(row, bin * s.gates)
-      s.tex.set(row, ((bin + 1) % AZ_BINS) * s.gates)
       if (r.elevationNumber === selected.elevNum && name === selected.moment) {
         touchedSelected = true
       }
@@ -110,7 +164,7 @@ function ingest(buf: ArrayBuffer, isStart: boolean): boolean {
 }
 
 function postSelectedSweep(): void {
-  const s = sweeps.get(key(selected.elevNum, selected.moment))
+  const s = sweeps.get(selectedKey())
   if (!s) return
   const msg: SweepMessage = {
     type: 'sweep',
@@ -133,7 +187,13 @@ function postTilts(): void {
     .map(([num, deg]) => ({
       num,
       deg,
-      moments: [...sweeps.keys()].filter((k) => k.startsWith(`${num}:`)).map((k) => k.split(':')[1]),
+      moments: [
+        ...new Set(
+          [...sweeps.keys()]
+            .filter((k) => k.startsWith(`${num}:`))
+            .map((k) => k.split(':')[1].replace('VEL_RAW', 'VEL')),
+        ),
+      ],
     }))
     .filter((t) => t.moments.length > 0)
     .sort((a, b) => a.num - b.num)
@@ -163,7 +223,7 @@ function probe(azDeg: number, rangeM: number): void {
 type Request =
   | { type: 'chunk'; buf: ArrayBuffer; isStart: boolean }
   | { type: 'reset' }
-  | { type: 'select'; elevNum: number; moment: string }
+  | { type: 'select'; elevNum: number; moment: string; raw: boolean }
   | { type: 'probe'; azDeg: number; rangeM: number }
 
 self.onmessage = (ev: MessageEvent<Request>) => {
@@ -171,10 +231,11 @@ self.onmessage = (ev: MessageEvent<Request>) => {
   if (msg.type === 'reset') {
     sweeps.clear()
     tiltDegs.clear()
+    prevVelRows.clear()
     return
   }
   if (msg.type === 'select') {
-    selected = { elevNum: msg.elevNum, moment: msg.moment }
+    selected = { elevNum: msg.elevNum, moment: msg.moment, raw: msg.raw }
     postSelectedSweep()
     return
   }

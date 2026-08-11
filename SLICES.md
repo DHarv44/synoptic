@@ -158,7 +158,11 @@ dependency order. Check boxes as slices land.
   split-cut-aware filtering, REF|VEL moment switch, velocity colormap),
   click-probe readout with az/range, beam height (4/3-earth), and all
   moments at the gate.
-- [ ] R5 — Velocity + SRV (dealiasing with raw toggle).
+- [x] R5 — Velocity + SRV: gate-continuity dealiasing in the worker (raw
+  and dealiased sweeps both kept; RAW toggle per the honesty rule),
+  Nyquist parsed from the RAD block, storm-relative velocity applied in
+  the shader with Bunkers right-mover motion computed from the site's
+  model sounding (shown in the control, e.g. "storm 303°/26kt").
 - [ ] R6 — Level 3 products: meso/TVS/tracks/hail icons + storm cell table.
 - [ ] R7 — All-Tilts, cross-section, cell trend charts.
 - [ ] R8 — 3D volume (R3F returns; raymarch/isosurface).

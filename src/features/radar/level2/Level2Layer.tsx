@@ -8,6 +8,8 @@ import { reportError, reportOk } from '@/core/data/healthStore'
 import { fixtureActive } from '@/core/data/fixtures'
 import type { SourceRef } from '@/core/data/types'
 import { nearestSite, type RadarSite } from '@/features/radar/level2/sites'
+import { fetchSoundingSeries, soundingAt } from '@/core/data/openMeteo/sounding'
+import { bunkersRightMover, type UV } from '@/core/met/kinematics'
 import { fetchChunk, findCurrentVolume, listVolumeChunks } from '@/features/radar/level2/volume'
 import { SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
 import { Level2Control, type ProbeReadout } from '@/features/radar/level2/Level2Control'
@@ -37,6 +39,9 @@ export function Level2Layer() {
   const [tilts, setTilts] = useState<TiltInfo[]>([])
   const [sel, setSel] = useState({ elevNum: 1, moment: 'REF' })
   const [probe, setProbe] = useState<ProbeReadout | null>(null)
+  const [srv, setSrv] = useState(false)
+  const [raw, setRaw] = useState(false)
+  const [storm, setStorm] = useState<UV | null>(null)
   const layerRef = useRef<SweepGlLayer | null>(null)
   const workerRef = useRef<Worker | null>(null)
   const lastClickRef = useRef<{ azDeg: number; rangeM: number } | null>(null)
@@ -70,6 +75,34 @@ export function Level2Layer() {
     if (layerRef.current) layerRef.current.opacity = opacity / 100
     map.triggerRepaint()
   }, [opacity, map])
+
+  // Storm motion (Bunkers right-mover) from the model sounding at the site.
+  useEffect(() => {
+    if (!site) {
+      setStorm(null)
+      return
+    }
+    let cancelled = false
+    void fetchSoundingSeries(site.lat, site.lon)
+      .then((series) => {
+        const snd = soundingAt(series, Date.now())
+        if (!cancelled && snd) setStorm(bunkersRightMover(snd.levels))
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+    }
+  }, [site])
+
+  // Push SRV state into the GL layer.
+  useEffect(() => {
+    const layer = layerRef.current
+    if (!layer) return
+    layer.srvEnabled = srv && storm !== null
+    layer.stormU = storm?.u ?? 0
+    layer.stormV = storm?.v ?? 0
+    map.triggerRepaint()
+  }, [srv, storm, map])
 
   // Streaming loop + worker per site.
   useEffect(() => {
@@ -148,10 +181,15 @@ export function Level2Layer() {
     }
   }, [site, map])
 
-  const select = (elevNum: number, moment: string): void => {
+  const select = (elevNum: number, moment: string, rawMode = raw): void => {
     setSel({ elevNum, moment })
-    workerRef.current?.postMessage({ type: 'select', elevNum, moment })
+    workerRef.current?.postMessage({ type: 'select', elevNum, moment, raw: rawMode })
   }
+
+  const stormMotion =
+    storm === null
+      ? null
+      : `${Math.round((Math.atan2(-storm.u, -storm.v) / DEG + 360) % 360)}°/${Math.round(Math.hypot(storm.u, storm.v) * 1.94384)}kt`
 
   if (!site) return null
   return (
@@ -163,6 +201,14 @@ export function Level2Layer() {
       moment={sel.moment}
       onSelect={select}
       probe={probe}
+      srv={srv && storm !== null}
+      raw={raw}
+      onSrv={setSrv}
+      onRaw={(on) => {
+        setRaw(on)
+        select(sel.elevNum, sel.moment, on)
+      }}
+      stormMotion={stormMotion}
     />
   )
 }

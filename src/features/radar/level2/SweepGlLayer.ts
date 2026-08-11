@@ -24,6 +24,9 @@ export class SweepGlLayer implements CustomLayerInterface {
   readonly renderingMode = '2d' as const
 
   opacity = 0.85
+  srvEnabled = false
+  stormU = 0
+  stormV = 0
   private gl: WebGL2RenderingContext | null = null
   private program: WebGLProgram | null = null
   private vao: WebGLVertexArrayObject | null = null
@@ -132,6 +135,9 @@ export class SweepGlLayer implements CustomLayerInterface {
     gl.uniform1f(u('u_lutMin'), lutMin)
     gl.uniform1f(u('u_lutMax'), lutMax)
     gl.uniform1f(u('u_opacity'), this.opacity)
+    const srvActive = this.srvEnabled && this.meta.moment === 'VEL' ? 1 : 0
+    gl.uniform1f(u('u_srv'), srvActive)
+    gl.uniform2f(u('u_storm'), this.stormU, this.stormV)
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, this.sweepTex)
     gl.uniform1i(u('u_sweep'), 0)

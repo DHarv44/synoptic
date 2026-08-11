@@ -25,6 +25,8 @@ export interface Radial {
   elevationNumber: number
   /** ms past UTC midnight of the radial's Julian date */
   timeMs: number
+  /** Nyquist velocity (m/s) from the RAD block; 0 if absent */
+  nyquistMs: number
   moments: Record<string, MomentData>
 }
 
@@ -95,22 +97,27 @@ export function parseRadials(record: Uint8Array): Radial[] {
     const blockCount = view.getUint16(h + 30)
 
     const moments: Record<string, MomentData> = {}
+    let nyquistMs = 0
     for (let b = 0; b < Math.min(blockCount, 10); b++) {
       const ptr = view.getUint32(h + 32 + b * 4)
       if (ptr === 0 || h + ptr + 28 > record.byteLength) continue
       const base = h + ptr
       const type = String.fromCharCode(view.getUint8(base))
-      if (type !== 'D') continue // R/E/V constant blocks skipped for now
       const name3 = String.fromCharCode(
         view.getUint8(base + 1),
         view.getUint8(base + 2),
         view.getUint8(base + 3),
       )
+      if (type === 'R' && name3 === 'RAD') {
+        nyquistMs = view.getUint16(base + 16) * 0.01
+        continue
+      }
+      if (type !== 'D') continue // other constant blocks skipped
       if (!MOMENT_NAMES.has(name3)) continue
       const { name, m } = parseMomentBlock(view, base)
       moments[name.trim()] = m
     }
-    out.push({ azimuthDeg, elevationDeg, elevationNumber, timeMs, moments })
+    out.push({ azimuthDeg, elevationDeg, elevationNumber, timeMs, nyquistMs, moments })
     off += msgSizeHalfwords * 2 + 12
   }
   return out
