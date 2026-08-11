@@ -87,7 +87,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
           </ActionIcon>
         </Tooltip>
         <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
-          {isMobile ? fmt.time(simTime) : fmt.dateTime(simTime)}
+          {isMobile ? fmt.hm(simTime) : fmt.dateTime(simTime)}
         </Text>
         <div style={{ flex: 1, position: 'relative', minWidth: 60 }}>
           <div

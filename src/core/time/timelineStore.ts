@@ -5,6 +5,16 @@ export const PAST_RANGE_MS = 48 * 3600_000 // −48h
 export const FUTURE_RANGE_MS = 16 * 24 * 3600_000 // +16d (forecast region)
 
 /**
+ * Granularity of the live clock. Sitting live, `simTime` used to take a new
+ * value on every 250 ms tick, re-rendering every subscriber — the meteogram
+ * cursor, radar and satellite frame pickers, the sounding lookup — four
+ * times a second forever, for a display that only shows minutes and data
+ * that changes every 5–10 minutes. Quantising means the store no-ops
+ * between steps, so idle costs nothing. Well under the 60 s `isLive` window.
+ */
+const LIVE_STEP_MS = 10_000
+
+/**
  * The one clock every layer obeys (PLAN.md §3.11). simTime is UTC ms.
  * isLive: simTime tracks wall clock; scrubbing detaches it.
  */
@@ -38,7 +48,11 @@ export const useTimeline = create<TimelineState>((set) => ({
   setSpeed: (speed) => set({ speed }),
   tick: (elapsedMs) =>
     set((s) => {
-      if (s.isLive && !s.playing) return { simTime: Date.now() }
+      if (s.isLive && !s.playing) {
+        const stepped = Math.floor(Date.now() / LIVE_STEP_MS) * LIVE_STEP_MS
+        // Same reference = zustand skips the notify entirely.
+        return stepped === s.simTime ? s : { simTime: stepped }
+      }
       if (!s.playing) return s
       const now = Date.now()
       const next = s.simTime + elapsedMs * s.speed

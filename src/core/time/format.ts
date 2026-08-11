@@ -12,6 +12,19 @@ export function zoneLabel(utc: boolean): string {
     .find((p) => p.type === 'timeZoneName')?.value ?? 'local'
 }
 
+/** HH:MM — for scrub positions, where seconds are noise. */
+export function fmtUtcHm(ms: number): string {
+  return new Date(ms).toISOString().slice(11, 16) + 'Z'
+}
+
+export function fmtLocalHm(ms: number): string {
+  return new Date(ms).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+}
+
 export function fmtUtcDateTime(ms: number): string {
   const iso = new Date(ms).toISOString()
   return iso.slice(0, 10) + ' ' + iso.slice(11, 16) + 'Z'

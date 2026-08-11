@@ -1,5 +1,12 @@
 import { useFeatureOption } from '@/core/settings/store'
-import { fmtLocalDateTime, fmtLocalTime, fmtUtcDateTime, fmtUtcTime } from '@/core/time/format'
+import {
+  fmtLocalDateTime,
+  fmtLocalHm,
+  fmtLocalTime,
+  fmtUtcDateTime,
+  fmtUtcHm,
+  fmtUtcTime,
+} from '@/core/time/format'
 
 export type TimeZonePref = 'local' | 'utc'
 
@@ -7,6 +14,8 @@ export interface TimeFormatters {
   zone: TimeZonePref
   /** HH:MM:SS with a zone marker. */
   time: (ms: number) => string
+  /** HH:MM with a zone marker. */
+  hm: (ms: number) => string
   /** YYYY-MM-DD HH:MM with a zone marker. */
   dateTime: (ms: number) => string
 }
@@ -21,6 +30,7 @@ export function useTimeFormat(): TimeFormatters {
   return {
     zone: utc ? 'utc' : 'local',
     time: utc ? fmtUtcTime : fmtLocalTime,
+    hm: utc ? fmtUtcHm : fmtLocalHm,
     dateTime: utc ? fmtUtcDateTime : fmtLocalDateTime,
   }
 }
