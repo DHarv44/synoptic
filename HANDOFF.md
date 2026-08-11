@@ -14,17 +14,13 @@ Single entry point for continuing SYNOPTIC. Read in this order:
   https://github.com/DHarv44/synoptic (remote `origin`, branch `main`).
 - **Working state is clean**: no uncommitted work in flight. If you find dirty
   files, `git status` + diff them against this doc's claims before trusting either.
-- **R7 COMPLETE** (All-Tilts, cross-section, cell trends). Radar suite is
-  R1–R7 done.
-- **Next: R8 — 3D radar volume.** react-three-fiber + three are still in
-  package.json (unused since the Phase 2.5 map swap; `src/scene/` was
-  deleted, recreate it). Plan: an R3F canvas overlaid on / beside the map
-  showing the retained sweeps as a volume — simplest honest first cut is
-  stacked tilt surfaces (each sweep as a cone/disc at its true beam height,
-  textured with the same polar R8 texture the map layer uses), then
-  raymarched isosurface later. `SweepStore` already holds every tilt; the
-  worker can post all sweeps on demand (add a `volume` message mirroring
-  `postSelectedSweep`). PLAN.md §3.3.3 has the target feature set.
+- **PHASE 6 RADAR SUITE COMPLETE (R1–R8)**: streaming L2 decode → polar
+  WebGL render → tilts/probe/All-Tilts → dealiasing/SRV → storm cells +
+  trends → cross-section → 3D echo view.
+- **Next up is the end-game queue below** (wind bug → UI overhaul → Chase
+  HUD). Optional radar polish if asked: raymarched isosurface instead of
+  tilt surfaces, manual site picker, `.pal` color tables, dual-pol presets
+  (TDS/hail auto-flagging — PLAN.md §3.3.3), volume-rollover blanking.
 
 ## The end-game queue (user-agreed order: features first, then these)
 

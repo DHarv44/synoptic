@@ -132,6 +132,46 @@ function probeColumn(azDeg: number, rangeM: number): void {
   self.postMessage({ type: 'columnResult', azDeg, rangeM, column } satisfies ColumnResultMessage)
 }
 
+export interface VolumeTilt {
+  elevationDeg: number
+  azBins: number
+  rangeBins: number
+  rangeStepM: number
+  /** azBins × rangeBins dBZ, NaN = no data */
+  dbz: Float32Array
+}
+
+export interface VolumeMessage {
+  type: 'volume'
+  tilts: VolumeTilt[]
+}
+
+const VOL_AZ = 240
+const VOL_RANGE = 140
+const VOL_MAX_RANGE_M = 180_000
+
+/** Downsampled REF grid per tilt for the 3D view (keeps transfers small). */
+function volume(): void {
+  const tilts: VolumeTilt[] = []
+  const transfers: ArrayBuffer[] = []
+  const rangeStepM = VOL_MAX_RANGE_M / VOL_RANGE
+  for (const [elevNum, elevationDeg] of [...store.tiltDegs.entries()].sort((a, b) => a[1] - b[1])) {
+    const k = store.key(elevNum, 'REF')
+    if (!store.sweeps.has(k)) continue
+    const dbz = new Float32Array(VOL_AZ * VOL_RANGE)
+    for (let a = 0; a < VOL_AZ; a++) {
+      const azDeg = (a / VOL_AZ) * 360
+      for (let r = 0; r < VOL_RANGE; r++) {
+        const v = store.valueAt(k, azDeg, r * rangeStepM + rangeStepM / 2)
+        dbz[a * VOL_RANGE + r] = v === null ? NaN : v
+      }
+    }
+    tilts.push({ elevationDeg, azBins: VOL_AZ, rangeBins: VOL_RANGE, rangeStepM, dbz })
+    transfers.push(dbz.buffer)
+  }
+  self.postMessage({ type: 'volume', tilts } satisfies VolumeMessage, transfers)
+}
+
 export interface SectionTilt {
   elevationDeg: number
   values: Array<number | null>
@@ -161,6 +201,7 @@ type Request =
   | { type: 'probe'; azDeg: number; rangeM: number }
   | { type: 'probeColumn'; azDeg: number; rangeM: number }
   | { type: 'section'; samples: Array<{ azDeg: number; rangeM: number }> }
+  | { type: 'volume' }
 
 self.onmessage = (ev: MessageEvent<Request>) => {
   const msg = ev.data
@@ -183,6 +224,10 @@ self.onmessage = (ev: MessageEvent<Request>) => {
   }
   if (msg.type === 'section') {
     section(msg.samples)
+    return
+  }
+  if (msg.type === 'volume') {
+    volume()
     return
   }
   if (store.ingest(msg.buf, msg.isStart, selected)) postSelectedSweep()

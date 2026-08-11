@@ -175,7 +175,13 @@ dependency order. Check boxes as slices land.
   dashed map line), and **cell trends** (client-side snapshot history —
   the IEM feed has no history endpoint — with dBZ/VIL/top sparklines on
   row select and ▲▼ deltas in the table; window starts at app open).
-- [ ] R8 — 3D volume (R3F returns; raymarch/isosurface).
+- [x] R8 — 3D echo view (R3F returns): worker exports a downsampled REF grid
+  per tilt (`volume` message); each tilt renders as its true conical
+  sampling surface at 4/3-earth beam height, vertex-colored by dBZ, with an
+  adjustable threshold and orbit camera. Honest by construction — gaps
+  between tilts are unsampled air, not missing echo. Bridge module lets the
+  panel talk to the layer's worker. Raymarched isosurface remains a future
+  upgrade (PLAN.md §3.3.3).
 
 ## Phase 7 (coarse; slice when reached)
 

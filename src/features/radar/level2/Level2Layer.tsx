@@ -22,9 +22,11 @@ import type {
   SweepMessage,
   TiltInfo,
   TiltsMessage,
+  VolumeMessage,
 } from '@/features/radar/level2/worker'
 import { distanceKm, sampleLine, toAzRange, type LatLon } from '@/features/radar/level2/geometry'
 import { SectionPlot } from '@/features/radar/level2/SectionPlot'
+import { emitVolume, setLevel2Worker } from '@/features/radar/level2/bridge'
 
 export const L2_SOURCE: SourceRef = { id: 'nexrad-l2', label: 'NEXRAD Level 2' }
 
@@ -41,6 +43,7 @@ type WorkerOut =
   | ProbeResultMessage
   | ColumnResultMessage
   | SectionResultMessage
+  | VolumeMessage
 
 /** Single-site Level 2: streaming sweeps, tilt/moment control, gate probe. */
 export function Level2Layer() {
@@ -167,12 +170,14 @@ export function Level2Layer() {
     layerRef.current?.setSite(activeSite.lat, activeSite.lon)
     const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
     workerRef.current = worker
+    setLevel2Worker(worker, activeSite)
     worker.onmessage = (ev: MessageEvent<WorkerOut>) => {
       const msg = ev.data
       if (msg.type === 'sweep') layerRef.current?.setSweep(msg)
       else if (msg.type === 'tilts') setTilts(msg.tilts)
       else if (msg.type === 'columnResult') setColumn(msg.column)
       else if (msg.type === 'sectionResult') setSection(msg.tilts)
+      else if (msg.type === 'volume') emitVolume(msg)
       else if (msg.type === 'probeResult') {
         const click = lastClickRef.current
         if (!click) return
@@ -253,6 +258,7 @@ export function Level2Layer() {
       map.off('click', onClick)
       worker.terminate()
       workerRef.current = null
+      setLevel2Worker(null, null)
     }
   }, [site, map])
 
