@@ -91,6 +91,13 @@ Single entry point for continuing SYNOPTIC. Read in this order:
    timings while streaming, long-session memory, bundle analysis, low-end
    mobile — which also de-risks the Chase HUD.
 5. **Phase 7 Chase HUD** — PLAN.md §3.14.
+6. **Historical mode** — needs a design pass before code (README has the
+   open questions): period picking (curated named events + free date entry),
+   showing per-source coverage on the timeline (radar→1991, models→1940),
+   prefetch/cache strategy for many frames, **user-uploaded datasets**
+   (own Level 2 volumes / GRIB / CSV — needs format + validation decisions
+   and a hard boundary so imported data never mixes with live feeds), and
+   replay-specific playback controls (loop, step-by-volume, export).
 4. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
 

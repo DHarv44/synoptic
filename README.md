@@ -215,7 +215,32 @@ probes that point.
    an intercept/escape route solver over OSM roads, placefile import, and a
    replay trainer over archived events.
 
-**Later** — historical archive mode (Open-Meteo reaches back to 1940), run-to-run
+6. **Historical mode** *(needs a deeper design pass)* — the timeline currently
+   covers −48 h to +16 d, but the underlying archives go much further back and
+   the app is already built to replay them: Open-Meteo's reanalysis reaches
+   **1940**, NEXRAD Level 2 volumes are public back to **1991**, and both flow
+   through code paths the live app already uses. Open questions worth settling
+   before building:
+   - **How the user picks a period.** Named events ("El Reno, 31 May 2013")
+     are the most useful entry point and the best demo, but a plain date/time
+     picker plus a duration ("this day," "this 6-hour window") is what makes
+     it a general tool. Probably both: a curated case list plus free date entry.
+   - **What's available when.** Coverage differs per source and per era —
+     radar to 1991, models to 1940, satellite and lightning much later — so
+     the timeline needs to *show* what exists rather than silently rendering
+     nothing. This is the same enrichment the live timeline wants.
+   - **Fetch and cache strategy.** Replay wants many frames at once, which is
+     the opposite of the live app's trickle; needs prefetch with progress,
+     bounded memory, and IndexedDB spill.
+   - **User-supplied datasets** — letting people load their own archives
+     (a saved Level 2 volume, a GRIB file, a CSV of observations) turns the
+     app into an analysis tool for research and post-event review. Needs
+     format decisions, a parsing/validation story, and a clear boundary so
+     imported data is never confused with live feeds.
+   - **Playback controls** distinct from live scrubbing: loop a window, step
+     by volume, and export a frame or animation for sharing.
+
+**Later** — run-to-run
 forecast trends (dProg/dt), forecast verification, shareable workspace URLs,
 virtual-temperature CAPE correction, hurricane mode, aurora/space weather.
 
