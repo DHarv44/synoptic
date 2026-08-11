@@ -65,12 +65,16 @@ export function RadarLayer() {
   const rvTiles = maps && frame ? tileUrlTemplate(maps, frame, scheme, smooth) : null
   const product = iemProduct(simTime, Date.now())
   /**
-   * The two composites are different products at different valid times, so
-   * they place the same storm several kilometres apart. Stacked, whichever
-   * finished loading wins — which is why the echo appeared to jump when a
-   * new zoom level's mosaic tiles arrived. Draw only one: the sharper
-   * mosaic wherever it fully covers the view, the global composite
-   * everywhere else.
+   * Exactly one composite is ever drawn. They are different products at
+   * different valid times, and the mosaic's "no echo" is transparent, so
+   * stacking them does not overlay — it *blends*: mosaic where it has echo,
+   * global composite where it doesn't. The blend changes as soon as either
+   * layer's coverage does, which is why the picture reorganised itself when
+   * zooming out past the point where the mosaic stops covering the view.
+   *
+   * So: the sharper mosaic while it fully covers the viewport, the global
+   * composite otherwise. At wide zoom the mosaic's extra resolution is
+   * invisible anyway, and one consistent picture beats a seam.
    */
   const mosaicCovers = conusEnabled && product !== null && boundsInsideConus(bounds)
 
@@ -117,6 +121,9 @@ export function RadarLayer() {
       if (map.getLayer('radar-rv')) {
         map.setLayoutProperty('radar-rv', 'visibility', mosaicCovers ? 'none' : 'visible')
       }
+      if (map.getLayer('radar-iem')) {
+        map.setLayoutProperty('radar-iem', 'visibility', mosaicCovers ? 'visible' : 'none')
+      }
       for (const [id, maxzoom] of [
         ['radar-rv', RV_MAXZOOM],
         ['radar-iem', IEM_MAXZOOM],
@@ -147,6 +154,7 @@ export function RadarLayer() {
           id: 'radar-iem',
           type: 'raster',
           source: 'radar-iem',
+          layout: { visibility: mosaicCovers ? 'visible' : 'none' },
           paint: {
             'raster-opacity': opacity / 100,
             'raster-fade-duration': 150,
