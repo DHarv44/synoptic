@@ -101,12 +101,14 @@ off and on moves it to the top (this is how radar came to cover warnings).
      and whatever is hidden gets counted back to the user, so a filter never
      reads as a quiet feed. `useFeatureOptions(id)` gives all of a feature's
      options with manifest defaults filled in; `featureOption(id, key)` is
-     the non-hook version for services. Still open (README has the list):
-     decoupled units (kt/inHg/kft/nm independent of metric-imperial), L2
-     defaults, radar loop length/speed, METAR content/density, timeline
-     defaults, per-source cadence. Then **presets** (PLAN §3.13a, never
-     built) and settings search. Adding fields is cheap — they're declared
-     in `FeatureManifest.settings` and the UI generates itself.
+     the non-hook version for services. Units are decoupled too: `useUnits()`
+     returns the resolved set (temp/wind/pressure/precip) and the formatters
+     take a unit rather than a system, each setting defaulting to `auto`.
+     Still open (README has the list): height/distance units, L2 defaults,
+     radar loop length/speed, METAR content/density, timeline defaults,
+     per-source cadence. Then **presets** (PLAN §3.13a, never built) and
+     settings search. Adding fields is cheap — they're declared in
+     `FeatureManifest.settings` and the UI generates itself.
    - **Session persistence**: done. Persisted stores are `synoptic.` +
      settings / dock / tools / home / camera / probe / timeline / radar, all
      versioned (add a version + migration to any new one, per CLAUDE.md).

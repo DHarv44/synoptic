@@ -1,4 +1,4 @@
-import { useTempUnit } from '@/core/units/useUnitSystem'
+import { useUnits } from '@/core/units/useUnitSystem'
 import { fmtTemp } from '@/core/units/format'
 import { useForecast } from '@/core/data/openMeteo/useForecast'
 import { wmoText } from '@/core/data/openMeteo/forecast'
@@ -7,7 +7,7 @@ import { dailyRows } from '@/features/forecast/service'
 
 /** Today's high and low, plus how it looks. */
 export function DailySummary() {
-  const tempUnit = useTempUnit()
+  const u = useUnits()
   const { data } = useForecast()
   if (!data) return null
 
@@ -15,7 +15,7 @@ export function DailySummary() {
   if (!today) return null
   return (
     <SectionHint>
-      {fmtTemp(today.highC, tempUnit)} / {fmtTemp(today.lowC, tempUnit)} ·{' '}
+      {fmtTemp(today.highC, u.temp)} / {fmtTemp(today.lowC, u.temp)} ·{' '}
       {wmoText(today.code)}
     </SectionHint>
   )

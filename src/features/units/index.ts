@@ -38,5 +38,40 @@ registerFeature({
       ],
       defaultValue: 'auto',
     },
+    {
+      kind: 'select',
+      key: 'wind',
+      label: 'Wind speed',
+      options: [
+        { value: 'auto', label: 'Follow system' },
+        { value: 'kt', label: 'Knots (kt)' },
+        { value: 'mph', label: 'Miles per hour' },
+        { value: 'kmh', label: 'Kilometres per hour' },
+        { value: 'ms', label: 'Metres per second' },
+      ],
+      defaultValue: 'auto',
+    },
+    {
+      kind: 'select',
+      key: 'pressure',
+      label: 'Pressure',
+      options: [
+        { value: 'auto', label: 'Follow system' },
+        { value: 'hPa', label: 'Hectopascals (hPa)' },
+        { value: 'inHg', label: 'Inches of mercury (inHg)' },
+      ],
+      defaultValue: 'auto',
+    },
+    {
+      kind: 'select',
+      key: 'precip',
+      label: 'Precipitation',
+      options: [
+        { value: 'auto', label: 'Follow system' },
+        { value: 'mm', label: 'Millimetres' },
+        { value: 'in', label: 'Inches' },
+      ],
+      defaultValue: 'auto',
+    },
   ],
 })

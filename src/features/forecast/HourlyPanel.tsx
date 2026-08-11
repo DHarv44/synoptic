@@ -1,6 +1,6 @@
 import { Table, Text } from '@mantine/core'
 import { useProbe } from '@/core/probe/store'
-import { useTempUnit, useUnitSystem } from '@/core/units/useUnitSystem'
+import { useUnits } from '@/core/units/useUnitSystem'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { fmtPrecip, fmtTemp } from '@/core/units/format'
 import { useForecast } from '@/core/data/openMeteo/useForecast'
@@ -13,8 +13,7 @@ const HOURS = 24
 /** Hour-by-hour for the next day at the probed point. */
 export function HourlyPanel() {
   const point = useProbe((s) => s.point)
-  const units = useUnitSystem()
-  const tempUnit = useTempUnit()
+  const u = useUnits()
   const fmt = useTimeFormat()
   const { data, loading, error } = useForecast()
 
@@ -42,14 +41,14 @@ export function HourlyPanel() {
               <Table.Tr key={r.timeMs}>
                 <Table.Td ff="monospace">{fmt.hm(r.timeMs)}</Table.Td>
                 <Table.Td ta="right" ff="monospace">
-                  {fmtTemp(r.tempC, tempUnit)}
+                  {fmtTemp(r.tempC, u.temp)}
                 </Table.Td>
                 <Table.Td ta="right" ff="monospace" c={r.precipProb >= 40 ? undefined : 'dimmed'}>
                   {r.precipProb}%
                 </Table.Td>
                 <Table.Td c="dimmed">
                   {wmoText(r.code)}
-                  {r.precipMm > 0 && ` · ${fmtPrecip(r.precipMm, units)}`}
+                  {r.precipMm > 0 && ` · ${fmtPrecip(r.precipMm, u.precip)}`}
                 </Table.Td>
               </Table.Tr>
             ))}

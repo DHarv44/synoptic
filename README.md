@@ -168,9 +168,14 @@ probes that point. Works on desktop and mobile, in dark or light.
      filter drives the map, the list and the summary alike.
    - **Storm-cell display threshold** ✅ (all / hail-and-large / rotating /
      tornado signatures) and **lightning fade window** ✅ (2–30 min).
-   - **Decoupled units** — wind in kt/mph/km-h/m-s, pressure in hPa/inHg,
-     heights in m/ft/kft, distance in km/mi/nm, independent of the metric /
-     imperial system switch, the way professional tools do it.
+   - **Decoupled units** ✅ — wind (kt/mph/km-h/m-s), pressure (hPa/inHg) and
+     precipitation (mm/in) each switch independently of the metric/imperial
+     system, joining temperature, which already did. Each defaults to
+     "follow system", so the simple case stays one control. *Still open:*
+     heights in m/ft/kft and distance in km/mi/nm — currently the radar
+     readouts use kft and km by convention, and changing those means
+     deciding whether a radar display should follow a general preference at
+     all.
    - **Level 2 defaults** — default moment and tilt, range rings, dealiasing
      default. (Site lock shipped with the radar picker.)
    - **Radar loop behavior** — loop length (30 min / 1 h / 2 h), speed,

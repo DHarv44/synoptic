@@ -1,7 +1,7 @@
 import { SegmentedControl, Stack, Table, Text } from '@mantine/core'
 import { useState } from 'react'
 import { useProbe } from '@/core/probe/store'
-import { useTempUnit, useUnitSystem } from '@/core/units/useUnitSystem'
+import { useUnits } from '@/core/units/useUnitSystem'
 import { fmtPrecip, fmtTemp, fmtWind } from '@/core/units/format'
 import { useForecast } from '@/core/data/openMeteo/useForecast'
 import { wmoText } from '@/core/data/openMeteo/forecast'
@@ -13,8 +13,7 @@ const RANGES = ['3', '5', '10'] as const
 /** Multi-day outlook for the probed point, 3 / 5 / 10 days. */
 export function DailyPanel() {
   const point = useProbe((s) => s.point)
-  const units = useUnitSystem()
-  const tempUnit = useTempUnit()
+  const u = useUnits()
   const [range, setRange] = useState<string>('5')
   const { data, loading, error } = useForecast()
 
@@ -51,10 +50,10 @@ export function DailyPanel() {
                 <Table.Tr key={r.date}>
                   <Table.Td>{dayLabel(r.date, now)}</Table.Td>
                   <Table.Td ta="right" ff="monospace">
-                    {fmtTemp(r.highC, tempUnit)}
+                    {fmtTemp(r.highC, u.temp)}
                     <Text component="span" c="dimmed">
                       {' / '}
-                      {fmtTemp(r.lowC, tempUnit)}
+                      {fmtTemp(r.lowC, u.temp)}
                     </Text>
                   </Table.Td>
                   <Table.Td ta="right" ff="monospace" c={r.precipProb >= 40 ? undefined : 'dimmed'}>
@@ -62,8 +61,8 @@ export function DailyPanel() {
                   </Table.Td>
                   <Table.Td c="dimmed">
                     {wmoText(r.code)}
-                    {r.precipMm > 0 && ` · ${fmtPrecip(r.precipMm, units)}`}
-                    {r.gustMs >= 15 && ` · gusts ${fmtWind(r.gustMs, units)}`}
+                    {r.precipMm > 0 && ` · ${fmtPrecip(r.precipMm, u.precip)}`}
+                    {r.gustMs >= 15 && ` · gusts ${fmtWind(r.gustMs, u.wind)}`}
                   </Table.Td>
                 </Table.Tr>
               ))}

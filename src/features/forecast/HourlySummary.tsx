@@ -1,4 +1,4 @@
-import { useTempUnit } from '@/core/units/useUnitSystem'
+import { useUnits } from '@/core/units/useUnitSystem'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { fmtTemp } from '@/core/units/format'
 import { useForecast } from '@/core/data/openMeteo/useForecast'
@@ -9,7 +9,7 @@ const WET = 40
 
 /** Temperature range, and when rain becomes likely — if it does. */
 export function HourlySummary() {
-  const tempUnit = useTempUnit()
+  const u = useUnits()
   const fmt = useTimeFormat()
   const { data } = useForecast()
   if (!data) return null
@@ -22,7 +22,7 @@ export function HourlySummary() {
 
   return (
     <SectionHint>
-      {fmtTemp(hi, tempUnit)} / {fmtTemp(lo, tempUnit)}
+      {fmtTemp(hi, u.temp)} / {fmtTemp(lo, u.temp)}
       {wet ? ` · ${wet.precipProb}% from ${fmt.hm(wet.timeMs)}` : ' · dry'}
     </SectionHint>
   )
