@@ -11,6 +11,7 @@ import { styleUrl } from '@/map/style'
 import { useProbe } from '@/core/probe/store'
 import { useCameraStore } from '@/map/cameraStore'
 import { useMapView } from '@/map/viewStore'
+import { useSavedCamera } from '@/map/cameraPersist'
 import { useHealth } from '@/core/data/healthStore'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
@@ -50,11 +51,15 @@ export function MapView() {
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+    // Resume where the session left off; persist rehydrates synchronously.
+    const saved = useSavedCamera.getState().camera
     const map = new MLMap({
       container,
       style: styleUrl(scheme),
-      center: [-95, 38],
-      zoom: 3.4,
+      center: saved ? [saved.lon, saved.lat] : [-95, 38],
+      zoom: saved?.zoom ?? 3.4,
+      bearing: saved?.bearing ?? 0,
+      pitch: saved?.pitch ?? 0,
       hash: false,
       // Attribution is rendered in the app footer (AttributionBar) so the
       // map surface stays clear for controls.
@@ -73,6 +78,14 @@ export function MapView() {
     const publishBounds = (): void => {
       const b = map.getBounds()
       useMapView.getState().setBounds([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()])
+      const c = map.getCenter()
+      useSavedCamera.getState().save({
+        lon: c.lng,
+        lat: c.lat,
+        zoom: map.getZoom(),
+        bearing: map.getBearing(),
+        pitch: map.getPitch(),
+      })
     }
     map.on('moveend', publishBounds)
     map.on('load', publishBounds)

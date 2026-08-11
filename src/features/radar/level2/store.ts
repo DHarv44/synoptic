@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { attachDevStore } from '@/dev/wx'
 import type { UV } from '@/core/met/kinematics'
 import type { RadarSite } from '@/features/radar/level2/sites'
@@ -66,27 +67,49 @@ const CLEARED = {
  * readouts panel and left-hand workbench all read from here so the same
  * volume drives every surface.
  */
-export const useRadar = create<RadarState>((set) => ({
-  site: null,
-  tilts: [],
-  elevNum: 1,
-  moment: 'REF',
-  raw: false,
-  srv: false,
-  storm: null,
-  probe: null,
-  column: null,
-  section: null,
-  sectionLine: null,
-  drawing: false,
-  drawStart: null,
-  locked: false,
-  set: (patch) => set(patch),
-  resetSite: (site) => set({ site, ...CLEARED }),
-  pickSite: (site) => set({ site, locked: true, ...CLEARED }),
-  setLocked: (on) => set({ locked: on }),
-  startDraw: () => set({ drawing: true, drawStart: null, sectionLine: null, section: null }),
-  cancelDraw: () => set({ drawing: false, drawStart: null, sectionLine: null }),
-}))
+export const useRadar = create<RadarState>()(
+  persist(
+    (set) => ({
+      site: null,
+      tilts: [],
+      elevNum: 1,
+      moment: 'REF',
+      raw: false,
+      srv: false,
+      storm: null,
+      probe: null,
+      column: null,
+      section: null,
+      sectionLine: null,
+      drawing: false,
+      drawStart: null,
+      locked: false,
+      set: (patch) => set(patch),
+      resetSite: (site) => set({ site, ...CLEARED }),
+      pickSite: (site) => set({ site, locked: true, ...CLEARED }),
+      setLocked: (on) => set({ locked: on }),
+      startDraw: () => set({ drawing: true, drawStart: null, sectionLine: null, section: null }),
+      cancelDraw: () => set({ drawing: false, drawStart: null, sectionLine: null }),
+    }),
+    {
+      name: 'synoptic.radar',
+      version: 1,
+      /**
+       * Only the choices, never the volume. Sweeps, probes and sections all
+       * belong to one download and are meaningless next session. The site is
+       * kept only when locked: unlocked, the map picks it on the first move,
+       * so restoring one would start a worker on a site about to be replaced.
+       */
+      partialize: (s) => ({
+        locked: s.locked,
+        site: s.locked ? s.site : null,
+        elevNum: s.elevNum,
+        moment: s.moment,
+        raw: s.raw,
+        srv: s.srv,
+      }),
+    },
+  ),
+)
 
 attachDevStore('radar', useRadar)

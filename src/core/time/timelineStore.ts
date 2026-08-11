@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { attachDevStore } from '@/dev/wx'
 
 export const PAST_RANGE_MS = 48 * 3600_000 // −48h
@@ -32,34 +33,68 @@ interface TimelineState {
   tick: (elapsedMs: number) => void
 }
 
-export const useTimeline = create<TimelineState>((set) => ({
-  simTime: Date.now(),
-  isLive: true,
-  playing: false,
-  speed: 60,
-  setSimTime: (ms) =>
-    set(() => {
-      const now = Date.now()
-      const clamped = Math.min(Math.max(ms, now - PAST_RANGE_MS), now + FUTURE_RANGE_MS)
-      return { simTime: clamped, isLive: Math.abs(clamped - now) < 60_000, playing: false }
+export const useTimeline = create<TimelineState>()(
+  persist(
+    (set) => ({
+      simTime: Date.now(),
+      isLive: true,
+      playing: false,
+      speed: 60,
+      setSimTime: (ms) =>
+        set(() => {
+          const now = Date.now()
+          const clamped = Math.min(Math.max(ms, now - PAST_RANGE_MS), now + FUTURE_RANGE_MS)
+          return { simTime: clamped, isLive: Math.abs(clamped - now) < 60_000, playing: false }
+        }),
+      goLive: () => set({ simTime: Date.now(), isLive: true, playing: false }),
+      setPlaying: (playing) => set({ playing }),
+      setSpeed: (speed) => set({ speed }),
+      tick: (elapsedMs) =>
+        set((s) => {
+          if (s.isLive && !s.playing) {
+            const stepped = Math.floor(Date.now() / LIVE_STEP_MS) * LIVE_STEP_MS
+            // Same reference = zustand skips the notify entirely.
+            return stepped === s.simTime ? s : { simTime: stepped }
+          }
+          if (!s.playing) return s
+          const now = Date.now()
+          const next = s.simTime + elapsedMs * s.speed
+          if (next >= now + FUTURE_RANGE_MS) {
+            return { simTime: now + FUTURE_RANGE_MS, playing: false }
+          }
+          return { simTime: next, isLive: Math.abs(next - now) < 60_000 }
+        }),
     }),
-  goLive: () => set({ simTime: Date.now(), isLive: true, playing: false }),
-  setPlaying: (playing) => set({ playing }),
-  setSpeed: (speed) => set({ speed }),
-  tick: (elapsedMs) =>
-    set((s) => {
-      if (s.isLive && !s.playing) {
-        const stepped = Math.floor(Date.now() / LIVE_STEP_MS) * LIVE_STEP_MS
-        // Same reference = zustand skips the notify entirely.
-        return stepped === s.simTime ? s : { simTime: stepped }
-      }
-      if (!s.playing) return s
-      const now = Date.now()
-      const next = s.simTime + elapsedMs * s.speed
-      if (next >= now + FUTURE_RANGE_MS) return { simTime: now + FUTURE_RANGE_MS, playing: false }
-      return { simTime: next, isLive: Math.abs(next - now) < 60_000 }
-    }),
-}))
+    {
+      name: 'synoptic.timeline',
+      version: 1,
+      partialize: (s) => ({ simTime: s.simTime, isLive: s.isLive, speed: s.speed }),
+      /**
+       * A scrub position only means something while it's still inside the
+       * window. Come back tomorrow and yesterday's offset sits off the left
+       * edge, so fall back to live rather than restoring a position that
+       * can't be seen. Playback never resumes on load — a display that
+       * starts animating by itself is alarming.
+       */
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<TimelineState>
+        const now = Date.now()
+        const inWindow =
+          typeof p.simTime === 'number' &&
+          p.simTime >= now - PAST_RANGE_MS &&
+          p.simTime <= now + FUTURE_RANGE_MS
+        const live = p.isLive !== false || !inWindow
+        return {
+          ...current,
+          speed: p.speed ?? current.speed,
+          playing: false,
+          isLive: live,
+          simTime: live ? now : (p.simTime as number),
+        }
+      },
+    },
+  ),
+)
 
 export function stepSimTime(deltaMs: number): void {
   const s = useTimeline.getState()

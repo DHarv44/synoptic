@@ -177,11 +177,15 @@ probes that point. Works on desktop and mobile, in dark or light.
    - **Presets** — Workstation / Chase / Minimal plus user-saved profiles
      (specified in PLAN.md §3.13a, never built) and **settings search**;
      both matter much more once the knob count grows.
-   - **Session / workspace persistence** — feature settings, dock tab, section
-     order and expansion now persist (versioned localStorage), but the rest of
-     the session does not: map camera, probe point, timeline position, and
-     radar tilt/moment/SRV all reset on reload. Restore them, add the
-     shareable workspace URL from PLAN.md §3.12, and offer export/import.
+   - **Session persistence** ✅ — a reload now comes back where you were: map
+     camera (centre, zoom, bearing, pitch), probe point, timeline position,
+     dock tab and section expansion, tool panel and width, and the radar
+     selection. Only choices are stored, never downloaded volumes: the radar
+     site is kept only while locked, since unlocked the map reassigns it on
+     the first move. A scrub position outside the −48 h/+16 d window comes
+     back live rather than off-screen, and playback never resumes by itself.
+     *Still open:* the shareable workspace URL from PLAN.md §3.12 and
+     export/import.
    - Deliberately *not* exposing per-layer draw order — the stacking is
      meaningful and mostly offers users a way to break their own display.
      It is declared once in `map/layerOrder.ts`: imagery, then radar by

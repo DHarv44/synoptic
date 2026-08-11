@@ -102,12 +102,14 @@ off and on moves it to the top (this is how radar came to cover warnings).
      defaults, per-source cadence. Then **presets** (PLAN §3.13a, never
      built) and settings search. Adding fields is cheap — they're declared
      in `FeatureManifest.settings` and the UI generates itself.
-   - **Session/workspace persistence**: feature settings DO persist
-     (`core/settings/store.ts`, zustand `persist`, key `synoptic.settings`,
-     versioned) — but map camera, probe, timeline position, active dock tab
-     and radar tilt/moment/SRV do NOT and reset every reload. Restore those,
-     then add the shareable workspace URL (PLAN.md §3.12) and export/import.
-     Any new persisted store must carry a version + migration, per CLAUDE.md.
+   - **Session persistence**: done. Persisted stores are `synoptic.` +
+     settings / dock / tools / home / camera / probe / timeline / radar, all
+     versioned (add a version + migration to any new one, per CLAUDE.md).
+     Two rules worth keeping: persist choices, not downloads (the radar
+     store partializes to selection only, and keeps `site` just while
+     locked), and validate on rehydrate (the timeline `merge` drops a scrub
+     position that has aged out of the window and never resumes playback).
+     Still open: shareable workspace URL (PLAN.md §3.12) and export/import.
    - **Help + About panels**: interaction basics (probe click, drawing a
      cross-section, ↑/↓ tilts), keyboard list, plain-language
      notes on CAPE/SRH/hodograph/velocity folding; About with version, GitHub
