@@ -1,6 +1,7 @@
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import '@mantine/spotlight/styles.css'
+import '@/app/global.css'
 
 import { createRoot } from 'react-dom/client'
 import { App } from '@/app/App'

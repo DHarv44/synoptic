@@ -1,0 +1,10 @@
+/* Full-bleed app shell: the page never scrolls — panning belongs to the map
+   and scrolling belongs to the panels. Prevents sub-pixel overflow in the
+   map canvas from summoning page scrollbars. */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}

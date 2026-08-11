@@ -23,7 +23,7 @@ export function Shell() {
       <AppShell.Aside>
         <AnalysisDock />
       </AppShell.Aside>
-      <AppShell.Main style={{ display: 'flex', height: '100dvh' }}>
+      <AppShell.Main style={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
         <Viewport />
       </AppShell.Main>
       <AppShell.Footer>
