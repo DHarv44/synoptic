@@ -142,11 +142,17 @@ dependency order. Check boxes as slices land.
   (seek-bzip records → radials with REF/VEL/SW/ZDR/PHI/RHO moment blocks),
   5 vitest cases against a committed real KTLX chunk. seek-bzip audited
   before install (7.3M dl/wk, clean).
-- [ ] R2 — Site selector + volume assembly: latest volume chunks → radials
-  per elevation; site list w/ nearest-to-camera default.
-- [ ] R3 — Polar renderer: reflectivity sweep as a custom WebGL layer
-  (radial texture, native gates, NWS color table), sweep painting as
-  chunks arrive.
+- [x] R2 — Volume assembly: bundled WSR-88D site list (159, nearest-to-view
+  auto-select), current-volume discovery over the wrapping 0–999 ring,
+  incremental chunk streaming into a decode worker (Buffer polyfill —
+  seek-bzip needs it in-worker).
+- [x] R3 — Polar renderer: custom WebGL layer, R8 polar texture (720×gates),
+  mercator→(range,az) fragment shader, NWS reflectivity LUT, dual-bin
+  azimuth write. **Map now defaults to mercator** — globe projection broke
+  simple custom-layer matrices (also the wind layer's placement); globe
+  returns via maplibre's projection shader API later.
+- Known v1 gaps: brief blank at volume rollover; radial gaps while a
+  volume is mid-stream; site is auto-only (no manual pick yet).
 - [ ] R4 — Tilt control + gate probe (all moments + beam height).
 - [ ] R5 — Velocity + SRV (dealiasing with raw toggle).
 - [ ] R6 — Level 3 products: meso/TVS/tracks/hail icons + storm cell table.

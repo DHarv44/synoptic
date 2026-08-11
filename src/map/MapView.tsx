@@ -58,7 +58,10 @@ export function MapView() {
       attributionControl: { compact: true },
     })
     map.on('style.load', () => {
-      map.setProjection({ type: 'globe' })
+      // Mercator (not globe): custom WebGL layers (Level 2 sweeps, wind
+      // particles) use plain mercator matrices, which globe projection
+      // breaks. Globe returns when those layers adopt the projection API.
+      map.setProjection({ type: 'mercator' })
       setCtx((prev) => ({ map, styleVersion: (prev?.styleVersion ?? 0) + 1 }))
     })
     map.on('click', (e: MapMouseEvent) => {
