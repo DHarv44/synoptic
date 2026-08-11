@@ -11,7 +11,7 @@ instrument-panel UI.
 
 Every layer and tool is individually togglable, the whole workstation follows one
 timeline (−48 h of observations → +16 d of forecast), and clicking anywhere on Earth
-probes that point.
+probes that point. Works on desktop and mobile, in dark or light.
 
 ---
 
@@ -64,6 +64,21 @@ probes that point.
 | Notifications | Desktop alerts for warnings and incoming rain at your location | 🔭 |
 | Alert ticker | Top-bar scrolling severe ticker | 🔭 |
 
+### Interface
+
+| Feature | What it does | Status |
+|---|---|---|
+| Map-first shell | Edge-to-edge map; a right-edge icon rail carries navigation above, layer toggles below | ✅ |
+| Analysis dock | Location / Nearby / Radar / Settings — one scrolling column of collapsible sections | ✅ |
+| Section ordering | Drag or menu to reorder; order and expansion persist per tab | ✅ |
+| Settings | Registry-generated, searchable, with per-feature and global reset | ✅ |
+| Dark + light | Follows the OS by default; translucent map chrome with adjustable opacity | ✅ |
+| Units & time | Metric/imperial, independent temperature unit, local or UTC clock | ✅ |
+| Loading + health | Live loading indicator plus per-source status dots | ✅ |
+| Mobile layout | Bottom tab bar with three panel heights; layers expand from a map button | ✅ |
+| Section summaries | Collapsed sections showing their headline value | 🔭 |
+| Help & About | Interaction guide, keyboard map, data-source credits | 🔭 |
+
 ✅ shipped · ⚠️ known issue · 🔭 planned
 
 ---
@@ -79,34 +94,45 @@ probes that point.
    GFS files, but client speeds run ~30 m/s hotter, implicating the V-component —
    either `grib2class` mis-decoding VGRD or a u/v assembly bug. Resume steps are
    recorded in [SLICES.md](SLICES.md) (Phase 3) and [HANDOFF.md](HANDOFF.md).
-2. **UI overhaul pass** — the interface has grown organically across seven phases
-   and is due a deliberate design pass. The map should be the hero; chrome
-   should be summonable, not permanent.
+2. **UI overhaul pass** — largely shipped; the remainder is listed below.
 
-   **Chrome restructure**
-   - **Fold Layers into Settings** and retire the permanent left rail. Layer
-     toggles, opacity, and source health are settings — they don't need to
-     occupy a column full-time. Reclaims that width for the map.
-   - **Settings becomes a drawer**, not a modal: slides in over the edge,
-     dismissible with Esc or a click outside, scrollable, with the existing
-     registry-generated sections plus the layer stack at the top.
+   **Shipped.** The structural work is done. The permanent left rail is gone
+   and the map runs edge to edge. A persistent icon rail on the right edge
+   carries navigation above and layer toggles below — layer *visibility* is
+   an operation you perform while working, so it lives on the map, while
+   opacity, colour tables and products are preferences and live in Settings.
+   Clicking the active rail tab hides the panel and clicking any other
+   reveals it, so there are no separate collapse buttons. The dock's seven
+   wrapping tabs collapsed into four sections chosen by mental model —
+   **Location** (probe-driven), **Nearby** (viewport-driven), **Radar**
+   (storm tools) and **Settings** — each a single scrolling column of
+   collapsible sections whose order and expansion persist per tab and can be
+   reordered by drag or menu. Settings itself was rebuilt to convention:
+   sticky search that also matches option labels, hairline sections instead
+   of nested cards, label-left/control-right rows on a fixed control column,
+   sliders for continuous ranges, and per-feature plus global reset.
+   Attribution moved to a footer strip and playback became a floating map
+   control; map chrome is translucent with a user-adjustable opacity; a
+   loading indicator reports both API fetches and tile loads; times follow a
+   local/UTC preference (local by default). **Mobile** drops the rail for a
+   bottom tab bar with three panel heights, and the layers button expands
+   into the same vertical icon strip.
 
-   **Right panel reorganization** — the dock has grown to seven tabs
-   (Alerts, Cells, Now, Meteogram, Skew-T, Models, 3D) and forecast panels
-   would push it past ten; the tab strip already wraps. The real problem
-   isn't count, it's that the tabs mix two different mental models:
-   *"tell me about this point"* (probe-driven) and *"what's happening around
-   here"* (viewport-driven). Proposed collapse to three top-level tabs:
-   - **Place** — everything about the probed point, grouped by how deep you
-     want to go: conditions + forecast at the top (a scrollable stack, not
-     tabs — they're one story at different time scales), with Sounding and
-     Models as sub-views for when you want the full analysis.
-   - **Nearby** — the viewport-driven situation: active warnings and storm
-     cells merged into one severity/distance-ranked list rather than two
-     separate tabs answering the same question.
-   - **Radar** — the radar tool bench: site, tilt, moment, SRV/RAW, the 3D
-     echo view, and the cross-section, all in one place. This also gives the
-     floating site control a real home instead of hovering over the map.
+   **Still to do.**
+   - **Section summary lines** — the plumbing shipped (`summary` on the panel
+     contract) but no feature fills it yet. A collapsed section should say
+     "SBCAPE 1886 · shear 45 kt" or "3 warnings in view", and the *Location*
+     header should carry a plain-language verdict ("Severe risk — moderately
+     unstable, strong shear"). This is the highest-leverage item left for the
+     hobbyist audience.
+   - **Rail indicators** — warning count badge on Nearby, live dot on Radar.
+   - **Typographic pass** — values should dominate their labels (tabular
+     figures, larger, higher contrast); labels recede. Plus a density setting.
+   - **Timeline as an information display** — radar frame ticks, warning
+     issue/expiry bars, model-run boundaries, and a precip-probability
+     sparkline for the probed point, so scrubbing has a visible purpose.
+   - **Desktop panel resize** — 360 px is cramped for a skew-T; a drag handle
+     would let it widen for analysis and narrow for monitoring.
 
    **Deeper settings** — the registry already generates the settings UI from
    each feature's manifest, so new controls are cheap to add; the discipline
@@ -129,11 +155,11 @@ probes that point.
    - **Presets** — Workstation / Chase / Minimal plus user-saved profiles
      (specified in PLAN.md §3.13a, never built) and **settings search**;
      both matter much more once the knob count grows.
-   - **Session / workspace persistence** — feature settings already persist
-     to localStorage (versioned), but session state does not: map camera,
-     probe point, timeline position, active dock tab, and radar tilt/moment/
-     SRV selections all reset on reload. Restore them, add the shareable
-     workspace URL from PLAN.md §3.12, and offer workspace export/import.
+   - **Session / workspace persistence** — feature settings, dock tab, section
+     order and expansion now persist (versioned localStorage), but the rest of
+     the session does not: map camera, probe point, timeline position, and
+     radar tilt/moment/SRV all reset on reload. Restore them, add the
+     shareable workspace URL from PLAN.md §3.12, and offer export/import.
    - Deliberately *not* exposing per-layer draw order — the stacking is
      meaningful (labels over radar over satellite) and mostly offers users a
      way to break their own display.
@@ -161,22 +187,18 @@ probes that point.
      Deliberately scoped after the structural UI work — it's content writing,
      not layout, and it should attach to panels whose shape has settled.
 
-   Also in scope: timeline affordances, information density, empty states,
-   keyboard access (tab switching, Esc to dismiss drawers), and the deferred
-   polish items (alert ticker, manual radar site picker, layer re-ordering,
-   zone-alert geometry resolution, restoring globe projection once custom
-   WebGL layers adopt MapLibre's projection API).
+   Also still open: keyboard access (tab switching, Esc), and the deferred
+   polish items (alert ticker, manual radar site picker, zone-alert geometry
+   resolution, restoring globe projection once custom WebGL layers adopt
+   MapLibre's projection API).
 
-   - **Mobile / responsive view** — first pass shipped: the rail gives way to
-     a bottom sheet with three heights (peek shows the tab row and keeps the
-     map; half shows panel content with the map still visible; full hands
-     over the screen), a thumb-reachable layers button opens a labelled
-     sheet, playback goes full-width above the peek, and the radar bench
-     moves clear of both. Still to do: **drag-to-resize the sheet** with
-     momentum and snap points (tap-to-cycle only today — needs hand-rolled
-     pointer handling or a small dep like `vaul`), a "Data sources" entry to
-     replace the hidden attribution footer, and a touch pass on the radar
-     bench. This is also the groundwork the Chase HUD builds on.
+   - **Mobile follow-ups** — the first pass shipped (bottom tab bar, three
+     panel heights, expanding layer strip, full-width playback, relocated
+     radar bench, UTC-only clock). Remaining: **drag-to-resize** the panel
+     with momentum and snap points (tap-to-cycle only today — needs
+     hand-rolled pointer handling or a small dep like `vaul`), a "Data
+     sources" entry to replace the footer that mobile hides, and a touch
+     pass on the radar bench. This is the groundwork the Chase HUD builds on.
 3. **Make it personal** — three related features that turn the instrument into
    something you'd keep open every day:
    - **My location** — a small button on the map that centers and zooms to

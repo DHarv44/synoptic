@@ -30,19 +30,22 @@ Single entry point for continuing SYNOPTIC. Read in this order:
    Also re-test after any fix WITH the globe/mercator note below in mind —
    part of the original misplacement was the globe-projection matrix issue.
    The wind feature ships `defaultEnabled: false` until fixed.
-2. **UI overhaul** — user will provide a gripe list; agreed direction so far
-   (full rationale in README roadmap):
-   - Fold **Layers into Settings**, retire the permanent left rail
-     (`app/shell/LayerRail.tsx` content moves into the settings screen).
-   - **Settings becomes a drawer** (Mantine `Drawer`, not `Modal`) —
-     `app/settings/SettingsModal.tsx` is the file to convert.
-   - **Collapse the 7-tab dock to 3**: *Place* (probe-driven: conditions +
-     forecast stacked, sounding/models as sub-views), *Nearby* (viewport-
-     driven: alerts + cells merged, ranked by severity/distance), *Radar*
-     (site/tilt/moment/SRV + 3D + cross-section; gives the floating
-     Level2Control a real home). Note this changes the registry's panel
-     contribution model — panels currently register flat; they'll need a
-     group/slot field in `FeatureManifest`.
+2. **UI overhaul — STRUCTURAL WORK DONE** (see README roadmap item 2 for the
+   full shipped list). Rail + 4-tab dock + collapsible reorderable sections +
+   rebuilt settings + mobile bottom-tab layout + translucent chrome +
+   loading indicator + local/UTC time preference are all in.
+   Remaining, roughly in priority order:
+   - **Section summary lines**: `PanelContribution.summary` exists and
+     `DockSection` renders it as the collapsed-state hint — no feature fills
+     it yet. Add per-feature summaries (CAPE/shear for sounding, warning
+     count for alerts, site/tilt for radar) and a verdict line in the
+     Location header.
+   - **Rail indicators**: `DockRail` already accepts an `indicators` prop
+     (count or 'live') — nothing passes it. Wiring needs alert/cell counts,
+     which means the shell reading feature stores; consider exposing counts
+     through the registry instead to keep layering clean.
+   - Typographic pass (values should dominate labels), timeline as an
+     information display, desktop panel resize, keyboard access.
    - **Deeper per-feature settings** (README has the full priority list):
      alert event-type/severity filtering first (marine warnings swamp the
      list), decoupled units (kt/inHg/kft/nm independent of metric-imperial),
