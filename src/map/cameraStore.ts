@@ -12,18 +12,23 @@ type FitBounds = [number, number, number, number]
 interface CameraState {
   target: FlyTarget | null
   fit: FitBounds | null
+  /** Bumped per reset request; a counter so repeat presses always fire. */
+  resetNonce: number
   requestFlyTo: (lat: number, lon: number) => void
   requestFitBounds: (bounds: FitBounds) => void
+  requestResetNorth: () => void
   consume: () => void
   consumeFit: () => void
 }
 
-/** Camera requests (fly-to / fit-bounds) consumed by MapView. */
+/** Camera requests (fly-to / fit-bounds / reset) consumed by MapView. */
 export const useCameraStore = create<CameraState>((set) => ({
   target: null,
   fit: null,
+  resetNonce: 0,
   requestFlyTo: (lat, lon) => set({ target: { lat, lon } }),
   requestFitBounds: (bounds) => set({ fit: bounds }),
+  requestResetNorth: () => set((s) => ({ resetNonce: s.resetNonce + 1 })),
   consume: () => set({ target: null }),
   consumeFit: () => set({ fit: null }),
 }))

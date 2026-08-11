@@ -4,6 +4,8 @@ import { PlaybackControl } from '@/app/shell/PlaybackControl'
 import { MobileSheet, TAB_BAR_HEIGHT } from '@/app/shell/MobileSheet'
 import { MobileLayerButton } from '@/map/MobileLayerButton'
 import { LoadingIndicator } from '@/ui/LoadingIndicator'
+import { ReorientButton } from '@/ui/ReorientButton'
+import { useCameraStore } from '@/map/cameraStore'
 import { ToolRail } from '@/app/shell/ToolRail'
 import { MobileToolBar } from '@/app/shell/MobileToolBar'
 
@@ -13,6 +15,8 @@ import { MobileToolBar } from '@/app/shell/MobileToolBar'
  * and a thumb-reachable layers button — no rail.
  */
 export function Viewport({ isMobile }: { isMobile: boolean }) {
+  const resetNorth = useCameraStore((s) => s.requestResetNorth)
+
   return (
     <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
       <MapView />
@@ -20,6 +24,13 @@ export function Viewport({ isMobile }: { isMobile: boolean }) {
       {isMobile ? (
         <>
           <MobileLayerButton bottom={TAB_BAR_HEIGHT + 66} />
+          {/* Beside the layers button, so expanding it doesn't overlap. */}
+          <ReorientButton
+            onClick={resetNorth}
+            size={44}
+            label="North up"
+            style={{ right: 64, bottom: TAB_BAR_HEIGHT + 66 }}
+          />
           <LoadingIndicator top={12} right={12} />
           <MobileToolBar />
           <MobileSheet />
@@ -28,6 +39,11 @@ export function Viewport({ isMobile }: { isMobile: boolean }) {
         <>
           <ToolRail />
           <DockRail />
+          <ReorientButton
+            onClick={resetNorth}
+            label="North up"
+            style={{ right: 52, bottom: 8 }}
+          />
           <LoadingIndicator top={12} right={56} />
         </>
       )}

@@ -114,6 +114,13 @@ export function MapView() {
     useCameraStore.getState().consumeFit()
   }, [ctx, fitTarget])
 
+  // Reorient: north up, flat. Nonce starts at 0 so mounting doesn't move it.
+  const resetNonce = useCameraStore((s) => s.resetNonce)
+  useEffect(() => {
+    if (!ctx || resetNonce === 0) return
+    ctx.map.easeTo({ bearing: 0, pitch: 0, duration: 300 })
+  }, [ctx, resetNonce])
+
   const layerFeatures = listFeatures().filter((f) => f.layerComponent)
 
   return (

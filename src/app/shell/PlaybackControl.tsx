@@ -67,7 +67,8 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
         right: isMobile ? 8 : undefined,
         zIndex: 5,
         width: isMobile ? undefined : 420,
-        maxWidth: isMobile ? undefined : 'calc(100% - 76px)',
+        // Desktop reserve clears the rail plus the reorient button.
+        maxWidth: isMobile ? undefined : 'calc(100% - 118px)',
       }}
     >
       <Group gap={8} wrap="nowrap">

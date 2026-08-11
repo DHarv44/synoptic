@@ -29,8 +29,8 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Gate probe | All moments at a gate + 4/3-earth beam height | ✅ |
 | All-Tilts | One click → the whole vertical column of values | ✅ |
 | Velocity + SRV | Gate-continuity dealiasing (with RAW toggle), storm-relative velocity from Bunkers motion | ✅ |
-| Cross-section | Shift+click A→B → RHI slice at true beam heights | ✅ |
-| 3D echo | Tilt surfaces in 3D, threshold + orbit | ✅ |
+| Cross-section | Draw A→B on the map → RHI slice at true beam heights | ✅ |
+| 3D echo | Tilt surfaces in 3D over a basemap floor, threshold + orbit, heading tape | ✅ |
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
 | Radar quality + resolution | Clutter suppression, seamless zoom handoff, multi-site blending | ⚠️ needs work |
 | Isosurface raymarch | Solid volume instead of tilt surfaces | 🔭 |

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Button, Group, Slider, Stack, Text } from '@mantine/core'
@@ -7,6 +7,7 @@ import { currentSite, onVolume, requestVolume } from '@/features/radar/level2/br
 import { buildTiltMesh } from '@/features/radar/level2/volumeGeometry'
 import { GroundPlane } from '@/features/radar/level2/GroundPlane'
 import { CameraBearing, ViewCompass, ViewLoading } from '@/features/radar/level2/ViewCompass'
+import { ReorientButton } from '@/ui/ReorientButton'
 import type { VolumeTilt } from '@/features/radar/level2/worker'
 
 const VERTICAL_EXAGGERATION = 4
@@ -53,6 +54,7 @@ export function Volume3D() {
   const [volumeLoading, setVolumeLoading] = useState(false)
   const [groundLoading, setGroundLoading] = useState(false)
   const stallRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null)
 
   /** Ask the worker for a volume, showing the spinner until it answers. */
   const ask = useCallback((): boolean => {
@@ -161,6 +163,7 @@ export function Volume3D() {
           <CameraBearing onChange={setBearing} />
           {/* Left drag orbits, right drag pans across the ground, wheel zooms. */}
           <OrbitControls
+            ref={controlsRef}
             enablePan
             screenSpacePanning={false}
             minDistance={40}
@@ -169,6 +172,12 @@ export function Volume3D() {
         </Canvas>
         <ViewCompass bearing={bearing} />
         {busy && <ViewLoading />}
+        <ReorientButton
+          onClick={() => controlsRef.current?.reset()}
+          size={30}
+          label="Reset camera"
+          style={{ right: 8, bottom: 8 }}
+        />
       </div>
       <Text size="xs" c="dimmed">
         Surfaces are the radar's actual beam cones (vertical ×{VERTICAL_EXAGGERATION});
