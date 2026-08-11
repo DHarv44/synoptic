@@ -142,7 +142,7 @@ function postTilts(): void {
 function probe(azDeg: number, rangeM: number): void {
   const values: Record<string, number> = {}
   let elevationDeg = 0
-  for (const moment of ['REF', 'VEL', 'ZDR', 'RHO']) {
+  for (const moment of ['REF', 'VEL', 'SW', 'ZDR', 'PHI', 'RHO']) {
     for (const elevNum of [selected.elevNum, selected.elevNum + 1]) {
       const v = store.valueAt(store.key(elevNum, moment), azDeg, rangeM)
       if (v !== null) {

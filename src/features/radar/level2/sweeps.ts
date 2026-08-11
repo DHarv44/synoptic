@@ -2,8 +2,18 @@
 import { decodeChunk, type MomentData } from '@/features/radar/level2/decode'
 
 export const AZ_BINS = 720
+
+/**
+ * Retention policy. Each sweep is 720 azimuths × up to ~1832 gates, about
+ * 1.3 MB, so keeping every moment on every cut would run to tens of
+ * megabytes per volume. Reflectivity and velocity are kept throughout
+ * because tilt-walking depends on them; the dual-pol fields are kept only
+ * on the lowest cuts, which is where they are actually read — hail and
+ * debris signatures, and telling weather from clutter, are all low-tilt
+ * questions.
+ */
 const ALL_TILT_MOMENTS = new Set(['REF', 'VEL'])
-const LOW_TILT_MOMENTS = new Set(['ZDR', 'RHO'])
+const LOW_TILT_MOMENTS = new Set(['ZDR', 'RHO', 'SW', 'PHI'])
 const LOW_TILT_MAX = 2
 
 export interface SweepState {

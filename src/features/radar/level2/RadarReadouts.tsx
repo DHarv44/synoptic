@@ -12,8 +12,9 @@ function beamKft(rangeM: number, elevDeg: number): number {
 
 function fmtValue(moment: string, v: number): string {
   if (moment === 'REF') return `${v.toFixed(1)} dBZ`
-  if (moment === 'VEL') return `${v.toFixed(1)} m/s`
+  if (moment === 'VEL' || moment === 'SW') return `${v.toFixed(1)} m/s`
   if (moment === 'ZDR') return `${v.toFixed(2)} dB`
+  if (moment === 'PHI') return `${v.toFixed(0)}°`
   if (moment === 'RHO') return v.toFixed(3)
   return v.toFixed(1)
 }

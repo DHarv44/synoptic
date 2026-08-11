@@ -1,6 +1,6 @@
 import type { CustomLayerInterface, Map as MLMap } from 'maplibre-gl'
 import { SWEEP_FRAG, SWEEP_VERT } from '@/features/radar/level2/shaders'
-import { LUT_RANGES, reflectivityLut, velocityLut } from '@/features/radar/level2/colormap'
+import { LUT_RANGES, lutFor } from '@/features/radar/level2/colormap'
 import type { SweepMessage } from '@/features/radar/level2/worker'
 import { linkProgram } from '@/map/glUtils'
 
@@ -39,7 +39,7 @@ export class SweepGlLayer implements CustomLayerInterface {
     if (msg.moment !== this.lutMoment) {
       this.lutMoment = msg.moment
       gl.bindTexture(gl.TEXTURE_2D, this.lutTex)
-      const lut = msg.moment === 'VEL' ? velocityLut() : reflectivityLut()
+      const lut = lutFor(msg.moment)
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, lut)
     }
     gl.bindTexture(gl.TEXTURE_2D, this.sweepTex)
@@ -75,7 +75,7 @@ export class SweepGlLayer implements CustomLayerInterface {
 
     this.lutTex = gl.createTexture()
     gl.bindTexture(gl.TEXTURE_2D, this.lutTex)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, reflectivityLut())
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, lutFor('REF'))
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)

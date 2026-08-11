@@ -33,7 +33,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | 3D echo | Tilt surfaces in 3D over a basemap floor, threshold + orbit, heading tape | ✅ |
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
 | Radar quality + resolution | Clutter suppression, seamless zoom handoff, multi-site blending | ⚠️ needs work |
-| Dual-pol products | SW/ZDR/PHI/RHO decoded, but only REF/VEL can be displayed | ⚠️ needs work |
+| Dual-pol products | Spectrum width, ZDR, correlation coefficient and differential phase, each with its own colour ramp | ✅ |
 | Scan time + VCP | Volume age and coverage pattern shown on the panel | 🔭 |
 | Isosurface raymarch | Solid volume instead of tilt surfaces | 🔭 |
 | `.pal` color tables | Import GRLevelX community palettes | 🔭 |
@@ -290,13 +290,13 @@ probes that point. Works on desktop and mobile, in dark or light.
    - Also worth revisiting: dual-bin azimuth writes were a stopgap for
      1°-spaced cuts and may be widening returns; range-folded and
      below-threshold gates should be visually distinct from "no echo".
-   - **Displayable dual-pol moments.** The decoder already handles
-     REF/VEL/SW/ZDR/PHI/RHO/CFP and the gate probe reads four of them, but
-     only reflectivity and velocity can be *painted* — the product picker
-     offers nothing else. Spectrum width, differential reflectivity,
-     differential phase and correlation coefficient are decoded and
-     unreachable. Exposing them is the prerequisite for the clutter masking
-     above and for the TDS/hail presets in PLAN.md §3.3.3.
+   - **Displayable dual-pol moments** ✅ — spectrum width, differential
+     reflectivity, correlation coefficient and differential phase each have
+     a colour ramp and can be painted, and the gate probe reads all six.
+     They are retained on the lowest cuts only: a sweep is ~1.3 MB, and low
+     tilts are where these fields are actually read. The product picker
+     offers only what the current volume carries. This unblocks the clutter
+     masking above and the TDS/hail presets in PLAN.md §3.3.3.
    - **Scan time and VCP on the panel.** Nothing says how old the current
      volume is or which coverage pattern produced it, so a stalled feed and
      a fresh one look identical. Every real radar app shows both — a

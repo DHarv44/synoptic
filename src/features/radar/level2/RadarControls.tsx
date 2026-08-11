@@ -1,14 +1,5 @@
 import { useMemo } from 'react'
-import {
-  ActionIcon,
-  Chip,
-  Group,
-  SegmentedControl,
-  Select,
-  Stack,
-  Text,
-  Tooltip,
-} from '@mantine/core'
+import { ActionIcon, Chip, Group, Select, Stack, Text, Tooltip } from '@mantine/core'
 import {
   IconChevronDown,
   IconChevronUp,
@@ -32,10 +23,39 @@ function Label({ children }: { children: React.ReactNode }) {
   )
 }
 
-const MOMENT_HINT: Record<string, string> = {
-  REF: 'Echo strength. Heavier precipitation reads higher.',
-  VEL: 'Air motion toward or away from the radar.',
-}
+/** Products in the order a forecaster works through them. */
+const MOMENTS: Array<{ value: string; label: string; hint: string }> = [
+  {
+    value: 'REF',
+    label: 'Reflectivity',
+    hint: 'Echo strength. Heavier precipitation reads higher.',
+  },
+  {
+    value: 'VEL',
+    label: 'Velocity',
+    hint: 'Air motion toward or away from the radar.',
+  },
+  {
+    value: 'SW',
+    label: 'Spectrum width',
+    hint: 'How varied the motion is inside each gate. High values mark turbulence and shear.',
+  },
+  {
+    value: 'ZDR',
+    label: 'Differential reflectivity',
+    hint: 'Flat versus round targets. Near zero is hail or dry snow; high is large raindrops.',
+  },
+  {
+    value: 'RHO',
+    label: 'Correlation coefficient',
+    hint: 'How alike the targets are. Below ~0.9 is usually not weather — clutter, birds, or debris.',
+  },
+  {
+    value: 'PHI',
+    label: 'Differential phase',
+    hint: 'Cumulative phase shift along the beam. Rises fastest through heavy rain.',
+  },
+]
 
 /** Which radar, and whether the map is allowed to change it. */
 function SitePicker() {
@@ -152,18 +172,20 @@ function SweepControls() {
       </Group>
 
       <Label>Product</Label>
-      <SegmentedControl
+      <Select
         size="xs"
-        fullWidth
+        allowDeselect={false}
+        comboboxProps={{ withinPortal: true }}
         value={moment}
-        onChange={setMoment}
-        data={[
-          { value: 'REF', label: 'Reflectivity' },
-          { value: 'VEL', label: 'Velocity' },
-        ]}
+        onChange={(m) => m && setMoment(m)}
+        // Only what this volume actually carries: a picker offering products
+        // that render blank is worse than a shorter list.
+        data={MOMENTS.filter((m) => tilts.some((t) => t.moments.includes(m.value))).map(
+          (m) => ({ value: m.value, label: m.label }),
+        )}
       />
       <Text size="xs" c="dimmed">
-        {MOMENT_HINT[moment]}
+        {MOMENTS.find((m) => m.value === moment)?.hint}
       </Text>
 
       {moment === 'VEL' && (
