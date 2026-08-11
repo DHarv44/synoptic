@@ -72,6 +72,12 @@ export interface FeatureManifest {
   layerComponent?: ComponentType
   /** Analysis dock panels this feature contributes. */
   panels?: PanelContribution[]
+  /**
+   * Live status shown on the rail tab holding this feature's panels — the
+   * feature owns the condition, `RailIndicator` owns the look. Keeps the
+   * shell from having to read feature stores.
+   */
+  dockIndicator?: ComponentType
   /** Left-panel tool views this feature contributes. */
   tools?: ToolContribution[]
   settings: SettingField[]

@@ -1,5 +1,6 @@
-import { Group, Stack, Table, Text } from '@mantine/core'
+import { Divider, Stack, Table, Text } from '@mantine/core'
 import { useRadar } from '@/features/radar/level2/store'
+import { RadarControls } from '@/features/radar/level2/RadarControls'
 
 const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
 const DEG = Math.PI / 180
@@ -18,34 +19,31 @@ function fmtValue(moment: string, v: number): string {
 }
 
 /**
- * Radar readouts: the numbers behind the current volume — every moment at
- * the probed gate, and that gate's values through the whole vertical
- * column (All-Tilts) with true beam heights.
+ * The radar's home: what it's showing and how to change it, then the
+ * numbers behind the current volume — every moment at the probed gate, and
+ * that gate's values through the whole column (All-Tilts) at true beam
+ * heights. Controls sit first so they're reachable without scrolling,
+ * which is what makes this usable at the mobile sheet's half height.
  */
 export function RadarReadouts() {
   const site = useRadar((s) => s.site)
-  const tilts = useRadar((s) => s.tilts)
   const probe = useRadar((s) => s.probe)
   const column = useRadar((s) => s.column)
 
   if (!site) {
     return (
       <Text size="xs" c="dimmed">
-        Zoom in past z6 to attach a Level 2 radar site.
+        No Level 2 site attached. Zoom in past z6 over the United States and the
+        nearest WSR-88D takes over — single-site radar at full resolution, rather
+        than the blended national mosaic.
       </Text>
     )
   }
 
   return (
     <Stack gap="xs">
-      <Group justify="space-between" wrap="nowrap">
-        <Text size="sm" fw={600} ff="monospace">
-          {site.id}
-        </Text>
-        <Text size="xs" c="dimmed">
-          {tilts.length} tilts retained
-        </Text>
-      </Group>
+      <RadarControls />
+      <Divider />
 
       {!probe && (
         <Text size="xs" c="dimmed">

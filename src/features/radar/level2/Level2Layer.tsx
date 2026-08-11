@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useHotkeys } from '@mantine/hooks'
 import type { MapMouseEvent } from 'maplibre-gl'
 import { useMapContext } from '@/map/MapView'
 import { useMapLayer, firstSymbolLayerId } from '@/map/useMapLayer'
@@ -12,7 +13,7 @@ import { bunkersRightMover } from '@/core/met/kinematics'
 import { nearestSite } from '@/features/radar/level2/sites'
 import { fetchChunk, findCurrentVolume, listVolumeChunks } from '@/features/radar/level2/volume'
 import { RANGE_M, SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
-import { Level2Control } from '@/features/radar/level2/Level2Control'
+import { stepTilt } from '@/features/radar/level2/controls'
 import { useRadar } from '@/features/radar/level2/store'
 import { useSectionDraw } from '@/features/radar/level2/useSectionDraw'
 import { distanceKm, sampleLine, toAzRange } from '@/features/radar/level2/geometry'
@@ -42,14 +43,17 @@ type WorkerOut =
   | SectionResultMessage
   | VolumeMessage
 
-/** Single-site Level 2: streams sweeps, drives the shared radar store. */
+/**
+ * Single-site Level 2: streams sweeps, drives the shared radar store. It
+ * renders no map chrome — the controls live in the Radar panel, so the map
+ * stays clear for the echo itself.
+ */
 export function Level2Layer() {
   const { map } = useMapContext()
   const bounds = useMapView((s) => s.bounds)
   const opacity = useFeatureOption<number>('level2', 'opacity')
   const site = useRadar((s) => s.site)
   const srv = useRadar((s) => s.srv)
-  const raw = useRadar((s) => s.raw)
   const storm = useRadar((s) => s.storm)
   const sectionLine = useRadar((s) => s.sectionLine)
   const layerRef = useRef<SweepGlLayer | null>(null)
@@ -241,25 +245,11 @@ export function Level2Layer() {
     }
   }, [site, map])
 
-  const select = (elevNum: number, moment: string, rawMode = raw): void => {
-    useRadar.getState().set({ elevNum, moment })
-    workerRef.current?.postMessage({ type: 'select', elevNum, moment, raw: rawMode })
-  }
+  // Tilt walking without leaving the map. Left/Right are the timeline's.
+  useHotkeys([
+    ['ArrowUp', () => stepTilt(1)],
+    ['ArrowDown', () => stepTilt(-1)],
+  ])
 
-  const stormMotion =
-    storm === null
-      ? null
-      : `${Math.round((Math.atan2(-storm.u, -storm.v) / DEG + 360) % 360)}°/${Math.round(Math.hypot(storm.u, storm.v) * 1.94384)}kt`
-
-  return (
-    <Level2Control
-      onSelect={select}
-      onSrv={(on) => useRadar.getState().set({ srv: on })}
-      onRaw={(on) => {
-        useRadar.getState().set({ raw: on })
-        select(useRadar.getState().elevNum, useRadar.getState().moment, on)
-      }}
-      stormMotion={stormMotion}
-    />
-  )
+  return null
 }

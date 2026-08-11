@@ -15,8 +15,10 @@ setting (in Settings). Radar tilt is a control (floating bench), default tilt
 would be a setting.
 
 Three surfaces, split by kind, not by topic:
-- **Map** — the hero, edge to edge. Carries the floating radar bench (only
-  what changes the map), the playback control, and the loading indicator.
+- **Map** — the hero, edge to edge. Carries the playback control, the
+  loading indicator and the reorient button, and nothing else. The radar
+  bench that used to float here was removed: unlabelled controls over the
+  map read as a mystery box to anyone who isn't already a radar user.
 - **Left rail + tool panel** (`ToolRail`/`ToolPanel`, `toolStore`) — *views*
   with their own camera/navigation. Today: the radar workbench (3D echo |
   cross-section). Resizable, % width persisted. Features contribute via
@@ -79,10 +81,11 @@ is the only writer; bench, workbench and readouts all read from it.
      it yet. Add per-feature summaries (CAPE/shear for sounding, warning
      count for alerts, site/tilt for radar) and a verdict line in the
      Location header.
-   - **Rail indicators**: `DockRail` already accepts an `indicators` prop
-     (count or 'live') — nothing passes it. Wiring needs alert/cell counts,
-     which means the shell reading feature stores; consider exposing counts
-     through the registry instead to keep layering clean.
+   - **Rail indicators**: mechanism is in — a feature declares
+     `dockIndicator` in its manifest (a component that renders
+     `<RailIndicator />`), and `DockRail` collects them by panel group, so
+     the shell never reads feature stores. Level 2 uses it for its live dot.
+     Alerts and cells should contribute counts the same way.
    - Typographic pass (values should dominate labels), timeline as an
      information display, desktop panel resize, keyboard access.
    - **Deeper per-feature settings** (README has the full priority list):

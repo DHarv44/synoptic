@@ -23,6 +23,11 @@ export function requestVolume(): boolean {
   return true
 }
 
+/** Ask the worker to render a different elevation cut or moment. */
+export function selectSweep(elevNum: number, moment: string, raw: boolean): void {
+  current?.worker.postMessage({ type: 'select', elevNum, moment, raw })
+}
+
 export function onVolume(cb: (msg: VolumeMessage) => void): () => void {
   volumeListeners.add(cb)
   return () => volumeListeners.delete(cb)

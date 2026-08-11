@@ -8,3 +8,26 @@ body,
   overflow: hidden;
   overscroll-behavior: none;
 }
+
+/* Slow breath for "this source is live" marks. Deliberately long and
+   low-contrast — a background reassurance, not an alert. */
+@keyframes wx-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.wx-pulse {
+  animation: wx-pulse 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wx-pulse {
+    animation: none;
+    opacity: 0.9;
+  }
+}

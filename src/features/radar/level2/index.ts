@@ -3,6 +3,7 @@ import { registerFeature } from '@/core/settings/registry'
 import { Level2Layer } from '@/features/radar/level2/Level2Layer'
 import { RadarWorkbench } from '@/features/radar/level2/RadarWorkbench'
 import { RadarReadouts } from '@/features/radar/level2/RadarReadouts'
+import { Level2RailIndicator } from '@/features/radar/level2/Level2RailIndicator'
 
 /**
  * Single-site NEXRAD Level 2: streaming super-res reflectivity from the
@@ -21,6 +22,7 @@ registerFeature({
   panels: [
     { id: 'radar-readouts', title: 'Level 2', component: RadarReadouts, group: 'radar', order: 0 },
   ],
+  dockIndicator: Level2RailIndicator,
   defaultEnabled: true,
   settings: [
     {

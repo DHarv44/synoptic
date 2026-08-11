@@ -1,4 +1,4 @@
-import { Badge, Stack, Tooltip, UnstyledButton } from '@mantine/core'
+import { Stack, Tooltip, UnstyledButton } from '@mantine/core'
 import {
   IconAdjustments,
   IconAlertTriangle,
@@ -10,6 +10,7 @@ import type { ComponentType } from 'react'
 import { useDock, type DockTab } from '@/app/shell/dockStore'
 import { mapChromeStyle } from '@/ui/mapChrome'
 import { LayerToggles } from '@/map/LayerToggles'
+import { listFeatures } from '@/core/settings/registry'
 
 export interface RailTab {
   key: DockTab
@@ -26,11 +27,23 @@ export const RAIL_TABS: RailTab[] = [
 
 const RAIL_WIDTH = 44
 
-function RailButton({ tab, indicator }: { tab: RailTab; indicator?: number | 'live' }) {
+/**
+ * Indicator components contributed by features whose panels live under this
+ * tab. Only one feature declares one today; if that changes they'd share a
+ * corner, which is visible enough to prompt a layout decision then.
+ */
+function indicatorsFor(tab: DockTab): ComponentType[] {
+  return listFeatures()
+    .filter((f) => f.dockIndicator && f.panels?.some((p) => p.group === tab))
+    .map((f) => f.dockIndicator as ComponentType)
+}
+
+function RailButton({ tab }: { tab: RailTab }) {
   const open = useDock((s) => s.open)
   const active = useDock((s) => s.tab === tab.key && s.open)
   const toggleTab = useDock((s) => s.toggleTab)
   const Icon = tab.icon
+  const indicators = indicatorsFor(tab.key)
 
   return (
     <Tooltip
@@ -56,24 +69,9 @@ function RailButton({ tab, indicator }: { tab: RailTab; indicator?: number | 'li
         }}
       >
         <Icon size={19} stroke={1.6} />
-        {indicator === 'live' && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 9,
-              right: 7,
-              width: 6,
-              height: 6,
-              borderRadius: 3,
-              background: 'var(--mantine-color-green-6)',
-            }}
-          />
-        )}
-        {typeof indicator === 'number' && indicator > 0 && (
-          <Badge size="xs" circle color="red" style={{ position: 'absolute', top: 5, right: 3 }}>
-            {indicator > 99 ? '99' : indicator}
-          </Badge>
-        )}
+        {indicators.map((Indicator, i) => (
+          <Indicator key={i} />
+        ))}
       </UnstyledButton>
     </Tooltip>
   )
@@ -84,11 +82,7 @@ function RailButton({ tab, indicator }: { tab: RailTab; indicator?: number | 'li
  * collapsed — clicking the active tab hides the panel, clicking any other
  * shows it. No separate collapse/expand buttons.
  */
-export function DockRail({
-  indicators = {},
-}: {
-  indicators?: Partial<Record<DockTab, number | 'live'>>
-}) {
+export function DockRail() {
   return (
     <Stack
       gap={0}
@@ -105,7 +99,7 @@ export function DockRail({
       }}
     >
       {RAIL_TABS.map((t) => (
-        <RailButton key={t.key} tab={t} indicator={indicators[t.key]} />
+        <RailButton key={t.key} tab={t} />
       ))}
       {/* Layer visibility toggles sit at the foot of the same strip. */}
       <div style={{ flex: 1 }} />
