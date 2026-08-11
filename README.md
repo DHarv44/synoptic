@@ -137,6 +137,22 @@ probes that point.
      meaningful (labels over radar over satellite) and mostly offers users a
      way to break their own display.
 
+   **Help & About** — nothing currently explains the app to a newcomer, and
+   several controls are undiscoverable (shift+click for a cross-section is
+   the worst offender). Add:
+   - A **help panel or drawer** covering the interaction basics (click to
+     probe, shift+click for a slice, tilt/moment controls, what the timeline
+     scrubs), a keyboard-shortcut list, and short plain-language notes on
+     reading the pro tools — what CAPE and SRH mean, how to read a hodograph,
+     why velocity folds. The tooltips already do some of this; this is the
+     place they graduate to.
+   - An **About panel** with the version/build, a link to the GitHub repo,
+     the license, full data-source attribution (currently only the map
+     credit is visible), and the standing "not a substitute for official
+     warnings" statement.
+   - Discoverability fixes alongside: hint text on first run, and surfacing
+     hidden gestures in the relevant panel rather than only in docs.
+
    Also in scope: timeline affordances, information density, empty states,
    keyboard access (tab switching, Esc to dismiss drawers), and the deferred
    polish items (alert ticker, manual radar site picker, layer re-ordering,

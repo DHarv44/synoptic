@@ -57,6 +57,11 @@ Single entry point for continuing SYNOPTIC. Read in this order:
      and radar tilt/moment/SRV do NOT and reset every reload. Restore those,
      then add the shareable workspace URL (PLAN.md §3.12) and export/import.
      Any new persisted store must carry a version + migration, per CLAUDE.md.
+   - **Help + About panels**: interaction basics (probe click, shift+click
+     cross-section — currently undiscoverable), keyboard list, plain-language
+     notes on CAPE/SRH/hodograph/velocity folding; About with version, GitHub
+     repo link, license, full data-source attribution (only the map credit
+     shows today) and the "not a substitute for official warnings" line.
    - Plus: timeline affordances, empty states, keyboard (tab switch, Esc),
      deferred polish (alert ticker, `.pal` tables, manual site picker,
      layer re-ordering, zone-alert geometry, globe projection restore).
