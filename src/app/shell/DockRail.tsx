@@ -1,4 +1,4 @@
-import { Badge, Group, Stack, Tooltip, UnstyledButton } from '@mantine/core'
+import { Badge, Stack, Tooltip, UnstyledButton } from '@mantine/core'
 import {
   IconAdjustments,
   IconAlertTriangle,
@@ -22,46 +22,35 @@ export const RAIL_TABS: RailTab[] = [
   { key: 'settings', label: 'Settings', icon: IconAdjustments },
 ]
 
-interface DockRailProps {
-  /** Badge counts / live dots per tab, e.g. active warnings. */
-  indicators?: Partial<Record<DockTab, number | 'live'>>
-  horizontal?: boolean
-}
+const RAIL_WIDTH = 44
 
-function RailButton({
-  tab,
-  indicator,
-  horizontal,
-}: {
-  tab: RailTab
-  indicator?: number | 'live'
-  horizontal: boolean
-}) {
-  const active = useDock((s) => s.tab) === tab.key
-  const setTab = useDock((s) => s.setTab)
+function RailButton({ tab, indicator }: { tab: RailTab; indicator?: number | 'live' }) {
+  const open = useDock((s) => s.open)
+  const active = useDock((s) => s.tab === tab.key && s.open)
+  const toggleTab = useDock((s) => s.toggleTab)
   const Icon = tab.icon
 
   return (
-    <Tooltip label={tab.label} position={horizontal ? 'bottom' : 'left'} openDelay={300}>
+    <Tooltip
+      label={active ? `Hide ${tab.label}` : tab.label}
+      position="left"
+      openDelay={300}
+    >
       <UnstyledButton
-        onClick={() => setTab(tab.key)}
+        onClick={() => toggleTab(tab.key)}
         aria-label={tab.label}
-        aria-current={active}
+        aria-pressed={active}
+        aria-expanded={open}
         style={{
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: horizontal ? '100%' : 40,
-          height: 42,
+          width: RAIL_WIDTH,
+          height: 44,
           color: active ? 'var(--mantine-color-text)' : 'var(--mantine-color-dimmed)',
           background: active ? 'var(--mantine-color-default-hover)' : 'transparent',
-          // Accent marks the active tab on the outer edge of the rail.
-          boxShadow: active
-            ? horizontal
-              ? 'inset 0 2px 0 var(--mantine-primary-color-filled)'
-              : 'inset 2px 0 0 var(--mantine-primary-color-filled)'
-            : 'none',
+          boxShadow: active ? 'inset 2px 0 0 var(--mantine-primary-color-filled)' : 'none',
         }}
       >
         <Icon size={19} stroke={1.6} />
@@ -69,8 +58,8 @@ function RailButton({
           <div
             style={{
               position: 'absolute',
-              top: 8,
-              right: horizontal ? 'calc(50% - 14px)' : 6,
+              top: 9,
+              right: 7,
               width: 6,
               height: 6,
               borderRadius: 3,
@@ -79,12 +68,7 @@ function RailButton({
           />
         )}
         {typeof indicator === 'number' && indicator > 0 && (
-          <Badge
-            size="xs"
-            circle
-            color="red"
-            style={{ position: 'absolute', top: 4, right: horizontal ? 'calc(50% - 20px)' : 2 }}
-          >
+          <Badge size="xs" circle color="red" style={{ position: 'absolute', top: 5, right: 3 }}>
             {indicator > 99 ? '99' : indicator}
           </Badge>
         )}
@@ -93,22 +77,33 @@ function RailButton({
   )
 }
 
-/** Tab rail: vertical beside the dock on desktop, horizontal above it on mobile. */
-export function DockRail({ indicators = {}, horizontal = false }: DockRailProps) {
-  const Container = horizontal ? Group : Stack
+/**
+ * Persistent tab rail on the right edge. It stays visible when the panel is
+ * collapsed — clicking the active tab hides the panel, clicking any other
+ * shows it. No separate collapse/expand buttons.
+ */
+export function DockRail({
+  indicators = {},
+}: {
+  indicators?: Partial<Record<DockTab, number | 'live'>>
+}) {
   return (
-    <Container
+    <Stack
       gap={0}
-      wrap="nowrap"
       style={{
-        flexShrink: 0,
-        borderRight: horizontal ? undefined : '1px solid var(--mantine-color-default-border)',
-        borderBottom: horizontal ? '1px solid var(--mantine-color-default-border)' : undefined,
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: RAIL_WIDTH,
+        zIndex: 6,
+        background: 'var(--mantine-color-body)',
+        borderLeft: '1px solid var(--mantine-color-default-border)',
       }}
     >
       {RAIL_TABS.map((t) => (
-        <RailButton key={t.key} tab={t} indicator={indicators[t.key]} horizontal={horizontal} />
+        <RailButton key={t.key} tab={t} indicator={indicators[t.key]} />
       ))}
-    </Container>
+    </Stack>
   )
 }

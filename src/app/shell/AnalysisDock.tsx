@@ -1,12 +1,10 @@
-import { ActionIcon, Group, ScrollArea, Stack, Text, Tooltip } from '@mantine/core'
-import { useMediaQuery } from '@mantine/hooks'
-import { IconChevronRight } from '@tabler/icons-react'
+import { Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { listFeatures } from '@/core/settings/registry'
 import { useSettings } from '@/core/settings/store'
 import { useProbe } from '@/core/probe/store'
 import { fmtLatLon } from '@/core/units/format'
 import { applyOrder, useDock, type DockTab } from '@/app/shell/dockStore'
-import { DockRail, RAIL_TABS } from '@/app/shell/DockRail'
+import { RAIL_TABS } from '@/app/shell/DockRail'
 import { DockSection } from '@/app/shell/DockSection'
 import { SettingsPanel } from '@/app/settings/SettingsPanel'
 import type { PanelContribution, PanelGroup } from '@/core/settings/types'
@@ -29,24 +27,11 @@ function ContextHeader({ tab }: { tab: DockTab }) {
           ? (point.name ?? fmtLatLon(point.lat, point.lon))
           : label}
       </Text>
-      <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
-        {tab === 'place' && point?.name && (
-          <Text size="xs" c="dimmed" ff="monospace">
-            {fmtLatLon(point.lat, point.lon)}
-          </Text>
-        )}
-        <Tooltip label="Collapse panel" position="left">
-          <ActionIcon
-            size="sm"
-            variant="subtle"
-            color="gray"
-            aria-label="Collapse analysis panel"
-            onClick={() => useDock.getState().toggleOpen()}
-          >
-            <IconChevronRight size={15} stroke={1.7} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
+      {tab === 'place' && point?.name && (
+        <Text size="xs" c="dimmed" ff="monospace" style={{ flexShrink: 0 }}>
+          {fmtLatLon(point.lat, point.lon)}
+        </Text>
+      )}
     </Group>
   )
 }
@@ -99,7 +84,6 @@ export function AnalysisDock() {
   // Subscribe so enable/disable updates the panel set live.
   const featureStates = useSettings((s) => s.features)
   const tab = useDock((s) => s.tab)
-  const isMobile = useMediaQuery('(max-width: 48em)') ?? false
 
   const panelsFor = (group: PanelGroup): PanelContribution[] =>
     listFeatures()
@@ -112,21 +96,11 @@ export function AnalysisDock() {
     tab === 'settings' ? <SettingsPanel /> : <SectionStack tab={tab} panels={panelsFor(tab)} />
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
-        height: '100%',
-        minHeight: 0,
-      }}
-    >
-      <DockRail horizontal={isMobile} />
-      <Stack gap={0} style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
-        <ContextHeader tab={tab} />
-        <ScrollArea flex={1} style={{ minHeight: 0 }} px={tab === 'settings' ? 'xs' : 0}>
-          {body}
-        </ScrollArea>
-      </Stack>
-    </div>
+    <Stack gap={0} h="100%" style={{ minHeight: 0 }}>
+      <ContextHeader tab={tab} />
+      <ScrollArea flex={1} style={{ minHeight: 0 }} px={tab === 'settings' ? 'xs' : 0}>
+        {body}
+      </ScrollArea>
+    </Stack>
   )
 }

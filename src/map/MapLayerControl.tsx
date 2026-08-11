@@ -89,7 +89,8 @@ export function MapLayerControl() {
   return (
     <Stack
       gap={6}
-      style={{ position: 'absolute', bottom: 34, right: 8, zIndex: 5 }}
+      // Offset clear of the dock rail pinned to the right edge.
+      style={{ position: 'absolute', bottom: 34, right: 52, zIndex: 5 }}
       align="center"
     >
       {GROUP_ORDER.map((group) => {

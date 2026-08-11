@@ -26,7 +26,7 @@ export function DockSection({
   reorderable = true,
   children,
 }: DockSectionProps) {
-  const expanded = useDock((s) => s.expanded[id] ?? false)
+  const expanded = useDock((s) => s.expanded[id] ?? true)
   const toggleSection = useDock((s) => s.toggleSection)
   const moveSection = useDock((s) => s.moveSection)
   const resetOrder = useDock((s) => s.resetOrder)

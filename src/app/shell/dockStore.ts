@@ -10,11 +10,13 @@ interface DockState {
   open: boolean
   /** Panel ids in user-chosen display order, per tab. */
   order: Partial<Record<DockTab, string[]>>
-  /** Section id → collapsed. Absent means collapsed (the default). */
+  /** Section id → expanded. Absent means expanded (the default). */
   expanded: Record<string, boolean>
   setTab: (tab: DockTab) => void
   toggleOpen: () => void
   show: (tab: DockTab) => void
+  /** Rail click: same tab collapses the panel, a different tab switches. */
+  toggleTab: (tab: DockTab) => void
   toggleSection: (id: string) => void
   moveSection: (tab: DockTab, id: string, delta: number) => void
   reorder: (tab: DockTab, ids: string[]) => void
@@ -36,8 +38,10 @@ export const useDock = create<DockState>()(
       setTab: (tab) => set({ tab }),
       toggleOpen: () => set((s) => ({ open: !s.open })),
       show: (tab) => set({ tab, open: true }),
+      toggleTab: (tab) =>
+        set((s) => (s.open && s.tab === tab ? { open: false } : { tab, open: true })),
       toggleSection: (id) =>
-        set((s) => ({ expanded: { ...s.expanded, [id]: !(s.expanded[id] ?? false) } })),
+        set((s) => ({ expanded: { ...s.expanded, [id]: !(s.expanded[id] ?? true) } })),
       reorder: (tab, ids) => set((s) => ({ order: { ...s.order, [tab]: ids } })),
       resetOrder: (tab) =>
         set((s) => {
