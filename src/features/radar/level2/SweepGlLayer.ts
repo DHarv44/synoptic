@@ -29,7 +29,13 @@ export class SweepGlLayer implements CustomLayerInterface {
   private map: MLMap | null = null
 
   setSite(lat: number, lon: number): void {
+    // A retained sweep belongs to the site it was collected from. Keeping it
+    // while the origin moves redraws the old echo around the new radar —
+    // convincing-looking precipitation in the wrong place, until the first
+    // radials of the new volume happen to arrive. Better to show nothing.
+    if (this.site && (this.site.lat !== lat || this.site.lon !== lon)) this.meta = null
     this.site = { lat, lon }
+    this.map?.triggerRepaint()
   }
 
   setSweep(msg: SweepMessage): void {
