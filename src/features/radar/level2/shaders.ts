@@ -22,6 +22,8 @@ uniform float u_firstGateM;
 uniform float u_gateSpanM; // gates * spacing
 uniform float u_scale;
 uniform float u_offsetV;
+uniform float u_lutMin;
+uniform float u_lutMax;
 uniform float u_opacity;
 in vec2 v_offset;
 out vec4 o_color;
@@ -35,8 +37,8 @@ void main() {
   float v = fract(az / 360.0);
   float raw = texture(u_sweep, vec2(u, v)).r * 255.0;
   if (raw < 2.0) discard;
-  float dbz = (raw - u_offsetV) / u_scale;
-  float idx = clamp((dbz + 32.0) * 2.0, 0.0, 255.0);
+  float value = (raw - u_offsetV) / u_scale;
+  float idx = clamp((value - u_lutMin) / (u_lutMax - u_lutMin) * 255.0, 0.0, 255.0);
   vec4 c = texture(u_lut, vec2((idx + 0.5) / 256.0, 0.5));
   if (c.a < 0.01) discard;
   o_color = vec4(c.rgb, c.a * u_opacity);

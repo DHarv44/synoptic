@@ -153,7 +153,11 @@ dependency order. Check boxes as slices land.
   returns via maplibre's projection shader API later.
 - Known v1 gaps: brief blank at volume rollover; radial gaps while a
   volume is mid-stream; site is auto-only (no manual pick yet).
-- [ ] R4 — Tilt control + gate probe (all moments + beam height).
+- [x] R4 — Tilt control + gate probe: worker retains all sweeps (REF/VEL
+  every tilt; ZDR/RHO low tilts), floating site control (tilt ▲▼ with
+  split-cut-aware filtering, REF|VEL moment switch, velocity colormap),
+  click-probe readout with az/range, beam height (4/3-earth), and all
+  moments at the gate.
 - [ ] R5 — Velocity + SRV (dealiasing with raw toggle).
 - [ ] R6 — Level 3 products: meso/TVS/tracks/hail icons + storm cell table.
 - [ ] R7 — All-Tilts, cross-section, cell trend charts.

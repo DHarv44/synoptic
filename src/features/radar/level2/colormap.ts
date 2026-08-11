@@ -18,6 +18,12 @@ const REF_STOPS: Array<[number, string]> = [
   [75, '#fdfdfd'],
 ]
 
+/** Value range each LUT spans (shader maps value→index linearly). */
+export const LUT_RANGES: Record<string, [number, number]> = {
+  REF: [-32, 95.5],
+  VEL: [-64, 64],
+}
+
 /**
  * 256×1 RGBA LUT indexed by dBZ mapped over [-32, 95): lut[i] covers
  * dBZ = i/2 − 32. Below 5 dBZ is transparent.
@@ -35,6 +41,27 @@ export function reflectivityLut(): Uint8Array {
       lut[i * 4 + 1] = parseInt(color.slice(3, 5), 16)
       lut[i * 4 + 2] = parseInt(color.slice(5, 7), 16)
       lut[i * 4 + 3] = 255
+    }
+  }
+  return lut
+}
+
+/**
+ * Velocity LUT over ±64 m/s: green = inbound (toward radar, negative),
+ * red = outbound; brightness scales with speed, gray near zero.
+ */
+export function velocityLut(): Uint8Array {
+  const lut = new Uint8Array(256 * 4)
+  for (let i = 0; i < 256; i++) {
+    const v = (i / 255) * 128 - 64 // m/s
+    const mag = Math.min(Math.abs(v) / 50, 1)
+    const bright = Math.round(70 + 185 * mag)
+    if (Math.abs(v) < 1) {
+      lut.set([110, 110, 110, 255], i * 4)
+    } else if (v < 0) {
+      lut.set([Math.round(bright * 0.15), bright, Math.round(bright * 0.25), 255], i * 4)
+    } else {
+      lut.set([bright, Math.round(bright * 0.15), Math.round(bright * 0.15), 255], i * 4)
     }
   }
   return lut

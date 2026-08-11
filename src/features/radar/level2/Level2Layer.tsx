@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import type { MapMouseEvent } from 'maplibre-gl'
 import { useMapContext } from '@/map/MapView'
 import { useMapLayer, firstSymbolLayerId } from '@/map/useMapLayer'
 import { useMapView } from '@/map/viewStore'
@@ -9,20 +10,36 @@ import type { SourceRef } from '@/core/data/types'
 import { nearestSite, type RadarSite } from '@/features/radar/level2/sites'
 import { fetchChunk, findCurrentVolume, listVolumeChunks } from '@/features/radar/level2/volume'
 import { SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
-import type { SweepMessage } from '@/features/radar/level2/worker'
+import { Level2Control, type ProbeReadout } from '@/features/radar/level2/Level2Control'
+import type {
+  ProbeResultMessage,
+  SweepMessage,
+  TiltInfo,
+  TiltsMessage,
+} from '@/features/radar/level2/worker'
 
 export const L2_SOURCE: SourceRef = { id: 'nexrad-l2', label: 'NEXRAD Level 2' }
 
 const POLL_MS = 15_000
 const MIN_ZOOM = 6
+const RANGE_M = 460_000
+const DEG = Math.PI / 180
+const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
 
-/** Single-site Level 2 sweep: nearest site to the view, streaming chunks. */
+type WorkerOut = SweepMessage | TiltsMessage | ProbeResultMessage
+
+/** Single-site Level 2: streaming sweeps, tilt/moment control, gate probe. */
 export function Level2Layer() {
   const { map } = useMapContext()
   const bounds = useMapView((s) => s.bounds)
   const opacity = useFeatureOption<number>('level2', 'opacity')
   const [site, setSite] = useState<RadarSite | null>(null)
+  const [tilts, setTilts] = useState<TiltInfo[]>([])
+  const [sel, setSel] = useState({ elevNum: 1, moment: 'REF' })
+  const [probe, setProbe] = useState<ProbeReadout | null>(null)
   const layerRef = useRef<SweepGlLayer | null>(null)
+  const workerRef = useRef<Worker | null>(null)
+  const lastClickRef = useRef<{ azDeg: number; rangeM: number } | null>(null)
 
   // Nearest site to view center while zoomed in.
   useEffect(() => {
@@ -36,7 +53,6 @@ export function Level2Layer() {
     setSite((prev) => (prev?.id === s?.id ? prev : s))
   }, [bounds, map])
 
-  // Custom GL layer lifecycle.
   useMapLayer(
     (m) => {
       const layer = new SweepGlLayer()
@@ -55,15 +71,40 @@ export function Level2Layer() {
     map.triggerRepaint()
   }, [opacity, map])
 
-  // Chunk streaming loop per site.
+  // Streaming loop + worker per site.
   useEffect(() => {
     if (!site || fixtureActive()) return
     const activeSite = site
+    setTilts([])
+    setProbe(null)
     layerRef.current?.setSite(activeSite.lat, activeSite.lon)
     const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
-    worker.onmessage = (ev: MessageEvent<SweepMessage>) => {
-      layerRef.current?.setSweep(ev.data)
+    workerRef.current = worker
+    worker.onmessage = (ev: MessageEvent<WorkerOut>) => {
+      const msg = ev.data
+      if (msg.type === 'sweep') layerRef.current?.setSweep(msg)
+      else if (msg.type === 'tilts') setTilts(msg.tilts)
+      else if (msg.type === 'probeResult') {
+        const click = lastClickRef.current
+        if (!click) return
+        const r = click.rangeM
+        const beamM =
+          r * Math.sin(msg.elevationDeg * DEG) + (r * r) / (2 * EFFECTIVE_EARTH_R)
+        setProbe({ ...click, beamKft: (beamM * 3.28084) / 1000, values: msg.values })
+      }
     }
+
+    const onClick = (e: MapMouseEvent): void => {
+      const dLat = (e.lngLat.lat - activeSite.lat) * DEG * 6_371_000
+      const dLon =
+        (e.lngLat.lng - activeSite.lon) * DEG * 6_371_000 * Math.cos(activeSite.lat * DEG)
+      const rangeM = Math.hypot(dLat, dLon)
+      if (rangeM > RANGE_M) return
+      const azDeg = ((Math.atan2(dLon, dLat) / DEG) + 360) % 360
+      lastClickRef.current = { azDeg, rangeM }
+      worker.postMessage({ type: 'probe', azDeg, rangeM })
+    }
+    map.on('click', onClick)
 
     let stopped = false
     let timer: ReturnType<typeof setTimeout> | undefined
@@ -84,13 +125,13 @@ export function Level2Layer() {
           if (stopped) return
           if (c.seq <= lastSeq) continue
           const buf = await fetchChunk(c)
-          worker.postMessage({ type: 'chunk', buf, isStart: c.kind === 'S', moment: 'REF' }, [buf])
+          worker.postMessage({ type: 'chunk', buf, isStart: c.kind === 'S' }, [buf])
           lastSeq = c.seq
-          if (c.kind === 'E') volume = 0 // volume complete → rediscover next cycle
+          if (c.kind === 'E') volume = 0
         }
         reportOk(L2_SOURCE)
       } catch (e) {
-        if (String(e).includes('disabled') === false) {
+        if (!String(e).includes('disabled')) {
           reportError(L2_SOURCE, e instanceof Error ? e.message : String(e))
         }
       }
@@ -101,9 +142,27 @@ export function Level2Layer() {
     return () => {
       stopped = true
       if (timer !== undefined) clearTimeout(timer)
+      map.off('click', onClick)
       worker.terminate()
+      workerRef.current = null
     }
-  }, [site])
+  }, [site, map])
 
-  return null
+  const select = (elevNum: number, moment: string): void => {
+    setSel({ elevNum, moment })
+    workerRef.current?.postMessage({ type: 'select', elevNum, moment })
+  }
+
+  if (!site) return null
+  return (
+    <Level2Control
+      siteId={site.id}
+      siteName={site.name}
+      tilts={tilts}
+      elevNum={sel.elevNum}
+      moment={sel.moment}
+      onSelect={select}
+      probe={probe}
+    />
+  )
 }

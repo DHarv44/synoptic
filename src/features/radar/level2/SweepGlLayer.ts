@@ -1,6 +1,6 @@
 import type { CustomLayerInterface, Map as MLMap } from 'maplibre-gl'
 import { SWEEP_FRAG, SWEEP_VERT } from '@/features/radar/level2/shaders'
-import { reflectivityLut } from '@/features/radar/level2/colormap'
+import { LUT_RANGES, reflectivityLut, velocityLut } from '@/features/radar/level2/colormap'
 import type { SweepMessage } from '@/features/radar/level2/worker'
 
 const EARTH_CIRC = 40075016.686
@@ -41,11 +41,19 @@ export class SweepGlLayer implements CustomLayerInterface {
     this.meta = msg
     const gl = this.gl
     if (!gl) return
+    if (msg.moment !== this.lutMoment) {
+      this.lutMoment = msg.moment
+      gl.bindTexture(gl.TEXTURE_2D, this.lutTex)
+      const lut = msg.moment === 'VEL' ? velocityLut() : reflectivityLut()
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, lut)
+    }
     gl.bindTexture(gl.TEXTURE_2D, this.sweepTex)
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, msg.gates, msg.azBins, 0, gl.RED, gl.UNSIGNED_BYTE, msg.tex)
     this.map?.triggerRepaint()
   }
+
+  private lutMoment = 'REF'
 
   onAdd(map: MLMap, gl: WebGLRenderingContext | WebGL2RenderingContext): void {
     if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL2 required')
@@ -120,6 +128,9 @@ export class SweepGlLayer implements CustomLayerInterface {
     gl.uniform1f(u('u_gateSpanM'), this.meta.gates * this.meta.gateSpacingM)
     gl.uniform1f(u('u_scale'), this.meta.scale)
     gl.uniform1f(u('u_offsetV'), this.meta.offset)
+    const [lutMin, lutMax] = LUT_RANGES[this.meta.moment] ?? LUT_RANGES.REF
+    gl.uniform1f(u('u_lutMin'), lutMin)
+    gl.uniform1f(u('u_lutMax'), lutMax)
     gl.uniform1f(u('u_opacity'), this.opacity)
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, this.sweepTex)
