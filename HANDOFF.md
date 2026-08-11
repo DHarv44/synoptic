@@ -76,27 +76,36 @@ off and on moves it to the top (this is how radar came to cover warnings).
   pressure / precipitation units; a Help dock tab; collapsed-section summary
   lines; a profiled performance round; displayable dual-pol moments; scan
   time + VCP on the radar panel; opt-in Level 2 smoothing; and a run of
-  radar-correctness fixes listed under "Radar composite rules" below.
+  radar-correctness fixes listed under "Radar composites" below.
 - **Next up is the end-game queue below** (wind bug → UI overhaul → Chase
   HUD). Optional radar polish if asked: raymarched isosurface instead of
   tilt surfaces, `.pal` color tables, dual-pol presets
   (TDS/hail auto-flagging — PLAN.md §3.3.3), volume-rollover blanking.
 
-## Radar composite rules (learned the hard way — don't undo these)
+## Radar composites: what's true, and what I got wrong
 
-The user reported for a long time that "the radar changes when I zoom" and I
-repeatedly explained it away instead of measuring. Four separate real causes
-were found. Keep all of these true:
+The user reported for a long time that "the radar changes when I zoom". I
+chased it across four commits (`1125cf5`, `60528ef`, `e53cd71`, `84d5cbe`)
+and **made it worse**, then reverted the lot in `2a0d5e5`. Read this before
+touching [RadarLayer.tsx](src/features/radar/RadarLayer.tsx) again.
 
-- **Exactly one composite draws at a time.** The global composite and the
-  CONUS mosaic are different products at different valid times, and the
-  mosaic's "no echo" is *transparent* — so stacking them blends rather than
-  overlays, and the blend rearranges whenever either layer's coverage
-  changes. `mosaicCovers` picks one: mosaic while it fully covers the
-  viewport, global composite otherwise.
-- **The hide test uses `MOSAIC_CORE`, not `CONUS`.** `CONUS` is deliberately
-  generous so tile requests aren't clipped; using it to hide the global layer
-  blanked the map over Cuba, the Gulf and central Canada.
+**The mistake.** To stop the two composites blending, I hid the global one
+whenever the viewport fitted inside the mosaic's coverage box, and added a
+`raster-resampling` step expression to soften overzoomed tiles. Between them
+that put *three* appearance transitions in the way of the very complaint I
+was chasing: a whole-product swap keyed on viewport bounds (so zoom **and**
+pan flipped it, with different colour tables either side), plus nearest→
+linear flips at z7 and z12. `MOSAIC_CORE` only existed to patch a bug the
+swap itself introduced — hiding the global layer over Cuba, the Gulf and
+central Canada left the map bare. None of it was measured first.
+
+**The lesson**: don't add zoom-keyed rendering behaviour to fix a
+zoom-dependent complaint. Verified after the revert — z4 shows continuous
+coverage across North America, and z4/z6/z8 at the same centre resolve the
+same storm structure in the same place.
+
+Real causes found in that period, all still fixed and worth keeping:
+
 - **Level 2 chunk listings must drop earlier ring passes.** Volume prefixes
   wrap 0–999 and old objects are never deleted, so a prefix holds both the
   current pass and one from days ago. The stale pass owns the low sequence
@@ -110,13 +119,27 @@ are georeferenced consistently across zooms (870 points, z9 vs z10, 99.1%
 agreement at zero offset; every trial shift made it worse), and the Julian
 date decode matches S3 keys that embed their own timestamp to within seconds.
 
-**Still open on this thread**: the app requests the *live* IEM product, whose
-tiles are cached 5 minutes independently per zoom, so different zoom levels
-can resolve to different mosaic generations — the fix is to request an
-explicitly time-stamped `-mXXm` product so every tile shares a valid time
-(costs ~5 min of latency; the user has not chosen yet). And crossing the
-z5/z6 handoff still changes appearance because the two products use
-different colour tables.
+**Known and accepted**: the two composites are stacked, and the mosaic's "no
+echo" is transparent, so inside CONUS the picture is mosaic-over-global
+rather than mosaic alone. Living with a blend beats a hard swap.
+
+**Still open — per-zoom generation skew.** The app requests the live product
+`nexrad-n0q-900913`, `Cache-Control: max-age=300`. Two fetches a minute apart
+returned different bytes, so content turns over faster than the cache window
+and zoom levels fetched at different moments can hold different generations
+(~1–2 min of storm motion). Measured, so don't re-derive:
+
+- `-mXXm` products do **not** fix this — same `max-age=300`, and the offset is
+  relative to now, so they roll exactly like the live one. My earlier claim
+  that they pin a valid time was wrong.
+- `wms/nexrad/n0q.cgi` ignores `TIME` (identical bytes for any timestamp).
+- `wms/nexrad/n0q-t.cgi` with `LAYERS=nexrad-n0q-wmst` **does** honour `TIME`,
+  including recent times, and its output at 23:20Z was byte-identical to the
+  live tile fetched at 23:21 — so it is the same imagery, addressable by
+  absolute time. Cost: ~0.5–0.75 s/tile vs ~0.3 s for the cached tile.py, and
+  it is a WMS (`{bbox-epsg-3857}`), not a tilecache.
+
+Switching is the real fix but doubles tile latency; the user has not chosen.
 
 ## The end-game queue (user-agreed order: features first, then these)
 
