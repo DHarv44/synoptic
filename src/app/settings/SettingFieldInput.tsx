@@ -1,4 +1,4 @@
-import { NumberInput, Select, Switch } from '@mantine/core'
+import { Group, NumberInput, Select, Slider, Switch, Text } from '@mantine/core'
 import type { SettingField, SettingValue } from '@/core/settings/types'
 
 interface SettingFieldInputProps {
@@ -7,39 +7,69 @@ interface SettingFieldInputProps {
   onChange: (value: SettingValue) => void
 }
 
-/** Renders one manifest-declared setting as the right Mantine input. */
+/** Wide numeric ranges read better as sliders than as spinners. */
+function isContinuous(field: Extract<SettingField, { kind: 'number' }>): boolean {
+  return (field.max - field.min) / (field.step ?? 1) > 8
+}
+
+/** Renders one manifest-declared setting as the right Mantine control. */
 export function SettingFieldInput({ field, value, onChange }: SettingFieldInputProps) {
   switch (field.kind) {
     case 'boolean':
       return (
-        <Switch
-          label={field.label}
-          size="xs"
-          checked={value === true}
-          onChange={(e) => onChange(e.currentTarget.checked)}
-        />
+        <Group justify="flex-end">
+          <Switch
+            size="xs"
+            checked={value === true}
+            onChange={(e) => onChange(e.currentTarget.checked)}
+            aria-label={field.label}
+          />
+        </Group>
       )
-    case 'number':
+    case 'number': {
+      const current = typeof value === 'number' ? value : field.defaultValue
+      if (!isContinuous(field)) {
+        return (
+          <NumberInput
+            size="xs"
+            min={field.min}
+            max={field.max}
+            step={field.step}
+            value={current}
+            onChange={(v) => onChange(typeof v === 'number' ? v : field.defaultValue)}
+            aria-label={field.label}
+          />
+        )
+      }
       return (
-        <NumberInput
-          label={field.label}
-          size="xs"
-          min={field.min}
-          max={field.max}
-          step={field.step}
-          value={typeof value === 'number' ? value : field.defaultValue}
-          onChange={(v) => onChange(typeof v === 'number' ? v : field.defaultValue)}
-        />
+        <Group gap="xs" wrap="nowrap">
+          <Slider
+            flex={1}
+            size="xs"
+            min={field.min}
+            max={field.max}
+            step={field.step}
+            value={current}
+            onChange={(v) => onChange(v)}
+            label={null}
+            aria-label={field.label}
+          />
+          <Text size="xs" ff="monospace" c="dimmed" w={26} ta="right">
+            {current}
+          </Text>
+        </Group>
       )
+    }
     case 'select':
       return (
         <Select
-          label={field.label}
           size="xs"
           data={[...field.options]}
           value={typeof value === 'string' ? value : field.defaultValue}
           onChange={(v) => onChange(v ?? field.defaultValue)}
           allowDeselect={false}
+          aria-label={field.label}
+          comboboxProps={{ withinPortal: true }}
         />
       )
   }

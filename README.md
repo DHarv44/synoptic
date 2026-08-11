@@ -32,6 +32,7 @@ probes that point.
 | Cross-section | Shift+click A→B → RHI slice at true beam heights | ✅ |
 | 3D echo | Tilt surfaces in 3D, threshold + orbit | ✅ |
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
+| Level 2 quality pass | Clutter/noise suppression, smoothing, volume continuity | ⚠️ needs work |
 | Isosurface raymarch | Solid volume instead of tilt surfaces | 🔭 |
 | `.pal` color tables | Import GRLevelX community palettes | 🔭 |
 
@@ -189,7 +190,28 @@ probes that point.
      the radar trend, and severe-parameter thresholds crossing. Needs a
      notification-permission flow, a background poll that survives a
      backgrounded tab, and strict de-duplication so a single warning fires once.
-4. **Performance pass** — the app has been built feature-first and never
+4. **Level 2 radar quality pass** — the single-site layer works but reads
+   noisy and speckled next to the composite mosaics. Suspects, in order:
+   - **No clutter suppression.** Raw super-res base data includes ground
+     clutter, biological returns (birds/insects — the big low-dBZ bloom
+     around each site at night), anomalous propagation and interference
+     spikes. The dual-pol fields we already decode are the standard fix:
+     mask gates with low correlation coefficient (non-meteorological), and
+     optionally use the clutter filter power removed (CFP) field.
+   - **A low display floor.** Everything ≥ ~5 dBZ is drawn; a configurable
+     floor (and a smarter transparency ramp near it) would remove most of
+     the speckle without touching real echo.
+   - **Nearest-neighbour sampling** in the polar shader, producing hard
+     gate edges at high zoom. Add optional bilinear sampling across
+     azimuth/range as an opt-in "smoothing" setting, matching the presentation
+     smoothing paid apps offer — off by default, per the honesty rule.
+   - **Volume continuity** — partial sweeps show as wedges while a volume
+     streams in, and there's a brief blank at volume rollover. Retain the
+     previous complete sweep until the new one covers each azimuth.
+   - Also worth revisiting: dual-bin azimuth writes were a stopgap for
+     1°-spaced cuts and may be widening returns; range-folded and
+     below-threshold gates should be visually distinct from "no echo".
+5. **Performance pass** — the app has been built feature-first and never
    profiled. Known suspects, roughly in order of expected payoff:
    - **The live clock re-renders everything.** The timeline ticks 4×/second
      and `simTime` drives the meteogram cursor, radar frame selection and
@@ -210,12 +232,12 @@ probes that point.
    - Then measure properly: frame timings with radar streaming, memory over
      a long session, bundle analysis, and a low-end/mobile device pass
      (which also de-risks the Chase HUD).
-5. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
+6. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
    time-to-arrival from storm motion, SPC outlooks and mesoscale discussions,
    an intercept/escape route solver over OSM roads, placefile import, and a
    replay trainer over archived events.
 
-6. **Historical mode** *(needs a deeper design pass)* — the timeline currently
+7. **Historical mode** *(needs a deeper design pass)* — the timeline currently
    covers −48 h to +16 d, but the underlying archives go much further back and
    the app is already built to replay them: Open-Meteo's reanalysis reaches
    **1940**, NEXRAD Level 2 volumes are public back to **1991**, and both flow

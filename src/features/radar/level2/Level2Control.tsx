@@ -67,7 +67,8 @@ export function Level2Control({
       withBorder
       p={6}
       radius="sm"
-      style={{ position: 'absolute', bottom: 34, left: 8, zIndex: 5, minWidth: 190 }}
+      // Sits above the floating playback control at bottom-left.
+      style={{ position: 'absolute', bottom: 56, left: 8, zIndex: 5, minWidth: 190 }}
     >
       <Stack gap={4}>
         <Group justify="space-between" wrap="nowrap">

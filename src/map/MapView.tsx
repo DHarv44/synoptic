@@ -1,11 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import {
-  AttributionControl,
-  Map as MLMap,
-  Marker,
-  setWorkerUrl,
-  type MapMouseEvent,
-} from 'maplibre-gl'
+import { Map as MLMap, Marker, setWorkerUrl, type MapMouseEvent } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-csp-worker?url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -61,11 +55,10 @@ export function MapView() {
       center: [-95, 38],
       zoom: 3.4,
       hash: false,
-      // Default control sits bottom-right where the layer strip lives; add
-      // our own bottom-left so it expands rightward into open space.
+      // Attribution is rendered in the app footer (AttributionBar) so the
+      // map surface stays clear for controls.
       attributionControl: false,
     })
-    map.addControl(new AttributionControl({ compact: true }), 'bottom-left')
     map.on('style.load', () => {
       // Mercator (not globe): custom WebGL layers (Level 2 sweeps, wind
       // particles) use plain mercator matrices, which globe projection

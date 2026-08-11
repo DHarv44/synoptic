@@ -3,6 +3,7 @@
  * Add new features here and nowhere else.
  */
 import '@/features/units'
+import '@/features/interface'
 import '@/features/search'
 import '@/features/graticule'
 import '@/features/radar'

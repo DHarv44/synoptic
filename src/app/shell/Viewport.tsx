@@ -1,6 +1,7 @@
 import { MapView } from '@/map/MapView'
 import { MapLayerControl } from '@/map/MapLayerControl'
 import { DockRail } from '@/app/shell/DockRail'
+import { PlaybackControl } from '@/app/shell/PlaybackControl'
 
 /**
  * Center viewport: the map, its floating controls, and the persistent dock
@@ -11,6 +12,7 @@ export function Viewport() {
   return (
     <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
       <MapView />
+      <PlaybackControl />
       <MapLayerControl />
       <DockRail />
     </div>

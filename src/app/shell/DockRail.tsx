@@ -8,6 +8,7 @@ import {
 } from '@tabler/icons-react'
 import type { ComponentType } from 'react'
 import { useDock, type DockTab } from '@/app/shell/dockStore'
+import { mapChromeStyle } from '@/ui/mapChrome'
 
 export interface RailTab {
   key: DockTab
@@ -97,8 +98,9 @@ export function DockRail({
         bottom: 0,
         width: RAIL_WIDTH,
         zIndex: 6,
-        background: 'var(--mantine-color-body)',
+        ...mapChromeStyle,
         borderLeft: '1px solid var(--mantine-color-default-border)',
+        boxShadow: 'none',
       }}
     >
       {RAIL_TABS.map((t) => (

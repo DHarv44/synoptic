@@ -13,6 +13,9 @@ interface SettingsState {
   features: Record<string, FeatureState>
   setEnabled: (id: string, enabled: boolean) => void
   setOption: (id: string, key: string, value: SettingValue) => void
+  /** Drop a feature's overrides so it falls back to manifest defaults. */
+  resetFeature: (id: string) => void
+  resetAll: () => void
 }
 
 function defaultsFor(id: string): FeatureState {
@@ -46,6 +49,13 @@ export const useSettings = create<SettingsState>()(
             },
           }
         }),
+      resetFeature: (id) =>
+        set((s) => {
+          const next = { ...s.features }
+          delete next[id]
+          return { features: next }
+        }),
+      resetAll: () => set({ features: {} }),
     }),
     { name: 'synoptic.settings', version: 1 },
   ),
