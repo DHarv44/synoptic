@@ -170,7 +170,7 @@ dependency order. Check boxes as slices land.
   factory extracted (alerts refactored onto it).
 - [x] R7 — **All-Tilts** (probe click → per-tilt REF/VEL column with beam
   heights; worker `probeColumn`; sweep storage split to sweeps.ts),
-  **vertical cross-section** (shift+click A then B → worker `section`
+  **vertical cross-section** (Draw button, then click A and B → worker `section`
   samples REF along the line per tilt → RHI plot at true beam heights +
   dashed map line), and **cell trends** (client-side snapshot history —
   the IEM feed has no history endpoint — with dBZ/VIL/top sparklines on
@@ -182,6 +182,14 @@ dependency order. Check boxes as slices land.
   between tilts are unsampled air, not missing echo. Bridge module lets the
   panel talk to the layer's worker. Raymarched isosurface remains a future
   upgrade (PLAN.md §3.3.3).
+
+- [x] R9 — Radar controls moved off the map into the Radar panel (the
+  unlabelled floating bench read as a mystery box), with ↑/↓ tilt stepping,
+  a searchable 159-site picker, centre-on-site, and a site lock so panning
+  can't swap sites and discard the probe/section. Rail indicators wired
+  through the feature manifest (`dockIndicator`); Radar shows a slow green
+  pulse while attached. 3D echo now re-requests its volume as new elevations
+  land — it previously asked once at mount and stayed empty until remounted.
 
 ## Phase 7 (coarse; slice when reached)
 

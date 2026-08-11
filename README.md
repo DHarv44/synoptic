@@ -118,7 +118,12 @@ probes that point. Works on desktop and mobile, in dark or light.
    loading indicator reports both API fetches and tile loads; times follow a
    local/UTC preference (local by default). **Mobile** drops the rail for a
    bottom tab bar with three panel heights, and the layers button expands
-   into the same vertical icon strip.
+   into the same vertical icon strip. The **radar bench left the map**: its
+   controls now lead the Radar panel where each can be labelled, with ↑/↓
+   stepping tilts so walking a storm needs no panel, a searchable picker for
+   all 159 WSR-88D sites, a button to centre the map on the chosen radar, and
+   a lock that stops the map from swapping sites out from under work in
+   progress.
 
    **Still to do.**
    - **Section summary lines** — the plumbing shipped (`summary` on the panel
@@ -127,7 +132,10 @@ probes that point. Works on desktop and mobile, in dark or light.
      header should carry a plain-language verdict ("Severe risk — moderately
      unstable, strong shear"). This is the highest-leverage item left for the
      hobbyist audience.
-   - **Rail indicators** — warning count badge on Nearby, live dot on Radar.
+   - **Rail indicators** — the mechanism shipped (features declare
+     `dockIndicator`; the rail collects them by panel group, so the shell
+     never reads a feature store) and Radar uses it for a slow green pulse
+     while a site is attached. Nearby still needs its warning-count badge.
    - **Typographic pass** — values should dominate their labels (tabular
      figures, larger, higher contrast); labels recede. Plus a density setting.
    - **Timeline as an information display** — radar frame ticks, warning
@@ -174,10 +182,9 @@ probes that point. Works on desktop and mobile, in dark or light.
      way to break their own display.
 
    **Help & About** — nothing currently explains the app to a newcomer, and
-   several controls are undiscoverable (shift+click for a cross-section is
-   the worst offender). Add:
+   several controls are undiscoverable. Add:
    - A **help panel or drawer** covering the interaction basics (click to
-     probe, shift+click for a slice, tilt/moment controls, what the timeline
+     probe, drawing a cross-section, tilt/moment controls, what the timeline
      scrubs), a keyboard-shortcut list, and short plain-language notes on
      reading the pro tools — what CAPE and SRH mean, how to read a hodograph,
      why velocity folds. The tooltips already do some of this; this is the
