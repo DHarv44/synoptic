@@ -34,7 +34,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
 | Radar quality + resolution | Clutter suppression, seamless zoom handoff, multi-site blending | ⚠️ needs work |
 | Dual-pol products | Spectrum width, ZDR, correlation coefficient and differential phase, each with its own colour ramp | ✅ |
-| Scan time + VCP | Volume age and coverage pattern shown on the panel | 🔭 |
+| Scan time + VCP | Sweep collection time, age, and coverage pattern on the panel | ✅ |
 | Isosurface raymarch | Solid volume instead of tilt surfaces | 🔭 |
 | `.pal` color tables | Import GRLevelX community palettes | 🔭 |
 
@@ -297,11 +297,11 @@ probes that point. Works on desktop and mobile, in dark or light.
      tilts are where these fields are actually read. The product picker
      offers only what the current volume carries. This unblocks the clutter
      masking above and the TDS/hail presets in PLAN.md §3.3.3.
-   - **Scan time and VCP on the panel.** Nothing says how old the current
-     volume is or which coverage pattern produced it, so a stalled feed and
-     a fresh one look identical. Every real radar app shows both — a
-     4-minute severe-weather scan and a 10-minute clear-air scan are read
-     differently. The decoder knows both; the panel just never shows them.
+   - **Scan time and VCP on the panel** ✅ — the displayed sweep's collection
+     time, its age in minutes (orange past 15, stale under any scan
+     strategy), and the volume coverage pattern. Age is computed against the
+     client clock, which can run slow enough to put a fresh sweep in the
+     future, so negative ages clamp to "just now" rather than printing.
 5. **Performance pass** — a first profiled round has landed. Done, with
    measurements:
    - **Initial bundle** 2,679 kB → 1,751 kB (762 → 511 kB gzip). three.js,

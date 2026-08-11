@@ -28,6 +28,10 @@ interface RadarState {
   raw: boolean
   srv: boolean
   storm: UV | null
+  /** Collection time of the displayed sweep, ms UTC; 0 before one arrives. */
+  scanTimeMs: number
+  /** Volume coverage pattern; 0 until a volume header is seen. */
+  vcp: number
   probe: ProbeReadout | null
   column: ColumnEntry[] | null
   section: SectionData | null
@@ -54,6 +58,8 @@ interface RadarState {
 /** Everything tied to one site's volume, dropped when the site changes. */
 const CLEARED = {
   tilts: [],
+  scanTimeMs: 0,
+  vcp: 0,
   probe: null,
   column: null,
   section: null,
@@ -77,6 +83,8 @@ export const useRadar = create<RadarState>()(
       raw: false,
       srv: false,
       storm: null,
+      scanTimeMs: 0,
+      vcp: 0,
       probe: null,
       column: null,
       section: null,

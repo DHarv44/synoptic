@@ -30,6 +30,10 @@ export interface SweepMessage {
   scale: number
   offset: number
   tex: Uint8Array
+  /** When this sweep was collected, ms UTC — the age of what's on screen. */
+  timeMs: number
+  /** Volume coverage pattern producing it; 0 if not seen yet. */
+  vcp: number
 }
 
 export interface TiltsMessage {
@@ -80,6 +84,8 @@ function postSelectedSweep(): void {
     scale: s.scale,
     offset: s.offset,
     tex: s.tex.slice(),
+    timeMs: s.timeMs,
+    vcp: store.vcp,
   }
   self.postMessage(msg, [msg.tex.buffer])
 }

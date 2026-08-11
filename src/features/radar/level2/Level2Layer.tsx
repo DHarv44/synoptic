@@ -165,7 +165,10 @@ export function Level2Layer() {
 
     worker.onmessage = (ev: MessageEvent<WorkerOut>) => {
       const msg = ev.data
-      if (msg.type === 'sweep') layerRef.current?.setSweep(msg)
+      if (msg.type === 'sweep') {
+        layerRef.current?.setSweep(msg)
+        useRadar.getState().set({ scanTimeMs: msg.timeMs, vcp: msg.vcp })
+      }
       else if (msg.type === 'tilts') useRadar.getState().set({ tilts: msg.tilts })
       else if (msg.type === 'columnResult') useRadar.getState().set({ column: msg.column })
       else if (msg.type === 'volume') emitVolume(msg)

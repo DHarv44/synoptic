@@ -1,5 +1,5 @@
 /** Sweep storage + ingest logic shared by the decode worker. */
-import { decodeChunk, type MomentData } from '@/features/radar/level2/decode'
+import { decodeChunk, type MomentData, type Radial } from '@/features/radar/level2/decode'
 
 export const AZ_BINS = 720
 
@@ -24,17 +24,22 @@ export interface SweepState {
   scale: number
   offset: number
   elevationDeg: number
+  /** Timestamp of the most recent radial written into this sweep, ms UTC. */
+  timeMs: number
 }
 
 export class SweepStore {
   readonly sweeps = new Map<string, SweepState>()
   readonly tiltDegs = new Map<number, number>()
+  /** Volume coverage pattern of the volume being ingested; 0 until seen. */
+  vcp = 0
   private readonly prevVelRows = new Map<number, Uint8Array>()
 
   clear(): void {
     this.sweeps.clear()
     this.tiltDegs.clear()
     this.prevVelRows.clear()
+    this.vcp = 0
   }
 
   key(elevNum: number, moment: string): string {
@@ -46,6 +51,7 @@ export class SweepStore {
     let touched = false
     for (const r of decodeChunk(buf, isStart)) {
       if (!this.tiltDegs.has(r.elevationNumber)) this.tiltDegs.set(r.elevationNumber, r.elevationDeg)
+      if (r.vcp !== 0) this.vcp = r.vcp
       for (const [name, m] of Object.entries(r.moments)) {
         if (m.wordSize !== 8) continue
         const keep =
@@ -54,12 +60,12 @@ export class SweepStore {
         if (!keep) continue
         const row = m.data as Uint8Array
         if (name === 'VEL') {
-          this.writeRow(this.key(r.elevationNumber, 'VEL_RAW'), m, r.elevationDeg, r.azimuthDeg, row)
+          this.writeRow(this.key(r.elevationNumber, 'VEL_RAW'), m, r, row)
           const deal = dealiasRow(row, this.prevVelRows.get(r.elevationNumber), r.nyquistMs, m.scale, m.offset)
           this.prevVelRows.set(r.elevationNumber, deal)
-          this.writeRow(this.key(r.elevationNumber, 'VEL'), m, r.elevationDeg, r.azimuthDeg, deal)
+          this.writeRow(this.key(r.elevationNumber, 'VEL'), m, r, deal)
         } else {
-          this.writeRow(this.key(r.elevationNumber, name), m, r.elevationDeg, r.azimuthDeg, row)
+          this.writeRow(this.key(r.elevationNumber, name), m, r, row)
         }
         if (r.elevationNumber === sel.elevNum && name === sel.moment) touched = true
       }
@@ -82,10 +88,11 @@ export class SweepStore {
   private writeRow(
     k: string,
     template: Pick<MomentData, 'gates' | 'firstGateM' | 'gateSpacingM' | 'scale' | 'offset'>,
-    elevDeg: number,
-    azDeg: number,
+    r: Pick<Radial, 'elevationDeg' | 'azimuthDeg' | 'timestampMs'>,
     row: Uint8Array,
   ): void {
+    const elevDeg = r.elevationDeg
+    const azDeg = r.azimuthDeg
     let s = this.sweeps.get(k)
     if (!s || s.gates < template.gates) {
       const prev = s
@@ -97,6 +104,7 @@ export class SweepStore {
         scale: template.scale,
         offset: template.offset,
         elevationDeg: elevDeg,
+        timeMs: r.timestampMs,
       }
       if (prev) {
         for (let az = 0; az < AZ_BINS; az++) {
@@ -109,6 +117,8 @@ export class SweepStore {
     const trimmed = row.subarray(0, s.gates)
     s.tex.set(trimmed, bin * s.gates)
     s.tex.set(trimmed, ((bin + 1) % AZ_BINS) * s.gates)
+    // The sweep is as fresh as its newest radial.
+    if (r.timestampMs > s.timeMs) s.timeMs = r.timestampMs
   }
 }
 

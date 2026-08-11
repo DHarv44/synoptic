@@ -25,6 +25,10 @@ export interface Radial {
   elevationNumber: number
   /** ms past UTC midnight of the radial's Julian date */
   timeMs: number
+  /** Full UTC timestamp, ms since epoch. */
+  timestampMs: number
+  /** Volume coverage pattern from the VOL block; 0 if absent */
+  vcp: number
   /** Nyquist velocity (m/s) from the RAD block; 0 if absent */
   nyquistMs: number
   moments: Record<string, MomentData>
@@ -91,6 +95,9 @@ export function parseRadials(record: Uint8Array): Radial[] {
     }
     const h = off + CTM_AND_MSG_HEADER
     const timeMs = view.getUint32(h + 4)
+    // Julian date counts days from 1 Jan 1970 as day 1, not day 0.
+    const julianDate = view.getUint16(h + 8)
+    const timestampMs = (julianDate - 1) * 86_400_000 + timeMs
     const azimuthDeg = view.getFloat32(h + 12)
     const elevationNumber = view.getUint8(h + 22)
     const elevationDeg = view.getFloat32(h + 24)
@@ -98,6 +105,7 @@ export function parseRadials(record: Uint8Array): Radial[] {
 
     const moments: Record<string, MomentData> = {}
     let nyquistMs = 0
+    let vcp = 0
     for (let b = 0; b < Math.min(blockCount, 10); b++) {
       const ptr = view.getUint32(h + 32 + b * 4)
       if (ptr === 0 || h + ptr + 28 > record.byteLength) continue
@@ -112,12 +120,16 @@ export function parseRadials(record: Uint8Array): Radial[] {
         nyquistMs = view.getUint16(base + 16) * 0.01
         continue
       }
+      if (type === 'R' && name3 === 'VOL') {
+        vcp = view.getUint16(base + 40)
+        continue
+      }
       if (type !== 'D') continue // other constant blocks skipped
       if (!MOMENT_NAMES.has(name3)) continue
       const { name, m } = parseMomentBlock(view, base)
       moments[name.trim()] = m
     }
-    out.push({ azimuthDeg, elevationDeg, elevationNumber, timeMs, nyquistMs, moments })
+    out.push({ azimuthDeg, elevationDeg, elevationNumber, timeMs, timestampMs, vcp, nyquistMs, moments })
     off += msgSizeHalfwords * 2 + 12
   }
   return out

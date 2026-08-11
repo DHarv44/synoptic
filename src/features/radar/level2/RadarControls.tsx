@@ -7,12 +7,32 @@ import {
   IconLock,
   IconLockOpen,
 } from '@tabler/icons-react'
+import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useCameraStore } from '@/map/cameraStore'
 import { useRadar } from '@/features/radar/level2/store'
 import { SITES } from '@/features/radar/level2/sites'
 import { setMoment, setRaw, setSrv, stepTilt, tiltsFor } from '@/features/radar/level2/controls'
 
 const DEG = Math.PI / 180
+
+/**
+ * A volume that stopped arriving looks exactly like a quiet one, so say how
+ * old the displayed sweep is rather than only when it was taken. Severe
+ * patterns complete in ~4 minutes and clear-air ones in ~10, so anything
+ * past 15 is stale however you scan.
+ */
+const STALE_MIN = 15
+
+function scanAge(scanTimeMs: number, nowMs: number): { text: string; stale: boolean } | null {
+  if (scanTimeMs <= 0) return null
+  const min = Math.floor((nowMs - scanTimeMs) / 60_000)
+  // Radar time is authoritative and the client clock is not: a machine
+  // running a minute or two slow makes a fresh sweep look like it arrived
+  // from the future. Observed during development, not hypothetical — so
+  // clamp rather than print a negative age.
+  if (min < 0) return { text: 'just now', stale: false }
+  return { text: min < 1 ? 'just now' : `${min} min ago`, stale: min >= STALE_MIN }
+}
 
 /** Section label, matching the readout tables below. */
 function Label({ children }: { children: React.ReactNode }) {
@@ -124,6 +144,9 @@ function SitePicker() {
 /** What the attached site is painting: which cut, which moment. */
 function SweepControls() {
   const tilts = useRadar((s) => s.tilts)
+  const scanTimeMs = useRadar((s) => s.scanTimeMs)
+  const vcp = useRadar((s) => s.vcp)
+  const fmt = useTimeFormat()
   const elevNum = useRadar((s) => s.elevNum)
   const moment = useRadar((s) => s.moment)
   const raw = useRadar((s) => s.raw)
@@ -140,8 +163,24 @@ function SweepControls() {
           Math.hypot(storm.u, storm.v) * 1.94384,
         )} kt`
 
+  const age = scanAge(scanTimeMs, Date.now())
+
   return (
     <>
+      <Label>Scan</Label>
+      <Group gap={6} wrap="nowrap">
+        <Text size="xs" ff="monospace" c={age?.stale ? 'orange' : undefined}>
+          {age ? `${fmt.hm(scanTimeMs)} · ${age.text}` : 'waiting for radials'}
+        </Text>
+        {vcp > 0 && (
+          <Tooltip label="Volume coverage pattern — the sequence of elevation angles being scanned">
+            <Text size="xs" c="dimmed" ff="monospace">
+              VCP {vcp}
+            </Text>
+          </Tooltip>
+        )}
+      </Group>
+
       <Label>Elevation</Label>
       <Group gap={6} wrap="nowrap">
         <ActionIcon
