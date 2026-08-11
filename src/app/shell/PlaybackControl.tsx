@@ -8,7 +8,7 @@ import {
   stepSimTime,
   useTimeline,
 } from '@/core/time/timelineStore'
-import { fmtUtcDateTime } from '@/core/time/format'
+import { fmtUtcDateTime, fmtUtcTime } from '@/core/time/format'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
 const STEP_MS = 10 * 60_000 // ←/→ step: 10 min
@@ -32,7 +32,7 @@ function useTimelineClock() {
  * Past is solid, the forecast half is hatched, and the now tick marks the
  * boundary — the timeline is honest about which side of "now" you're on.
  */
-export function PlaybackControl() {
+export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
   useTimelineClock()
   const simTime = useTimeline((s) => s.simTime)
   const isLive = useTimeline((s) => s.isLive)
@@ -60,11 +60,13 @@ export function PlaybackControl() {
       style={{
         ...mapChromeStyle,
         position: 'absolute',
-        bottom: 8,
+        // Mobile: full width just above the sheet peek. Desktop: bottom-left.
+        bottom: isMobile ? 100 : 8,
         left: 8,
+        right: isMobile ? 8 : undefined,
         zIndex: 5,
-        width: 420,
-        maxWidth: 'calc(100% - 76px)',
+        width: isMobile ? undefined : 420,
+        maxWidth: isMobile ? undefined : 'calc(100% - 76px)',
       }}
     >
       <Group gap={8} wrap="nowrap">
@@ -83,7 +85,7 @@ export function PlaybackControl() {
           </ActionIcon>
         </Tooltip>
         <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
-          {fmtUtcDateTime(simTime)}
+          {isMobile ? fmtUtcTime(simTime) : fmtUtcDateTime(simTime)}
         </Text>
         <div style={{ flex: 1, position: 'relative', minWidth: 60 }}>
           <div

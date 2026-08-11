@@ -167,12 +167,16 @@ probes that point.
    zone-alert geometry resolution, restoring globe projection once custom
    WebGL layers adopt MapLibre's projection API).
 
-   - **Mobile / responsive view** — the workstation layout currently assumes a
-     desktop-width screen. Needs a real small-screen story: drawers as
-     bottom sheets, touch-sized controls, a phone-appropriate timeline, and
-     sensible defaults for what's on screen at once. This is also the
-     groundwork the Chase HUD builds on (it's the same problem solved for a
-     truck mount), so it lands before or alongside item 5.
+   - **Mobile / responsive view** — first pass shipped: the rail gives way to
+     a bottom sheet with three heights (peek shows the tab row and keeps the
+     map; half shows panel content with the map still visible; full hands
+     over the screen), a thumb-reachable layers button opens a labelled
+     sheet, playback goes full-width above the peek, and the radar bench
+     moves clear of both. Still to do: **drag-to-resize the sheet** with
+     momentum and snap points (tap-to-cycle only today — needs hand-rolled
+     pointer handling or a small dep like `vaul`), a "Data sources" entry to
+     replace the hidden attribution footer, and a touch pass on the radar
+     bench. This is also the groundwork the Chase HUD builds on.
 3. **Make it personal** — three related features that turn the instrument into
    something you'd keep open every day:
    - **My location** — a small button on the map that centers and zooms to

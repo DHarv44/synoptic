@@ -5,9 +5,16 @@ import { attachDevStore } from '@/dev/wx'
 
 export type DockTab = PanelGroup | 'settings'
 
+/** Mobile sheet heights: summary only, map + panel, or panel only. */
+export type SheetState = 'peek' | 'half' | 'full'
+
 interface DockState {
   tab: DockTab
   open: boolean
+  sheet: SheetState
+  setSheet: (sheet: SheetState) => void
+  /** Mobile tab press: same tab cycles the sheet, a new tab opens it. */
+  pressTab: (tab: DockTab) => void
   /** Panel ids in user-chosen display order, per tab. */
   order: Partial<Record<DockTab, string[]>>
   /** Section id → expanded. Absent means expanded (the default). */
@@ -33,8 +40,16 @@ export const useDock = create<DockState>()(
     (set) => ({
       tab: 'place',
       open: true,
+      sheet: 'peek',
       order: {},
       expanded: {},
+      setSheet: (sheet) => set({ sheet }),
+      pressTab: (tab) =>
+        set((s) =>
+          s.tab === tab && s.sheet !== 'peek'
+            ? { sheet: 'peek' }
+            : { tab, sheet: s.sheet === 'peek' ? 'half' : s.sheet },
+        ),
       setTab: (tab) => set({ tab }),
       toggleOpen: () => set((s) => ({ open: !s.open })),
       show: (tab) => set({ tab, open: true }),

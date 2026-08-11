@@ -1,4 +1,5 @@
 import { ActionIcon, Chip, Group, Paper, SegmentedControl, Stack, Table, Text } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import type { ColumnEntry, TiltInfo } from '@/features/radar/level2/worker'
 
 const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
@@ -58,6 +59,7 @@ export function Level2Control({
   onRaw,
   stormMotion,
 }: Level2ControlProps) {
+  const isMobile = useMediaQuery('(max-width: 48em)') ?? false
   const available = tilts.filter((t) => t.moments.includes(moment))
   const idx = available.findIndex((t) => t.num === elevNum)
   const current = available[idx] ?? available[0]
@@ -67,8 +69,13 @@ export function Level2Control({
       withBorder
       p={6}
       radius="sm"
-      // Sits above the floating playback control at bottom-left.
-      style={{ position: 'absolute', bottom: 56, left: 8, zIndex: 5, minWidth: 190 }}
+      // Desktop: above the playback control at bottom-left. Mobile: top-left,
+      // clear of the bottom sheet and the playback bar.
+      style={
+        isMobile
+          ? { position: 'absolute', top: 8, left: 8, zIndex: 5, maxWidth: 'calc(100% - 76px)' }
+          : { position: 'absolute', bottom: 56, left: 8, zIndex: 5, minWidth: 190 }
+      }
     >
       <Stack gap={4}>
         <Group justify="space-between" wrap="nowrap">

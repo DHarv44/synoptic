@@ -16,7 +16,7 @@ const EMPTY: Record<PanelGroup, string> = {
 }
 
 /** Contextual header: what this tab is currently about. */
-function ContextHeader({ tab }: { tab: DockTab }) {
+export function ContextHeader({ tab }: { tab: DockTab }) {
   const point = useProbe((s) => s.point)
   const label = RAIL_TABS.find((t) => t.key === tab)?.label ?? ''
 
@@ -75,31 +75,34 @@ function SectionStack({ tab, panels }: { tab: PanelGroup; panels: PanelContribut
   )
 }
 
-/**
- * Analysis dock: a tab rail plus a single scrolling column of collapsible
- * sections. Sections start collapsed and can be reordered per tab, so the
- * panel adapts to whether you're monitoring, forecasting or interrogating.
- */
-export function AnalysisDock() {
+/** The scrolling body for a tab — shared by the desktop dock and mobile sheet. */
+export function DockContent({ tab }: { tab: DockTab }) {
   // Subscribe so enable/disable updates the panel set live.
   const featureStates = useSettings((s) => s.features)
+
+  if (tab === 'settings') return <SettingsPanel />
+
+  const panels = listFeatures()
+    .filter((f) => featureStates[f.id]?.enabled ?? f.defaultEnabled ?? true)
+    .flatMap((f) => f.panels ?? [])
+    .filter((p) => p.group === tab)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+  return <SectionStack tab={tab} panels={panels} />
+}
+
+/**
+ * Analysis dock (desktop): a single scrolling column of collapsible
+ * sections beside the map, with the tab rail pinned to the map's edge.
+ */
+export function AnalysisDock() {
   const tab = useDock((s) => s.tab)
-
-  const panelsFor = (group: PanelGroup): PanelContribution[] =>
-    listFeatures()
-      .filter((f) => featureStates[f.id]?.enabled ?? f.defaultEnabled ?? true)
-      .flatMap((f) => f.panels ?? [])
-      .filter((p) => p.group === group)
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-
-  const body =
-    tab === 'settings' ? <SettingsPanel /> : <SectionStack tab={tab} panels={panelsFor(tab)} />
 
   return (
     <Stack gap={0} h="100%" style={{ minHeight: 0 }}>
       <ContextHeader tab={tab} />
       <ScrollArea flex={1} style={{ minHeight: 0 }} px="xs">
-        {body}
+        <DockContent tab={tab} />
       </ScrollArea>
     </Stack>
   )
