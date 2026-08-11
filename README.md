@@ -126,6 +126,11 @@ probes that point.
    - **Presets** — Workstation / Chase / Minimal plus user-saved profiles
      (specified in PLAN.md §3.13a, never built) and **settings search**;
      both matter much more once the knob count grows.
+   - **Session / workspace persistence** — feature settings already persist
+     to localStorage (versioned), but session state does not: map camera,
+     probe point, timeline position, active dock tab, and radar tilt/moment/
+     SRV selections all reset on reload. Restore them, add the shareable
+     workspace URL from PLAN.md §3.12, and offer workspace export/import.
    - Deliberately *not* exposing per-layer draw order — the stacking is
      meaningful (labels over radar over satellite) and mostly offers users a
      way to break their own display.

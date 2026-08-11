@@ -51,6 +51,12 @@ Single entry point for continuing SYNOPTIC. Read in this order:
      defaults, per-source cadence. Then **presets** (PLAN §3.13a, never
      built) and settings search. Adding fields is cheap — they're declared
      in `FeatureManifest.settings` and the UI generates itself.
+   - **Session/workspace persistence**: feature settings DO persist
+     (`core/settings/store.ts`, zustand `persist`, key `synoptic.settings`,
+     versioned) — but map camera, probe, timeline position, active dock tab
+     and radar tilt/moment/SRV do NOT and reset every reload. Restore those,
+     then add the shareable workspace URL (PLAN.md §3.12) and export/import.
+     Any new persisted store must carry a version + migration, per CLAUDE.md.
    - Plus: timeline affordances, empty states, keyboard (tab switch, Esc),
      deferred polish (alert ticker, `.pal` tables, manual site picker,
      layer re-ordering, zone-alert geometry, globe projection restore).
