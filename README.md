@@ -5,7 +5,7 @@ Level 2 radar with professional interrogation tools, severe weather alerts,
 forecaster-grade sounding analysis, and multi-model comparison, in one dark
 instrument-panel UI.
 
-**▶ [Live demo](https://synoptic-production.up.railway.app/)**
+<p><strong>▶ <a href="https://synoptic-production.up.railway.app/" target="_blank" rel="noopener noreferrer">Live demo</a></strong></p>
 
 ![stack](https://img.shields.io/badge/react-19-blue) ![stack](https://img.shields.io/badge/maplibre-5-green) ![stack](https://img.shields.io/badge/vite-7-purple) ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
