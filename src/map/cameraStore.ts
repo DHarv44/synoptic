@@ -4,6 +4,8 @@ import { attachDevStore } from '@/dev/wx'
 interface FlyTarget {
   lat: number
   lon: number
+  /** Minimum zoom to arrive at; the current zoom is kept if already closer. */
+  zoom?: number
 }
 
 /** [west, south, east, north] */
@@ -14,7 +16,7 @@ interface CameraState {
   fit: FitBounds | null
   /** Bumped per reset request; a counter so repeat presses always fire. */
   resetNonce: number
-  requestFlyTo: (lat: number, lon: number) => void
+  requestFlyTo: (lat: number, lon: number, zoom?: number) => void
   requestFitBounds: (bounds: FitBounds) => void
   requestResetNorth: () => void
   consume: () => void
@@ -26,7 +28,7 @@ export const useCameraStore = create<CameraState>((set) => ({
   target: null,
   fit: null,
   resetNonce: 0,
-  requestFlyTo: (lat, lon) => set({ target: { lat, lon } }),
+  requestFlyTo: (lat, lon, zoom) => set({ target: { lat, lon, zoom } }),
   requestFitBounds: (bounds) => set({ fit: bounds }),
   requestResetNorth: () => set((s) => ({ resetNonce: s.resetNonce + 1 })),
   consume: () => set({ target: null }),

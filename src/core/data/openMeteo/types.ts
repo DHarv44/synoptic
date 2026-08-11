@@ -28,4 +28,15 @@ export interface OpenMeteoForecast {
     pressure_msl: number[]
     weather_code: number[]
   }
+  /** Optional: fixtures predate the daily block. */
+  daily?: {
+    time: string[]
+    weather_code: number[]
+    temperature_2m_max: number[]
+    temperature_2m_min: number[]
+    precipitation_sum: number[]
+    precipitation_probability_max: Array<number | null>
+    wind_speed_10m_max: number[]
+    wind_gusts_10m_max: number[]
+  }
 }

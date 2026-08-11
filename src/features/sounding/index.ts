@@ -6,7 +6,7 @@ registerFeature({
   id: 'sounding',
   title: 'Sounding',
   description: 'Skew-T log-p, hodograph, and derived indices at the probed point.',
-  panels: [{ id: 'sounding', title: 'Skew-T', component: SoundingPanel, group: 'place', order: 2 }],
+  panels: [{ id: 'sounding', title: 'Skew-T', component: SoundingPanel, group: 'place', order: 4 }],
   defaultEnabled: true,
   settings: [],
 })

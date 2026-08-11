@@ -99,7 +99,10 @@ export function MapView() {
   const fitTarget = useCameraStore((s) => s.fit)
   useEffect(() => {
     if (!ctx || !flyTarget) return
-    ctx.map.flyTo({ center: [flyTarget.lon, flyTarget.lat], zoom: Math.max(ctx.map.getZoom(), 7) })
+    ctx.map.flyTo({
+      center: [flyTarget.lon, flyTarget.lat],
+      zoom: Math.max(ctx.map.getZoom(), flyTarget.zoom ?? 7),
+    })
     useCameraStore.getState().consume()
   }, [ctx, flyTarget])
   useEffect(() => {

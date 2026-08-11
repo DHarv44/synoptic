@@ -28,14 +28,28 @@ const HOURLY_FIELDS = [
   'weather_code',
 ].join(',')
 
+const DAILY_FIELDS = [
+  'weather_code',
+  'temperature_2m_max',
+  'temperature_2m_min',
+  'precipitation_sum',
+  'precipitation_probability_max',
+  'wind_speed_10m_max',
+  'wind_gusts_10m_max',
+].join(',')
+
+/** How far the daily outlook runs. Open-Meteo serves up to 16 days free. */
+export const FORECAST_DAYS = 10
+
 export function forecastUrl(lat: number, lon: number): string {
   const p = new URLSearchParams({
     latitude: lat.toFixed(4),
     longitude: lon.toFixed(4),
     current: CURRENT_FIELDS,
     hourly: HOURLY_FIELDS,
+    daily: DAILY_FIELDS,
     timezone: 'UTC',
-    forecast_days: '7',
+    forecast_days: String(FORECAST_DAYS),
     wind_speed_unit: 'ms',
   })
   return `https://api.open-meteo.com/v1/forecast?${p}`

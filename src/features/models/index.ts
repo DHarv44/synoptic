@@ -6,7 +6,7 @@ registerFeature({
   id: 'models',
   title: 'Model comparison',
   description: 'GFS / ECMWF / ICON / GEM / UKMO spaghetti + GFS ensemble at the probe.',
-  panels: [{ id: 'models', title: 'Models', component: ModelsPanel, group: 'place', order: 3 }],
+  panels: [{ id: 'models', title: 'Models', component: ModelsPanel, group: 'place', order: 5 }],
   defaultEnabled: true,
   settings: [],
 })

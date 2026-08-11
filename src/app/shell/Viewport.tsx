@@ -5,6 +5,7 @@ import { MobileSheet, TAB_BAR_HEIGHT } from '@/app/shell/MobileSheet'
 import { MobileLayerButton } from '@/map/MobileLayerButton'
 import { LoadingIndicator } from '@/ui/LoadingIndicator'
 import { ReorientButton } from '@/ui/ReorientButton'
+import { LocateButton } from '@/map/LocateButton'
 import { useCameraStore } from '@/map/cameraStore'
 import { ToolRail } from '@/app/shell/ToolRail'
 import { MobileToolBar } from '@/app/shell/MobileToolBar'
@@ -31,6 +32,7 @@ export function Viewport({ isMobile }: { isMobile: boolean }) {
             label="North up"
             style={{ right: 64, bottom: TAB_BAR_HEIGHT + 66 }}
           />
+          <LocateButton size={44} style={{ right: 116, bottom: TAB_BAR_HEIGHT + 66 }} />
           <LoadingIndicator top={12} right={12} />
           <MobileToolBar />
           <MobileSheet />
@@ -44,6 +46,7 @@ export function Viewport({ isMobile }: { isMobile: boolean }) {
             label="North up"
             style={{ right: 52, bottom: 8 }}
           />
+          <LocateButton style={{ right: 52, bottom: 50 }} />
           <LoadingIndicator top={12} right={56} />
         </>
       )}
