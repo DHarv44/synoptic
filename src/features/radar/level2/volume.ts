@@ -20,7 +20,33 @@ async function listXml(query: string): Promise<Document> {
   return new DOMParser().parseFromString(await res.text(), 'text/xml')
 }
 
-/** Chunks of one volume, ascending sequence. */
+/** `SITE/VOL/YYYYMMDD-HHMMSS-SEQ-KIND` */
+const KEY_RE = /\/(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})-(\d{3})-([SIE])$/
+
+/** Collection time encoded in the chunk key, or null if it doesn't parse. */
+export function chunkKeyTime(key: string): number | null {
+  const m = KEY_RE.exec(key)
+  if (!m) return null
+  return Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6])
+}
+
+/**
+ * A volume never spans this long, so anything older than the newest chunk by
+ * more than this belongs to an earlier pass of the ring.
+ */
+const PASS_WINDOW_MS = 2 * 3600_000
+
+/**
+ * Chunks of one volume, ascending sequence — and only from the current pass.
+ *
+ * Volume prefixes wrap 0–999 and the old objects are not deleted, so a busy
+ * site reuses a prefix every few days while the previous pass is still
+ * sitting there. Listing the prefix returns both, and since the stale pass
+ * owns the low sequence numbers it sorts first, meaning the start chunk —
+ * the one that resets the sweep store — could be days old. Observed on KJKL:
+ * prefix 132 held a start chunk from three days earlier next to live ones,
+ * and the display quietly showed three-day-old weather.
+ */
 export async function listVolumeChunks(site: string, volume: number): Promise<ChunkRef[]> {
   const doc = await listXml(`prefix=${site}/${volume}/`)
   const out: ChunkRef[] = []
@@ -31,7 +57,17 @@ export async function listVolumeChunks(site: string, volume: number): Promise<Ch
     if (!m) continue
     out.push({ key, lastModified: lm, kind: m[2] as ChunkRef['kind'], seq: Number(m[1]) })
   }
-  return out.sort((a, b) => a.seq - b.seq)
+  return currentPassChunks(out)
+}
+
+/** Chunks belonging to the newest pass, ascending sequence. */
+export function currentPassChunks(chunks: ChunkRef[]): ChunkRef[] {
+  // Prefer the key's own collection time; fall back to upload time.
+  const timeOf = (c: ChunkRef): number => chunkKeyTime(c.key) ?? c.lastModified
+  const newest = chunks.reduce((max, c) => Math.max(max, timeOf(c)), 0)
+  return chunks
+    .filter((c) => newest - timeOf(c) <= PASS_WINDOW_MS)
+    .sort((a, b) => a.seq - b.seq)
 }
 
 async function newestIn(site: string, volume: number): Promise<number> {
