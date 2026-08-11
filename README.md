@@ -146,7 +146,7 @@ probes that point.
      bottom sheets, touch-sized controls, a phone-appropriate timeline, and
      sensible defaults for what's on screen at once. This is also the
      groundwork the Chase HUD builds on (it's the same problem solved for a
-     truck mount), so it lands before or alongside item 4.
+     truck mount), so it lands before or alongside item 5.
 3. **Make it personal** — three related features that turn the instrument into
    something you'd keep open every day:
    - **My location** — a small button on the map that centers and zooms to
@@ -164,7 +164,28 @@ probes that point.
      the radar trend, and severe-parameter thresholds crossing. Needs a
      notification-permission flow, a background poll that survives a
      backgrounded tab, and strict de-duplication so a single warning fires once.
-4. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
+4. **Performance pass** — the app has been built feature-first and never
+   profiled. Known suspects, roughly in order of expected payoff:
+   - **The live clock re-renders everything.** The timeline ticks 4×/second
+     and `simTime` drives the meteogram cursor, radar frame selection and
+     sounding lookup — so panels re-render continuously even when nothing
+     visible changed. Coarsen the live tick, or expose a throttled derived
+     time for subscribers that only need minute resolution.
+   - **Level 2 memory and copying.** Sweeps are retained per tilt/moment
+     (~1.3 MB each, tens of them) and the selected sweep is deep-copied and
+     transferred on *every* arriving chunk. Throttle posting to animation
+     cadence, cap retained tilts, and reuse buffers.
+   - **Per-poll GeoJSON rebuilds.** Alerts (hundreds of polygons) and cells
+     (~900 points) rebuild their whole FeatureCollection on each poll, and
+     lightning rebuilds up to 4096 features every second. Diff or reuse.
+   - **Code-splitting.** three.js/R3F/drei load eagerly for a single 3D
+     panel; d3 and the chart panels could split too. Lazy-load them.
+   - **Viewport work.** Cell/alert viewport filtering runs on every
+     `moveend` over the full national list — bucket spatially or debounce.
+   - Then measure properly: frame timings with radar streaming, memory over
+     a long session, bundle analysis, and a low-end/mobile device pass
+     (which also de-risks the Chase HUD).
+5. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
    time-to-arrival from storm motion, SPC outlooks and mesoscale discussions,
    an intercept/escape route solver over OSM roads, placefile import, and a
    replay trainer over archived events.

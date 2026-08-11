@@ -76,7 +76,16 @@ Single entry point for continuing SYNOPTIC. Read in this order:
      Needs permission flow, background-safe polling (note: pollers with
      `pauseWhenHidden` stall when hidden — use a non-paused poller or a
      service worker), and per-alert de-duplication by NWS alert id.
-4. **Phase 7 Chase HUD** — PLAN.md §3.14.
+4. **Performance pass** (never profiled; README has the full list). Biggest
+   suspects: the 250 ms timeline tick re-rendering every simTime subscriber
+   (meteogram cursor, radar frame pick, sounding lookup) even when idle;
+   Level 2 sweep deep-copy + transfer on every chunk (~1.3 MB × tens of
+   retained sweeps); per-poll GeoJSON rebuilds (alerts, ~900 cells,
+   lightning every 1 s); eager three.js/R3F load for one panel; viewport
+   filtering over national lists on every `moveend`. Then measure: frame
+   timings while streaming, long-session memory, bundle analysis, low-end
+   mobile — which also de-risks the Chase HUD.
+5. **Phase 7 Chase HUD** — PLAN.md §3.14.
 4. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
 
