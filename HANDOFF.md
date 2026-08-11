@@ -14,12 +14,12 @@ Single entry point for continuing SYNOPTIC. Read in this order:
   https://github.com/DHarv44/synoptic (remote `origin`, branch `main`).
 - **Working state is clean**: no uncommitted work in flight. If you find dirty
   files, `git status` + diff them against this doc's claims before trusting either.
-- **Next planned work (R7, not started)**: All-Tilts (probe a point → values
-  across every elevation; worker already retains all sweeps — add a message
-  type), vertical cross-section (drag line → range-height slice), cell trend
-  charts (needs client-side snapshot accumulation of the IEM attr feed —
-  there is no history API). Then R8: 3D radar volume (react-three-fiber
-  returns; deps still installed).
+- **In progress (R7, partially done)**: All-Tilts SHIPPED (click → per-tilt
+  REF/VEL column in the site control; see worker `probeColumn` + sweeps.ts).
+  Remaining R7: vertical cross-section (drag line → range-height slice —
+  sample `SweepStore.valueAt` along the line per tilt), cell trend charts
+  (accumulate IEM attr snapshots client-side — there is no history API).
+  Then R8: 3D radar volume (react-three-fiber returns; deps still installed).
 
 ## The end-game queue (user-agreed order: features first, then these)
 

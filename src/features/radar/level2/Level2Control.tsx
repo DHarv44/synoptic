@@ -1,5 +1,13 @@
-import { ActionIcon, Chip, Group, Paper, SegmentedControl, Stack, Text } from '@mantine/core'
-import type { TiltInfo } from '@/features/radar/level2/worker'
+import { ActionIcon, Chip, Group, Paper, SegmentedControl, Stack, Table, Text } from '@mantine/core'
+import type { ColumnEntry, TiltInfo } from '@/features/radar/level2/worker'
+
+const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
+const DEG = Math.PI / 180
+
+function beamKft(rangeM: number, elevDeg: number): number {
+  const h = rangeM * Math.sin(elevDeg * DEG) + (rangeM * rangeM) / (2 * EFFECTIVE_EARTH_R)
+  return (h * 3.28084) / 1000
+}
 
 export interface ProbeReadout {
   azDeg: number
@@ -16,6 +24,8 @@ interface Level2ControlProps {
   moment: string
   onSelect: (elevNum: number, moment: string) => void
   probe: ProbeReadout | null
+  /** All-Tilts values at the probed point */
+  column: ColumnEntry[] | null
   srv: boolean
   raw: boolean
   onSrv: (on: boolean) => void
@@ -41,6 +51,7 @@ export function Level2Control({
   moment,
   onSelect,
   probe,
+  column,
   srv,
   raw,
   onSrv,
@@ -124,6 +135,34 @@ export function Level2Control({
               </span>
             ))}
           </Text>
+        )}
+        {probe && column && column.length > 1 && (
+          <Table withRowBorders={false} verticalSpacing={0} fz={10} ff="monospace">
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th p={2}>tilt</Table.Th>
+                <Table.Th p={2} ta="right">kft</Table.Th>
+                <Table.Th p={2} ta="right">dBZ</Table.Th>
+                <Table.Th p={2} ta="right">m/s</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {[...column].reverse().map((e) => (
+                <Table.Tr key={e.elevNum}>
+                  <Table.Td p={2}>{e.elevationDeg.toFixed(1)}°</Table.Td>
+                  <Table.Td p={2} ta="right">
+                    {beamKft(probe.rangeM, e.elevationDeg).toFixed(0)}
+                  </Table.Td>
+                  <Table.Td p={2} ta="right">
+                    {e.REF !== null ? e.REF.toFixed(0) : '—'}
+                  </Table.Td>
+                  <Table.Td p={2} ta="right">
+                    {e.VEL !== null ? e.VEL.toFixed(0) : '—'}
+                  </Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
         )}
       </Stack>
     </Paper>

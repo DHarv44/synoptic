@@ -14,6 +14,8 @@ import { fetchChunk, findCurrentVolume, listVolumeChunks } from '@/features/rada
 import { RANGE_M, SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
 import { Level2Control, type ProbeReadout } from '@/features/radar/level2/Level2Control'
 import type {
+  ColumnEntry,
+  ColumnResultMessage,
   ProbeResultMessage,
   SweepMessage,
   TiltInfo,
@@ -27,7 +29,7 @@ const MIN_ZOOM = 6
 const DEG = Math.PI / 180
 const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
 
-type WorkerOut = SweepMessage | TiltsMessage | ProbeResultMessage
+type WorkerOut = SweepMessage | TiltsMessage | ProbeResultMessage | ColumnResultMessage
 
 /** Single-site Level 2: streaming sweeps, tilt/moment control, gate probe. */
 export function Level2Layer() {
@@ -41,6 +43,7 @@ export function Level2Layer() {
   const [srv, setSrv] = useState(false)
   const [raw, setRaw] = useState(false)
   const [storm, setStorm] = useState<UV | null>(null)
+  const [column, setColumn] = useState<ColumnEntry[] | null>(null)
   const layerRef = useRef<SweepGlLayer | null>(null)
   const workerRef = useRef<Worker | null>(null)
   const lastClickRef = useRef<{ azDeg: number; rangeM: number } | null>(null)
@@ -116,6 +119,7 @@ export function Level2Layer() {
       const msg = ev.data
       if (msg.type === 'sweep') layerRef.current?.setSweep(msg)
       else if (msg.type === 'tilts') setTilts(msg.tilts)
+      else if (msg.type === 'columnResult') setColumn(msg.column)
       else if (msg.type === 'probeResult') {
         const click = lastClickRef.current
         if (!click) return
@@ -135,6 +139,7 @@ export function Level2Layer() {
       const azDeg = ((Math.atan2(dLon, dLat) / DEG) + 360) % 360
       lastClickRef.current = { azDeg, rangeM }
       worker.postMessage({ type: 'probe', azDeg, rangeM })
+      worker.postMessage({ type: 'probeColumn', azDeg, rangeM })
     }
     map.on('click', onClick)
 
@@ -200,6 +205,7 @@ export function Level2Layer() {
       moment={sel.moment}
       onSelect={select}
       probe={probe}
+      column={column}
       srv={srv && storm !== null}
       raw={raw}
       onSrv={setSrv}
