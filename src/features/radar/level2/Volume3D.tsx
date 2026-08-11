@@ -5,9 +5,12 @@ import { Button, Group, Slider, Stack, Text } from '@mantine/core'
 import { DoubleSide } from 'three'
 import { currentSite, onVolume, requestVolume } from '@/features/radar/level2/bridge'
 import { buildTiltMesh } from '@/features/radar/level2/volumeGeometry'
+import { GroundPlane } from '@/features/radar/level2/GroundPlane'
 import type { VolumeTilt } from '@/features/radar/level2/worker'
 
 const VERTICAL_EXAGGERATION = 4
+/** Matches the worker's volume export extent so floor and echo agree. */
+const GROUND_RADIUS_KM = 180
 
 function TiltSurfaces({ tilts, threshold }: { tilts: VolumeTilt[]; threshold: number }) {
   const meshes = useMemo(
@@ -43,6 +46,7 @@ function TiltSurfaces({ tilts, threshold }: { tilts: VolumeTilt[]; threshold: nu
 export function Volume3D() {
   const [tilts, setTilts] = useState<VolumeTilt[]>([])
   const [threshold, setThreshold] = useState(30)
+  const [groundOpacity, setGroundOpacity] = useState(55)
   const [msg, setMsg] = useState<string | null>(null)
 
   useEffect(() => {
@@ -103,10 +107,25 @@ export function Volume3D() {
           label={(v) => `${v} dBZ`}
         />
       </Group>
+      <Group gap="xs" wrap="nowrap">
+        <Text size="xs" c="dimmed" w={54}>
+          ground
+        </Text>
+        <Slider
+          flex={1}
+          size="xs"
+          min={0}
+          max={100}
+          step={5}
+          value={groundOpacity}
+          onChange={setGroundOpacity}
+          label={(v) => `${v}%`}
+        />
+      </Group>
       <div style={{ flex: 1, minHeight: 220, borderRadius: 4, overflow: 'hidden' }}>
         <Canvas camera={{ position: [0, 90, 190], fov: 45, far: 4000 }} dpr={[1, 2]}>
           <color attach="background" args={['#0b0e12']} />
-          <gridHelper args={[360, 12, '#2c3440', '#1d232c']} />
+          <GroundPlane radiusKm={GROUND_RADIUS_KM} opacity={groundOpacity / 100} />
           <TiltSurfaces tilts={tilts} threshold={threshold} />
           <OrbitControls enablePan={false} minDistance={40} maxDistance={900} />
         </Canvas>
