@@ -6,6 +6,12 @@ import { STRIKE_TTL_MS, connectLightning, strikeBuffer } from '@/features/lightn
 import { makeBoltImage } from '@/features/lightning/boltIcon'
 
 const UPDATE_MS = 1000
+/**
+ * Ages drive the fade, so a redraw is due even with no new strikes — but
+ * over a 10-minute decay, coarse steps are indistinguishable. New strikes
+ * still appear on the next tick; only the fade is throttled.
+ */
+const FADE_REDRAW_MS = 5000
 
 function toGeojson(nowMs: number): GeoJSON.FeatureCollection {
   return {
@@ -67,14 +73,23 @@ export function LightningLayer() {
     [],
   )
 
-  // Refresh strike ages/positions once a second.
+  // Refresh strike ages/positions. Rebuilding the collection allocates a
+  // feature per strike (up to MAX_STRIKES) and makes MapLibre re-parse the
+  // source, so skip it when nothing has changed and no fade step is due.
   useEffect(() => {
+    let lastVersion = -1
+    let lastDraw = 0
     const id = setInterval(() => {
       const src = map.getSource('lightning') as GeoJSONSource | undefined
-      if (src) {
-        strikeBuffer.prune(Date.now())
-        src.setData(toGeojson(Date.now()))
-      }
+      if (!src) return
+      const now = Date.now()
+      strikeBuffer.prune(now)
+      const changed = strikeBuffer.version !== lastVersion
+      const fadeDue = strikeBuffer.strikes.length > 0 && now - lastDraw >= FADE_REDRAW_MS
+      if (!changed && !fadeDue) return
+      lastVersion = strikeBuffer.version
+      lastDraw = now
+      src.setData(toGeojson(now))
     }, UPDATE_MS)
     return () => clearInterval(id)
   }, [map])

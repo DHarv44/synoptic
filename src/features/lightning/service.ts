@@ -42,17 +42,23 @@ export function lzwDecode(data: string): string {
 /** Ring buffer of recent strikes, read imperatively by the layer. */
 class StrikeBuffer {
   readonly strikes: Strike[] = []
+  /** Bumped on every change, so the layer can skip a no-op redraw. */
+  version = 0
 
   push(s: Strike): void {
     this.strikes.push(s)
     if (this.strikes.length > MAX_STRIKES) this.strikes.splice(0, this.strikes.length - MAX_STRIKES)
+    this.version++
   }
 
   prune(nowMs: number): void {
     const cutoff = nowMs - STRIKE_TTL_MS
     let firstLive = 0
     while (firstLive < this.strikes.length && this.strikes[firstLive].timeMs < cutoff) firstLive++
-    if (firstLive > 0) this.strikes.splice(0, firstLive)
+    if (firstLive > 0) {
+      this.strikes.splice(0, firstLive)
+      this.version++
+    }
   }
 }
 

@@ -27,6 +27,33 @@ export function dbzToCss(dbz: number): string | null {
   return color
 }
 
+/**
+ * dBZ → 0..1 rgb, precomputed. The mesh builder needs a colour per vertex
+ * over tens of thousands of quads; going through `dbzToCss` meant a stop
+ * scan and three `parseInt`s on hex substrings every time. Indexed like
+ * `reflectivityLut`: i = (dBZ + 32) × 2. Tuples are shared, never copied,
+ * so lookups allocate nothing.
+ */
+const REF_RGB: Array<readonly [number, number, number] | null> = Array.from(
+  { length: 256 },
+  (_, i) => {
+    const css = dbzToCss(i / 2 - 32)
+    if (css === null) return null
+    return [
+      parseInt(css.slice(1, 3), 16) / 255,
+      parseInt(css.slice(3, 5), 16) / 255,
+      parseInt(css.slice(5, 7), 16) / 255,
+    ] as const
+  },
+)
+
+/** Reflectivity colour as rgb floats, or null below the 5 dBZ floor. */
+export function dbzToRgb(dbz: number): readonly [number, number, number] | null {
+  const i = Math.round((dbz + 32) * 2)
+  if (i < 0) return null
+  return REF_RGB[i > 255 ? 255 : i]
+}
+
 /** Value range each LUT spans (shader maps value→index linearly). */
 export const LUT_RANGES: Record<string, [number, number]> = {
   REF: [-32, 95.5],

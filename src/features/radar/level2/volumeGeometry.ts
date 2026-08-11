@@ -1,22 +1,13 @@
-import { dbzToCss } from '@/features/radar/level2/colormap'
+import { dbzToRgb } from '@/features/radar/level2/colormap'
 import type { VolumeTilt } from '@/features/radar/level2/worker'
 
 const DEG = Math.PI / 180
 const EFFECTIVE_EARTH_R_KM = (4 / 3) * 6371
+const FALLBACK_RGB = [0.5, 0.5, 0.5] as const
 
 /** Beam centre height (km) above the radar at ground range (km). */
 export function beamHeightKm(rangeKm: number, elevDeg: number): number {
   return rangeKm * Math.sin(elevDeg * DEG) + (rangeKm * rangeKm) / (2 * EFFECTIVE_EARTH_R_KM)
-}
-
-function rgb(dbz: number): [number, number, number] | null {
-  const css = dbzToCss(dbz)
-  if (css === null) return null
-  return [
-    parseInt(css.slice(1, 3), 16) / 255,
-    parseInt(css.slice(3, 5), 16) / 255,
-    parseInt(css.slice(5, 7), 16) / 255,
-  ]
 }
 
 export interface TiltMesh {
@@ -34,22 +25,29 @@ export function buildTiltMesh(
   thresholdDbz: number,
   verticalExaggeration: number,
 ): TiltMesh | null {
-  const pos: number[] = []
-  const col: number[] = []
   const { azBins, rangeBins, dbz } = t
   const stepKm = t.rangeStepM / 1000
+  // Written by index into buffers sized for the worst case (every quad
+  // emitted) and sliced to the used length at the end. Growing plain arrays
+  // and converting boxed numbers to Float32Array afterwards cost more than
+  // the geometry itself on a full volume.
+  const maxFloats = azBins * (rangeBins - 1) * 6 * 3
+  const pos = new Float32Array(maxFloats)
+  const col = new Float32Array(maxFloats)
+  let n = 0
 
   const at = (a: number, r: number): number => dbz[(a % azBins) * rangeBins + r]
   const vert = (a: number, r: number, value: number): void => {
     const azR = (a / azBins) * 360 * DEG
     const rangeKm = r * stepKm
-    pos.push(
-      rangeKm * Math.sin(azR),
-      beamHeightKm(rangeKm, t.elevationDeg) * verticalExaggeration,
-      -rangeKm * Math.cos(azR),
-    )
-    const c = rgb(value) ?? [0.5, 0.5, 0.5]
-    col.push(c[0], c[1], c[2])
+    pos[n] = rangeKm * Math.sin(azR)
+    pos[n + 1] = beamHeightKm(rangeKm, t.elevationDeg) * verticalExaggeration
+    pos[n + 2] = -rangeKm * Math.cos(azR)
+    const c = dbzToRgb(value) ?? FALLBACK_RGB
+    col[n] = c[0]
+    col[n + 1] = c[1]
+    col[n + 2] = c[2]
+    n += 3
   }
 
   for (let a = 0; a < azBins; a++) {
@@ -74,6 +72,6 @@ export function buildTiltMesh(
       vert(a + 1, r + 1, v11)
     }
   }
-  if (pos.length === 0) return null
-  return { positions: new Float32Array(pos), colors: new Float32Array(col) }
+  if (n === 0) return null
+  return { positions: pos.slice(0, n), colors: col.slice(0, n) }
 }
