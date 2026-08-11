@@ -33,6 +33,8 @@ probes that point. Works on desktop and mobile, in dark or light.
 | 3D echo | Tilt surfaces in 3D over a basemap floor, threshold + orbit, heading tape | ✅ |
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
 | Radar quality + resolution | Clutter suppression, seamless zoom handoff, multi-site blending | ⚠️ needs work |
+| Dual-pol products | SW/ZDR/PHI/RHO decoded, but only REF/VEL can be displayed | ⚠️ needs work |
+| Scan time + VCP | Volume age and coverage pattern shown on the panel | 🔭 |
 | Isosurface raymarch | Solid volume instead of tilt surfaces | 🔭 |
 | `.pal` color tables | Import GRLevelX community palettes | 🔭 |
 
@@ -263,6 +265,18 @@ probes that point. Works on desktop and mobile, in dark or light.
    - Also worth revisiting: dual-bin azimuth writes were a stopgap for
      1°-spaced cuts and may be widening returns; range-folded and
      below-threshold gates should be visually distinct from "no echo".
+   - **Displayable dual-pol moments.** The decoder already handles
+     REF/VEL/SW/ZDR/PHI/RHO/CFP and the gate probe reads four of them, but
+     only reflectivity and velocity can be *painted* — the product picker
+     offers nothing else. Spectrum width, differential reflectivity,
+     differential phase and correlation coefficient are decoded and
+     unreachable. Exposing them is the prerequisite for the clutter masking
+     above and for the TDS/hail presets in PLAN.md §3.3.3.
+   - **Scan time and VCP on the panel.** Nothing says how old the current
+     volume is or which coverage pattern produced it, so a stalled feed and
+     a fresh one look identical. Every real radar app shows both — a
+     4-minute severe-weather scan and a 10-minute clear-air scan are read
+     differently. The decoder knows both; the panel just never shows them.
 5. **Performance pass** — the app has been built feature-first and never
    profiled. Known suspects, roughly in order of expected payoff:
    - **The live clock re-renders everything.** The timeline ticks 4×/second
