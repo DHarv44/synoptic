@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { RasterTileSource } from 'maplibre-gl'
+import type { ExpressionSpecification, RasterTileSource } from 'maplibre-gl'
 import { fetchJson } from '@/core/data/fetchJson'
 import { startPoller } from '@/core/data/scheduler'
 import { featureEnabled, useFeatureOption } from '@/core/settings/store'
@@ -17,7 +17,24 @@ import {
 } from '@/features/radar/service'
 import { boundsInsideConus, iemProduct, iemTileTemplate, CONUS } from '@/features/radar/iem'
 
+/** Tile ceilings: past these the source has no more detail to give. */
+const RV_MAXZOOM = 7
+const IEM_MAXZOOM = 12
+
 const POLL_MS = 120_000
+
+/**
+ * Below a source's maxzoom every zoom step fetches genuinely finer tiles, so
+ * nearest-neighbour is right: it shows the data as measured. Above it there
+ * is no more data — the same image is just magnified — and nearest turns
+ * that into hard blocks that snap into view the moment the ceiling is
+ * crossed, which reads as the radar abruptly changing. Interpolate past the
+ * ceiling so it softens instead. `smooth` forces it on everywhere.
+ */
+function resampling(maxzoom: number, smooth: boolean): ExpressionSpecification | 'linear' {
+  if (smooth) return 'linear'
+  return ['step', ['zoom'], 'nearest', maxzoom, 'linear']
+}
 
 /** Global composite radar (RainViewer) + CONUS high-res (IEM), timeline-driven. */
 export function RadarLayer() {
@@ -67,7 +84,7 @@ export function RadarLayer() {
         tileSize: 256,
         // RainViewer's composite stops at z7 — overzoom beyond instead of
         // requesting their "Zoom Level Not Supported" placeholder tiles.
-        maxzoom: 7,
+        maxzoom: RV_MAXZOOM,
         attribution: 'Radar © RainViewer',
       })
       addDataLayer(
@@ -79,7 +96,7 @@ export function RadarLayer() {
           paint: {
             'raster-opacity': opacity / 100,
             'raster-fade-duration': 150,
-            'raster-resampling': smooth ? 'linear' : 'nearest',
+            'raster-resampling': resampling(RV_MAXZOOM, smooth),
           },
         },
         'radar',
@@ -100,11 +117,13 @@ export function RadarLayer() {
       if (map.getLayer('radar-rv')) {
         map.setLayoutProperty('radar-rv', 'visibility', mosaicCovers ? 'none' : 'visible')
       }
-      const resampling = smooth ? 'linear' : 'nearest'
-      for (const id of ['radar-rv', 'radar-iem']) {
+      for (const [id, maxzoom] of [
+        ['radar-rv', RV_MAXZOOM],
+        ['radar-iem', IEM_MAXZOOM],
+      ] as const) {
         if (!map.getLayer(id)) continue
         map.setPaintProperty(id, 'raster-opacity', opacity / 100)
-        map.setPaintProperty(id, 'raster-resampling', resampling)
+        map.setPaintProperty(id, 'raster-resampling', resampling(maxzoom, smooth))
       }
     },
     [rvTiles, opacity, smooth, mosaicCovers],
@@ -118,7 +137,7 @@ export function RadarLayer() {
         type: 'raster',
         tiles: [iemTileTemplate(product)],
         tileSize: 256,
-        maxzoom: 12,
+        maxzoom: IEM_MAXZOOM,
         bounds: [CONUS.lonMin, CONUS.latMin, CONUS.lonMax, CONUS.latMax],
         attribution: 'NEXRAD © Iowa Environmental Mesonet',
       })
@@ -131,7 +150,7 @@ export function RadarLayer() {
           paint: {
             'raster-opacity': opacity / 100,
             'raster-fade-duration': 150,
-            'raster-resampling': smooth ? 'linear' : 'nearest',
+            'raster-resampling': resampling(IEM_MAXZOOM, smooth),
           },
         },
         'radar-conus',

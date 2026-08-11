@@ -12,13 +12,27 @@ export function overConus(lat: number, lon: number): boolean {
 }
 
 /**
- * Whole viewport inside the mosaic's coverage — the test for whether the
- * global composite can be hidden without leaving a blank edge.
+ * Where the mosaic reliably has data, as opposed to `CONUS` above, which is
+ * deliberately generous so tile requests aren't clipped at the edges. Hiding
+ * the global composite is only safe inside this tighter box: the generous
+ * one reaches Cuba and central Canada, where the mosaic renders nothing and
+ * suppressing the global layer left the map bare.
+ */
+const MOSAIC_CORE = { latMin: 26, latMax: 48, lonMin: -123, lonMax: -70 }
+
+/**
+ * Whole viewport inside the mosaic's real coverage — the test for whether
+ * the global composite can be hidden without leaving a blank edge.
  */
 export function boundsInsideConus(b: [number, number, number, number] | null): boolean {
   if (!b) return false
   const [w, s, e, n] = b
-  return w >= CONUS.lonMin && e <= CONUS.lonMax && s >= CONUS.latMin && n <= CONUS.latMax
+  return (
+    w >= MOSAIC_CORE.lonMin &&
+    e <= MOSAIC_CORE.lonMax &&
+    s >= MOSAIC_CORE.latMin &&
+    n <= MOSAIC_CORE.latMax
+  )
 }
 
 /**
