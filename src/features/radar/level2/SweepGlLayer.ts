@@ -2,20 +2,12 @@ import type { CustomLayerInterface, Map as MLMap } from 'maplibre-gl'
 import { SWEEP_FRAG, SWEEP_VERT } from '@/features/radar/level2/shaders'
 import { LUT_RANGES, reflectivityLut, velocityLut } from '@/features/radar/level2/colormap'
 import type { SweepMessage } from '@/features/radar/level2/worker'
+import { linkProgram } from '@/map/glUtils'
 
 const EARTH_CIRC = 40075016.686
-const RANGE_M = 460_000
+/** Radar display range (m) — the sweep quad's half-size. */
+export const RANGE_M = 460_000
 const DEG = Math.PI / 180
-
-function compile(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
-  const sh = gl.createShader(type) as WebGLShader
-  gl.shaderSource(sh, src)
-  gl.compileShader(sh)
-  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-    throw new Error(gl.getShaderInfoLog(sh) ?? 'shader error')
-  }
-  return sh
-}
 
 /** MapLibre custom layer drawing one polar sweep around a site. */
 export class SweepGlLayer implements CustomLayerInterface {
@@ -62,14 +54,7 @@ export class SweepGlLayer implements CustomLayerInterface {
     if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL2 required')
     this.map = map
     this.gl = gl
-    const p = gl.createProgram() as WebGLProgram
-    gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, SWEEP_VERT))
-    gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, SWEEP_FRAG))
-    gl.linkProgram(p)
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
-      throw new Error(gl.getProgramInfoLog(p) ?? 'link error')
-    }
-    this.program = p
+    this.program = linkProgram(gl, SWEEP_VERT, SWEEP_FRAG)
 
     this.vao = gl.createVertexArray()
     gl.bindVertexArray(this.vao)

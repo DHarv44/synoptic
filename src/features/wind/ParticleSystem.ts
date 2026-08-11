@@ -1,26 +1,6 @@
 import { DRAW_FRAG, DRAW_VERT, QUAD_VERT, SIM_FRAG } from '@/features/wind/shaders'
 import type { WindField } from '@/features/wind/service'
-
-function compile(gl: WebGL2RenderingContext, type: number, src: string): WebGLShader {
-  const sh = gl.createShader(type) as WebGLShader
-  gl.shaderSource(sh, src)
-  gl.compileShader(sh)
-  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-    throw new Error(`shader: ${gl.getShaderInfoLog(sh) ?? '?'}`)
-  }
-  return sh
-}
-
-function link(gl: WebGL2RenderingContext, vert: string, frag: string): WebGLProgram {
-  const p = gl.createProgram() as WebGLProgram
-  gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, vert))
-  gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, frag))
-  gl.linkProgram(p)
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
-    throw new Error(`link: ${gl.getProgramInfoLog(p) ?? '?'}`)
-  }
-  return p
-}
+import { linkProgram } from '@/map/glUtils'
 
 /**
  * GPGPU particle advection through a wind field (webgl-wind pattern):
@@ -45,8 +25,8 @@ export class ParticleSystem {
     if (!gl.getExtension('EXT_color_buffer_float')) {
       throw new Error('EXT_color_buffer_float unavailable')
     }
-    this.simProgram = link(gl, QUAD_VERT, SIM_FRAG)
-    this.drawProgram = link(gl, DRAW_VERT, DRAW_FRAG)
+    this.simProgram = linkProgram(gl, QUAD_VERT, SIM_FRAG)
+    this.drawProgram = linkProgram(gl, DRAW_VERT, DRAW_FRAG)
 
     this.quadVao = gl.createVertexArray() as WebGLVertexArrayObject
     gl.bindVertexArray(this.quadVao)

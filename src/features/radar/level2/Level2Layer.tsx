@@ -11,7 +11,7 @@ import { nearestSite, type RadarSite } from '@/features/radar/level2/sites'
 import { fetchSoundingSeries, soundingAt } from '@/core/data/openMeteo/sounding'
 import { bunkersRightMover, type UV } from '@/core/met/kinematics'
 import { fetchChunk, findCurrentVolume, listVolumeChunks } from '@/features/radar/level2/volume'
-import { SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
+import { RANGE_M, SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
 import { Level2Control, type ProbeReadout } from '@/features/radar/level2/Level2Control'
 import type {
   ProbeResultMessage,
@@ -24,7 +24,6 @@ export const L2_SOURCE: SourceRef = { id: 'nexrad-l2', label: 'NEXRAD Level 2' }
 
 const POLL_MS = 15_000
 const MIN_ZOOM = 6
-const RANGE_M = 460_000
 const DEG = Math.PI / 180
 const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
 
