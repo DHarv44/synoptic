@@ -43,6 +43,14 @@ Single entry point for continuing SYNOPTIC. Read in this order:
      Level2Control a real home). Note this changes the registry's panel
      contribution model — panels currently register flat; they'll need a
      group/slot field in `FeatureManifest`.
+   - **Deeper per-feature settings** (README has the full priority list):
+     alert event-type/severity filtering first (marine warnings swamp the
+     list), decoupled units (kt/inHg/kft/nm independent of metric-imperial),
+     L2 defaults + site lock, radar loop length/speed, lightning fade
+     window, cell display thresholds, METAR content/density, timeline
+     defaults, per-source cadence. Then **presets** (PLAN §3.13a, never
+     built) and settings search. Adding fields is cheap — they're declared
+     in `FeatureManifest.settings` and the UI generates itself.
    - Plus: timeline affordances, empty states, keyboard (tab switch, Esc),
      deferred polish (alert ticker, `.pal` tables, manual site picker,
      layer re-ordering, zone-alert geometry, globe projection restore).

@@ -105,6 +105,31 @@ probes that point.
      echo view, and the cross-section, all in one place. This also gives the
      floating site control a real home instead of hovering over the map.
 
+   **Deeper settings** — the registry already generates the settings UI from
+   each feature's manifest, so new controls are cheap to add; the discipline
+   is choosing ones that earn their place. Priority order:
+   - **Alert filtering by event type + severity floor** — the biggest noise
+     win available (Special Marine Warnings routinely make up the large
+     majority of active alerts; inland users should be able to retire them).
+   - **Decoupled units** — wind in kt/mph/km-h/m-s, pressure in hPa/inHg,
+     heights in m/ft/kft, distance in km/mi/nm, independent of the metric /
+     imperial system switch, the way professional tools do it.
+   - **Level 2 defaults** — default moment and tilt, site lock (manual pick
+     vs auto-nearest), range rings, dealiasing default.
+   - **Radar loop behavior** — loop length (30 min / 1 h / 2 h), speed,
+     end-frame dwell.
+   - **Lightning fade window**, **storm-cell display thresholds** (min dBZ /
+     VIL, or TVS-and-meso only), **METAR content + density**, satellite
+     product/band expansion, wind trail length and color-by, timeline
+     defaults (range, arrow-key step, auto-return-to-live), basemap style
+     and label density, per-source refresh cadence for bandwidth/battery.
+   - **Presets** — Workstation / Chase / Minimal plus user-saved profiles
+     (specified in PLAN.md §3.13a, never built) and **settings search**;
+     both matter much more once the knob count grows.
+   - Deliberately *not* exposing per-layer draw order — the stacking is
+     meaningful (labels over radar over satellite) and mostly offers users a
+     way to break their own display.
+
    Also in scope: timeline affordances, information density, empty states,
    keyboard access (tab switching, Esc to dismiss drawers), and the deferred
    polish items (alert ticker, manual radar site picker, layer re-ordering,
