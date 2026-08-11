@@ -18,6 +18,15 @@ const REF_STOPS: Array<[number, string]> = [
   [75, '#fdfdfd'],
 ]
 
+/** CSS color for a dBZ value (CPU twin of the shader LUT); null below 5 dBZ. */
+export function dbzToCss(dbz: number): string | null {
+  let color: string | null = null
+  for (const [t, c] of REF_STOPS) {
+    if (dbz >= t) color = c
+  }
+  return color
+}
+
 /** Value range each LUT spans (shader maps value→index linearly). */
 export const LUT_RANGES: Record<string, [number, number]> = {
   REF: [-32, 95.5],

@@ -132,12 +132,35 @@ function probeColumn(azDeg: number, rangeM: number): void {
   self.postMessage({ type: 'columnResult', azDeg, rangeM, column } satisfies ColumnResultMessage)
 }
 
+export interface SectionTilt {
+  elevationDeg: number
+  values: Array<number | null>
+}
+
+export interface SectionResultMessage {
+  type: 'sectionResult'
+  tilts: SectionTilt[]
+}
+
+/** REF along a polyline of (az, range) samples, per tilt — RHI slice data. */
+function section(samples: Array<{ azDeg: number; rangeM: number }>): void {
+  const tilts: SectionTilt[] = [...store.tiltDegs.entries()]
+    .sort((a, b) => a[1] - b[1])
+    .map(([elevNum, elevationDeg]) => ({
+      elevationDeg,
+      values: samples.map((s) => store.valueAt(store.key(elevNum, 'REF'), s.azDeg, s.rangeM)),
+    }))
+    .filter((t) => t.values.some((v) => v !== null))
+  self.postMessage({ type: 'sectionResult', tilts } satisfies SectionResultMessage)
+}
+
 type Request =
   | { type: 'chunk'; buf: ArrayBuffer; isStart: boolean }
   | { type: 'reset' }
   | { type: 'select'; elevNum: number; moment: string; raw: boolean }
   | { type: 'probe'; azDeg: number; rangeM: number }
   | { type: 'probeColumn'; azDeg: number; rangeM: number }
+  | { type: 'section'; samples: Array<{ azDeg: number; rangeM: number }> }
 
 self.onmessage = (ev: MessageEvent<Request>) => {
   const msg = ev.data
@@ -156,6 +179,10 @@ self.onmessage = (ev: MessageEvent<Request>) => {
   }
   if (msg.type === 'probeColumn') {
     probeColumn(msg.azDeg, msg.rangeM)
+    return
+  }
+  if (msg.type === 'section') {
+    section(msg.samples)
     return
   }
   if (store.ingest(msg.buf, msg.isStart, selected)) postSelectedSweep()

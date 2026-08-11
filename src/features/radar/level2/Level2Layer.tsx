@@ -17,10 +17,14 @@ import type {
   ColumnEntry,
   ColumnResultMessage,
   ProbeResultMessage,
+  SectionResultMessage,
+  SectionTilt,
   SweepMessage,
   TiltInfo,
   TiltsMessage,
 } from '@/features/radar/level2/worker'
+import { distanceKm, sampleLine, toAzRange, type LatLon } from '@/features/radar/level2/geometry'
+import { SectionPlot } from '@/features/radar/level2/SectionPlot'
 
 export const L2_SOURCE: SourceRef = { id: 'nexrad-l2', label: 'NEXRAD Level 2' }
 
@@ -29,7 +33,14 @@ const MIN_ZOOM = 6
 const DEG = Math.PI / 180
 const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
 
-type WorkerOut = SweepMessage | TiltsMessage | ProbeResultMessage | ColumnResultMessage
+const SECTION_SAMPLES = 80
+
+type WorkerOut =
+  | SweepMessage
+  | TiltsMessage
+  | ProbeResultMessage
+  | ColumnResultMessage
+  | SectionResultMessage
 
 /** Single-site Level 2: streaming sweeps, tilt/moment control, gate probe. */
 export function Level2Layer() {
@@ -44,6 +55,10 @@ export function Level2Layer() {
   const [raw, setRaw] = useState(false)
   const [storm, setStorm] = useState<UV | null>(null)
   const [column, setColumn] = useState<ColumnEntry[] | null>(null)
+  const [section, setSection] = useState<SectionTilt[] | null>(null)
+  const [sectionMeta, setSectionMeta] = useState<{ ranges: number[]; lengthKm: number } | null>(null)
+  const [sectionLine, setSectionLine] = useState<LatLon[] | null>(null)
+  const sectionARef = useRef<LatLon | null>(null)
   const layerRef = useRef<SweepGlLayer | null>(null)
   const workerRef = useRef<Worker | null>(null)
   const lastClickRef = useRef<{ azDeg: number; rangeM: number } | null>(null)
@@ -77,6 +92,43 @@ export function Level2Layer() {
     if (layerRef.current) layerRef.current.opacity = opacity / 100
     map.triggerRepaint()
   }, [opacity, map])
+
+  // Section line A→B drawn over the sweep.
+  useMapLayer(
+    (m) => {
+      const data: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: sectionLine
+          ? [
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'LineString',
+                  coordinates: sectionLine.map((p) => [p.lon, p.lat]),
+                },
+              },
+            ]
+          : [],
+      }
+      m.addSource('l2-section', { type: 'geojson', data })
+      m.addLayer({
+        id: 'l2-section',
+        type: 'line',
+        source: 'l2-section',
+        paint: {
+          'line-color': '#ffd43b',
+          'line-width': 2,
+          'line-dasharray': [2, 1],
+        },
+      })
+      return () => {
+        if (m.getLayer('l2-section')) m.removeLayer('l2-section')
+        if (m.getSource('l2-section')) m.removeSource('l2-section')
+      }
+    },
+    [sectionLine],
+  )
 
   // Storm motion (Bunkers right-mover) from the model sounding at the site.
   useEffect(() => {
@@ -120,6 +172,7 @@ export function Level2Layer() {
       if (msg.type === 'sweep') layerRef.current?.setSweep(msg)
       else if (msg.type === 'tilts') setTilts(msg.tilts)
       else if (msg.type === 'columnResult') setColumn(msg.column)
+      else if (msg.type === 'sectionResult') setSection(msg.tilts)
       else if (msg.type === 'probeResult') {
         const click = lastClickRef.current
         if (!click) return
@@ -131,12 +184,30 @@ export function Level2Layer() {
     }
 
     const onClick = (e: MapMouseEvent): void => {
-      const dLat = (e.lngLat.lat - activeSite.lat) * DEG * 6_371_000
-      const dLon =
-        (e.lngLat.lng - activeSite.lon) * DEG * 6_371_000 * Math.cos(activeSite.lat * DEG)
-      const rangeM = Math.hypot(dLat, dLon)
+      const here = { lat: e.lngLat.lat, lon: e.lngLat.lng }
+
+      // Shift+click: first sets the section start, second draws the slice.
+      if (e.originalEvent.shiftKey) {
+        const a = sectionARef.current
+        if (!a) {
+          sectionARef.current = here
+          setSectionLine([here, here])
+          return
+        }
+        const pts = sampleLine(a, here, SECTION_SAMPLES)
+        const azRanges = pts.map((p) => toAzRange(activeSite, p))
+        sectionARef.current = null
+        setSectionLine([a, here])
+        setSectionMeta({
+          ranges: azRanges.map((s) => s.rangeM),
+          lengthKm: distanceKm(a, here),
+        })
+        worker.postMessage({ type: 'section', samples: azRanges })
+        return
+      }
+
+      const { azDeg, rangeM } = toAzRange(activeSite, here)
       if (rangeM > RANGE_M) return
-      const azDeg = ((Math.atan2(dLon, dLat) / DEG) + 360) % 360
       lastClickRef.current = { azDeg, rangeM }
       worker.postMessage({ type: 'probe', azDeg, rangeM })
       worker.postMessage({ type: 'probeColumn', azDeg, rangeM })
@@ -197,7 +268,19 @@ export function Level2Layer() {
 
   if (!site) return null
   return (
-    <Level2Control
+    <>
+      {section && sectionMeta && (
+        <SectionPlot
+          tilts={section}
+          sampleRangesM={sectionMeta.ranges}
+          lengthKm={sectionMeta.lengthKm}
+          onClose={() => {
+            setSection(null)
+            setSectionLine(null)
+          }}
+        />
+      )}
+      <Level2Control
       siteId={site.id}
       siteName={site.name}
       tilts={tilts}
@@ -213,7 +296,8 @@ export function Level2Layer() {
         setRaw(on)
         select(sel.elevNum, sel.moment, on)
       }}
-      stormMotion={stormMotion}
-    />
+        stormMotion={stormMotion}
+      />
+    </>
   )
 }

@@ -14,11 +14,12 @@ Single entry point for continuing SYNOPTIC. Read in this order:
   https://github.com/DHarv44/synoptic (remote `origin`, branch `main`).
 - **Working state is clean**: no uncommitted work in flight. If you find dirty
   files, `git status` + diff them against this doc's claims before trusting either.
-- **In progress (R7, partially done)**: All-Tilts SHIPPED (click → per-tilt
-  REF/VEL column in the site control; see worker `probeColumn` + sweeps.ts).
-  Remaining R7: vertical cross-section (drag line → range-height slice —
-  sample `SweepStore.valueAt` along the line per tilt), cell trend charts
-  (accumulate IEM attr snapshots client-side — there is no history API).
+- **In progress (R7, mostly done)**: All-Tilts SHIPPED (click → per-tilt
+  REF/VEL column; worker `probeColumn` + sweeps.ts). Cross-section SHIPPED
+  (shift+click A→B → worker `section` → SectionPlot RHI at true beam
+  heights + dashed map line). Remaining R7: cell trend charts — accumulate
+  IEM attr snapshots client-side keyed by `nexrad+storm_id` (no history
+  API), then plot max_dbz/VIL/top/hail over time in the Cells panel.
   Then R8: 3D radar volume (react-three-fiber returns; deps still installed).
 
 ## The end-game queue (user-agreed order: features first, then these)

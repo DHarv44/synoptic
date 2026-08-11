@@ -168,11 +168,12 @@ dependency order. Check boxes as slices land.
   severity-colored cell markers + id labels on the map, viewport-filtered
   cell table (dBZ/top/hail/TVS/meso) with click-to-fly. Shared-feed
   factory extracted (alerts refactored onto it).
-- [~] R7 — partial: **All-Tilts done** (probe click → per-tilt REF/VEL column
-  with beam heights in the site control; worker probeColumn message; sweep
-  storage split to sweeps.ts). Remaining: vertical cross-section (drag line →
-  range-height slice), cell trend charts (accumulate IEM attr snapshots
-  client-side — no history API).
+- [~] R7 — mostly done: **All-Tilts** (probe click → per-tilt REF/VEL column
+  with beam heights; worker `probeColumn`; sweep storage split to sweeps.ts)
+  and **vertical cross-section** (shift+click A then B → worker `section`
+  samples REF along the line per tilt → RHI-style plot at true beam heights,
+  dashed section line on the map). Remaining: cell trend charts (accumulate
+  IEM attr snapshots client-side — no history API).
 - [ ] R8 — 3D volume (R3F returns; raymarch/isosurface).
 
 ## Phase 7 (coarse; slice when reached)
