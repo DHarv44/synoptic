@@ -5,6 +5,7 @@ import { startPoller } from '@/core/data/scheduler'
 import { featureEnabled, useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
 import { useMapLayer } from '@/map/useMapLayer'
+import { useMapView } from '@/map/viewStore'
 import { addDataLayer } from '@/map/layerOrder'
 import {
   RAINVIEWER,
@@ -14,7 +15,7 @@ import {
   tileUrlTemplate,
   type RainViewerMaps,
 } from '@/features/radar/service'
-import { iemProduct, iemTileTemplate, CONUS } from '@/features/radar/iem'
+import { boundsInsideConus, iemProduct, iemTileTemplate, CONUS } from '@/features/radar/iem'
 
 const POLL_MS = 120_000
 
@@ -42,9 +43,19 @@ export function RadarLayer() {
     })
   }, [])
 
+  const bounds = useMapView((s) => s.bounds)
   const frame = maps ? pickFrame(allFrames(maps), simTime) : null
   const rvTiles = maps && frame ? tileUrlTemplate(maps, frame, scheme, smooth) : null
   const product = iemProduct(simTime, Date.now())
+  /**
+   * The two composites are different products at different valid times, so
+   * they place the same storm several kilometres apart. Stacked, whichever
+   * finished loading wins — which is why the echo appeared to jump when a
+   * new zoom level's mosaic tiles arrived. Draw only one: the sharper
+   * mosaic wherever it fully covers the view, the global composite
+   * everywhere else.
+   */
+  const mosaicCovers = conusEnabled && product !== null && boundsInsideConus(bounds)
 
   // RainViewer global composite
   useMapLayer(
@@ -86,6 +97,9 @@ export function RadarLayer() {
     (map) => {
       const src = map.getSource('radar-rv') as RasterTileSource | undefined
       if (src && rvTiles) src.setTiles([rvTiles])
+      if (map.getLayer('radar-rv')) {
+        map.setLayoutProperty('radar-rv', 'visibility', mosaicCovers ? 'none' : 'visible')
+      }
       const resampling = smooth ? 'linear' : 'nearest'
       for (const id of ['radar-rv', 'radar-iem']) {
         if (!map.getLayer(id)) continue
@@ -93,7 +107,7 @@ export function RadarLayer() {
         map.setPaintProperty(id, 'raster-resampling', resampling)
       }
     },
-    [rvTiles, opacity, smooth],
+    [rvTiles, opacity, smooth, mosaicCovers],
   )
 
   // IEM CONUS high-res overlay (bounds-limited so no off-CONUS requests)

@@ -12,6 +12,7 @@ import { useProbe } from '@/core/probe/store'
 import { useCameraStore } from '@/map/cameraStore'
 import { useMapView } from '@/map/viewStore'
 import { useSavedCamera } from '@/map/cameraPersist'
+import { strengthenLabels } from '@/map/labels'
 import { useHealth } from '@/core/data/healthStore'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
@@ -70,6 +71,8 @@ export function MapView() {
       // particles) use plain mercator matrices, which globe projection
       // breaks. Globe returns when those layers adopt the projection API.
       map.setProjection({ type: 'mercator' })
+      // Re-applied on every style load — setStyle discards these overrides.
+      strengthenLabels(map, map.getStyle().name?.toLowerCase().includes('positron') ? 'light' : 'dark')
       setCtx((prev) => ({ map, styleVersion: (prev?.styleVersion ?? 0) + 1 }))
     })
     map.on('click', (e: MapMouseEvent) => {

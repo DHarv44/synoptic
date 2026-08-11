@@ -12,6 +12,16 @@ export function overConus(lat: number, lon: number): boolean {
 }
 
 /**
+ * Whole viewport inside the mosaic's coverage — the test for whether the
+ * global composite can be hidden without leaving a blank edge.
+ */
+export function boundsInsideConus(b: [number, number, number, number] | null): boolean {
+  if (!b) return false
+  const [w, s, e, n] = b
+  return w >= CONUS.lonMin && e <= CONUS.lonMax && s >= CONUS.latMin && n <= CONUS.latMax
+}
+
+/**
  * IEM NEXRAD base-reflectivity (n0q) tile product for a sim-time:
  * current product within ~2.5 min of now, else 5-min archive steps back
  * to 50 min, else null (RainViewer's 2h history covers the rest).
