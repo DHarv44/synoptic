@@ -79,6 +79,12 @@ probes that point.
    (alert ticker, manual radar site picker, layer re-ordering, zone-alert
    geometry resolution, restoring globe projection once custom WebGL layers
    adopt MapLibre's projection API).
+   - **Mobile / responsive view** — the workstation layout currently assumes a
+     desktop-width screen. Needs a real small-screen story: collapsible
+     rail and dock as sheets, touch-sized controls, a phone-appropriate
+     timeline, and sensible defaults for what's on screen at once. This is
+     also the groundwork the Chase HUD builds on (it's the same problem
+     solved for a truck mount), so it lands before or alongside item 3.
 3. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
    time-to-arrival from storm motion, SPC outlooks and mesoscale discussions,
    an intercept/escape route solver over OSM roads, placefile import, and a

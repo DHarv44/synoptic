@@ -34,7 +34,9 @@ Single entry point for continuing SYNOPTIC. Read in this order:
    deferred items to fold in: alert ticker, radar color-table `.pal` support,
    manual Level 2 site picker, layer re-ordering, zone-alert geometry
    resolution, globe projection restoration (needs maplibre projection
-   shader API in custom layers).
+   shader API in custom layers). **Includes a mobile/responsive pass**
+   (rail + dock as sheets, touch targets, phone timeline) — shares
+   groundwork with the Chase HUD, so do it before/with item 3.
 3. **Phase 7 Chase HUD** — PLAN.md §3.14.
 4. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
