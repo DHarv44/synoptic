@@ -8,9 +8,10 @@ registerFeature({
   title: 'Alerts',
   description: 'NWS active alerts: warning polygons on the globe + list panel (US).',
   layer: true,
+  layerGroup: 'reference',
   layerComponent: AlertsLayer,
   sourceIds: ['nws-alerts'],
-  panels: [{ id: 'alerts', title: 'Alerts', component: AlertsPanel }],
+  panels: [{ id: 'alerts', title: 'Alerts', component: AlertsPanel, group: 'nearby', order: 0 }],
   defaultEnabled: true,
   settings: [],
 })

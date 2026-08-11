@@ -6,7 +6,9 @@ registerFeature({
   id: 'meteogram',
   title: 'Meteogram',
   description: '7-day hourly meteogram for the probed location.',
-  panels: [{ id: 'meteogram', title: 'Meteogram', component: MeteogramPanel }],
+  panels: [
+    { id: 'meteogram', title: 'Meteogram', component: MeteogramPanel, group: 'place', order: 1 },
+  ],
   defaultEnabled: true,
   settings: [],
 })

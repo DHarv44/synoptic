@@ -7,6 +7,7 @@ registerFeature({
   title: 'Lightning',
   description: 'Live strikes from the Blitzortung community network (seconds latency).',
   layer: true,
+  layerGroup: 'observations',
   layerComponent: LightningLayer,
   sourceIds: ['blitzortung'],
   defaultEnabled: true,

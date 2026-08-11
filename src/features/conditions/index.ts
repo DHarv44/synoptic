@@ -6,7 +6,7 @@ registerFeature({
   id: 'conditions',
   title: 'Conditions',
   description: 'Current conditions at the probed location (Open-Meteo).',
-  panels: [{ id: 'conditions', title: 'Now', component: ConditionsPanel }],
+  panels: [{ id: 'conditions', title: 'Now', component: ConditionsPanel, group: 'place', order: 0 }],
   defaultEnabled: true,
   settings: [],
 })

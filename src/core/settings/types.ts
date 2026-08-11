@@ -21,11 +21,20 @@ export type SettingField =
       defaultValue: string
     }
 
+/** Top-level dock sections: probe-driven, viewport-driven, radar tools. */
+export type PanelGroup = 'place' | 'nearby' | 'radar'
+
 export interface PanelContribution {
   id: string
   title: string
   component: ComponentType
+  group: PanelGroup
+  /** Sort order within the group (lower first). */
+  order?: number
 }
+
+/** Grouping for the map's layer toggle popover. */
+export type LayerGroup = 'radar' | 'observations' | 'analysis' | 'reference'
 
 /**
  * Everything a feature tells the shell about itself. The settings screen,
@@ -36,8 +45,10 @@ export interface FeatureManifest {
   id: string
   title: string
   description: string
-  /** Contributes a togglable viewport layer (entry in the layer rail). */
+  /** Contributes a togglable map layer (entry in the map layer control). */
   layer?: boolean
+  /** Which group the layer toggle appears under. */
+  layerGroup?: LayerGroup
   /** R3F component rendered inside the globe scene while the feature is enabled. */
   layerComponent?: ComponentType
   /** Analysis dock panels this feature contributes. */

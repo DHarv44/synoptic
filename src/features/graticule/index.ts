@@ -5,8 +5,9 @@ import { GraticuleLayer } from '@/features/graticule/GraticuleLayer'
 registerFeature({
   id: 'graticule',
   title: 'Graticule',
-  description: 'Latitude/longitude grid lines on the globe.',
+  description: 'Latitude/longitude grid lines on the map.',
   layer: true,
+  layerGroup: 'reference',
   layerComponent: GraticuleLayer,
   defaultEnabled: true,
   settings: [

@@ -8,9 +8,10 @@ registerFeature({
   title: 'Storm cells',
   description: 'NEXRAD storm attributes (TVS/meso/hail) as markers + cell table.',
   layer: true,
+  layerGroup: 'observations',
   layerComponent: CellsLayer,
   sourceIds: ['iem-attr'],
-  panels: [{ id: 'cells', title: 'Cells', component: CellsPanel }],
+  panels: [{ id: 'cells', title: 'Cells', component: CellsPanel, group: 'nearby', order: 1 }],
   defaultEnabled: true,
   settings: [],
 })

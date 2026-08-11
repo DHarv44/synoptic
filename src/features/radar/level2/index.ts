@@ -11,9 +11,10 @@ registerFeature({
   title: 'Radar · Level 2',
   description: 'Single-site super-res reflectivity, streamed radial-by-radial (zoom in).',
   layer: true,
+  layerGroup: 'radar',
   layerComponent: Level2Layer,
   sourceIds: ['nexrad-l2'],
-  panels: [{ id: 'volume3d', title: '3D', component: Volume3D }],
+  panels: [{ id: 'volume3d', title: '3D echo', component: Volume3D, group: 'radar', order: 0 }],
   defaultEnabled: true,
   settings: [
     {

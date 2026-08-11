@@ -7,6 +7,7 @@ registerFeature({
   title: 'Surface obs',
   description: 'METAR station plots (temp, dewpoint, wind barb) when zoomed in.',
   layer: true,
+  layerGroup: 'observations',
   layerComponent: MetarLayer,
   sourceIds: ['metar'],
   defaultEnabled: true,

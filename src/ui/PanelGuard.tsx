@@ -18,7 +18,7 @@ export function PanelGuard({ error, loading, children }: PanelGuardProps) {
   if (!point) {
     return (
       <Text size="xs" c="dimmed">
-        Click the globe to probe a location.
+        Click anywhere on the map for conditions, forecast, and a sounding.
       </Text>
     )
   }

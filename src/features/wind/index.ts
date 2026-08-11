@@ -7,6 +7,7 @@ registerFeature({
   title: 'Wind',
   description: 'GFS wind as GPU particle flow — surface up to the jet stream.',
   layer: true,
+  layerGroup: 'analysis',
   layerComponent: WindLayer,
   sourceIds: ['gfs-wind'],
   // Off by default until the pinned wind-field corruption is fixed (SLICES.md).

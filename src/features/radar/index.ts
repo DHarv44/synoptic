@@ -7,6 +7,7 @@ registerFeature({
   title: 'Radar',
   description: 'Global composite precipitation radar (RainViewer, 10-min updates).',
   layer: true,
+  layerGroup: 'radar',
   layerComponent: RadarLayer,
   sourceIds: ['rainviewer', 'iem-nexrad'],
   defaultEnabled: true,

@@ -7,6 +7,7 @@ registerFeature({
   title: 'Satellite',
   description: 'NASA GIBS satellite imagery (daily VIIRS; timeline-dated).',
   layer: true,
+  layerGroup: 'analysis',
   layerComponent: SatelliteLayer,
   sourceIds: ['gibs'],
   defaultEnabled: false,
