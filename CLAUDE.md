@@ -1,8 +1,9 @@
 # SYNOPTIC
 
 Web-native weather workstation: real public weather data (Open-Meteo, NEXRAD, MRMS, GOES,
-Blitzortung…), R3F globe, pro analysis tools (skew-T, radar interrogation), chase mode.
-**Read PLAN.md** (full spec) and **SLICES.md** (build order + status) before working.
+Blitzortung…), MapLibre map, pro analysis tools (skew-T, radar interrogation), chase mode.
+**Read HANDOFF.md first** (current state, in-flight work, traps), then PLAN.md (full
+spec) and SLICES.md (build order + status).
 
 ## Commands
 
