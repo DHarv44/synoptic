@@ -61,7 +61,7 @@ export class SweepGlLayer implements CustomLayerInterface {
     const buf = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, buf)
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW)
-    const loc = gl.getAttribLocation(p, 'a_pos')
+    const loc = gl.getAttribLocation(this.program, 'a_pos')
     gl.enableVertexAttribArray(loc)
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
     gl.bindVertexArray(null)
