@@ -123,16 +123,23 @@ export function Volume3D() {
         />
       </Group>
       <div style={{ flex: 1, minHeight: 220, borderRadius: 4, overflow: 'hidden' }}>
-        <Canvas camera={{ position: [0, 90, 190], fov: 45, far: 4000 }} dpr={[1, 2]}>
+        <Canvas camera={{ position: [0, 150, 200], fov: 45, far: 4000 }} dpr={[1, 2]}>
           <color attach="background" args={['#0b0e12']} />
           <GroundPlane radiusKm={GROUND_RADIUS_KM} opacity={groundOpacity / 100} />
           <TiltSurfaces tilts={tilts} threshold={threshold} />
-          <OrbitControls enablePan={false} minDistance={40} maxDistance={900} />
+          {/* Left drag orbits, right drag pans across the ground, wheel zooms. */}
+          <OrbitControls
+            enablePan
+            screenSpacePanning={false}
+            minDistance={40}
+            maxDistance={900}
+          />
         </Canvas>
       </div>
       <Text size="xs" c="dimmed">
         Surfaces are the radar's actual beam cones (vertical ×{VERTICAL_EXAGGERATION});
-        gaps between tilts are unsampled air, not missing echo. Grid 30 km.
+        gaps between tilts are unsampled air, not missing echo. Rings 50/100/150 km.
+        Drag to orbit, right-drag to pan, scroll to zoom.
       </Text>
     </Stack>
   )
