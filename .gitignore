@@ -1,6 +1,11 @@
 node_modules/
 dist/
+coverage/
 *.local
+*.log
+*.tmp.*
 .env
+.env.*
 server/.env
 .DS_Store
+Thumbs.db
