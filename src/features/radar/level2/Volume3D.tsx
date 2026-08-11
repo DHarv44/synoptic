@@ -3,7 +3,8 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Button, Group, Slider, Stack, Text } from '@mantine/core'
 import { DoubleSide } from 'three'
-import { currentSite, onVolume, requestVolume } from '@/features/radar/level2/bridge'
+import { onVolume, requestVolume } from '@/features/radar/level2/bridge'
+import { useRadar } from '@/features/radar/level2/store'
 import { buildTiltMesh } from '@/features/radar/level2/volumeGeometry'
 import { GroundPlane } from '@/features/radar/level2/GroundPlane'
 import { CameraBearing, ViewCompass, ViewLoading } from '@/features/radar/level2/ViewCompass'
@@ -49,21 +50,21 @@ export function Volume3D() {
   const [tilts, setTilts] = useState<VolumeTilt[]>([])
   const [threshold, setThreshold] = useState(30)
   const [groundOpacity, setGroundOpacity] = useState(55)
-  const [msg, setMsg] = useState<string | null>(null)
   const [bearing, setBearing] = useState(0)
   const [volumeLoading, setVolumeLoading] = useState(false)
   const [groundLoading, setGroundLoading] = useState(false)
   const stallRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null)
+  const site = useRadar((s) => s.site)
+  const tiltCount = useRadar((s) => s.tilts.length)
 
   /** Ask the worker for a volume, showing the spinner until it answers. */
-  const ask = useCallback((): boolean => {
-    if (!requestVolume()) return false
+  const ask = useCallback((): void => {
+    if (!requestVolume()) return
     setVolumeLoading(true)
     // The worker owns no timeout of its own; don't spin forever if it never answers.
     clearTimeout(stallRef.current)
     stallRef.current = setTimeout(() => setVolumeLoading(false), 20_000)
-    return true
   }, [])
 
   useEffect(() => {
@@ -71,26 +72,30 @@ export function Volume3D() {
       clearTimeout(stallRef.current)
       setVolumeLoading(false)
       setTilts(m.tilts)
-      setMsg(m.tilts.length === 0 ? 'No sweeps retained yet — waiting for radials.' : null)
     })
-    // The layer's worker may not exist yet (site still resolving) — retry.
-    let tries = 0
-    const timer = setInterval(() => {
-      if (ask() || tries++ > 10) {
-        clearInterval(timer)
-        if (tries > 10) setMsg('Zoom in past z6 so a Level 2 site is active.')
-      }
-    }, 1500)
-    if (ask()) clearInterval(timer)
     return () => {
-      clearInterval(timer)
       clearTimeout(stallRef.current)
       off()
     }
-  }, [ask])
+  }, [])
 
-  const site = currentSite()
+  // The worker only builds a volume when asked, so ask again whenever a new
+  // elevation lands. Radials filling in an existing tilt don't re-trigger —
+  // that would rebuild the whole grid every chunk; Refresh covers it.
+  useEffect(() => {
+    if (!site) {
+      setTilts([])
+      return
+    }
+    ask()
+  }, [site, tiltCount, ask])
+
   const busy = volumeLoading || groundLoading
+  const msg = !site
+    ? 'No radar attached — pick one in the Radar panel, or zoom in past z6.'
+    : tilts.length === 0
+      ? 'Waiting for radials — the echo builds as the volume streams in.'
+      : null
 
   return (
     <Stack gap="xs" h="100%" p="xs" style={{ minHeight: 0 }}>
@@ -98,13 +103,7 @@ export function Volume3D() {
         <Text size="sm" fw={600}>
           {site ? `${site.id} · 3D echo` : '3D echo'}
         </Text>
-        <Button
-          size="compact-xs"
-          variant="light"
-          onClick={() => {
-            if (!ask()) setMsg('Zoom in past z6 so a Level 2 site is active.')
-          }}
-        >
+        <Button size="compact-xs" variant="light" disabled={!site} onClick={ask}>
           Refresh
         </Button>
       </Group>
