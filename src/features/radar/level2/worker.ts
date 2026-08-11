@@ -84,6 +84,37 @@ function postSelectedSweep(): void {
   self.postMessage(msg, [msg.tex.buffer])
 }
 
+/**
+ * A sweep texture is 720 azimuth bins × up to ~1832 gates — about 1.3 MB,
+ * copied and transferred on every post. Chunks arrive in bursts as a volume
+ * downloads, so post on the leading edge and coalesce the rest: the display
+ * still fills in radial by radial, without a megabyte per chunk.
+ */
+const SWEEP_POST_MS = 120
+let sweepTimer: ReturnType<typeof setTimeout> | undefined
+let sweepPending = false
+
+function scheduleSweepPost(): void {
+  if (sweepTimer !== undefined) {
+    sweepPending = true
+    return
+  }
+  postSelectedSweep()
+  sweepTimer = setTimeout(() => {
+    sweepTimer = undefined
+    if (sweepPending) {
+      sweepPending = false
+      scheduleSweepPost()
+    }
+  }, SWEEP_POST_MS)
+}
+
+/**
+ * Last tilt list posted, so unchanged lists don't churn the store. null, not
+ * '', so the empty list after a reset still posts once.
+ */
+let lastTiltsKey: string | null = null
+
 function postTilts(): void {
   const tilts: TiltInfo[] = [...store.tiltDegs.entries()]
     .map(([num, deg]) => ({
@@ -99,6 +130,12 @@ function postTilts(): void {
     }))
     .filter((t) => t.moments.length > 0)
     .sort((a, b) => a.num - b.num)
+  // Every chunk re-derives this list, but it only actually changes when a new
+  // elevation or moment appears. Posting regardless replaced the array in the
+  // store on each chunk, re-rendering every reader for identical content.
+  const key = tilts.map((t) => `${t.num}:${t.deg}:${t.moments.join(',')}`).join('|')
+  if (key === lastTiltsKey) return
+  lastTiltsKey = key
   self.postMessage({ type: 'tilts', tilts } satisfies TiltsMessage)
 }
 
@@ -207,6 +244,7 @@ self.onmessage = (ev: MessageEvent<Request>) => {
   const msg = ev.data
   if (msg.type === 'reset') {
     store.clear()
+    lastTiltsKey = null
     return
   }
   if (msg.type === 'select') {
@@ -230,6 +268,6 @@ self.onmessage = (ev: MessageEvent<Request>) => {
     volume()
     return
   }
-  if (store.ingest(msg.buf, msg.isStart, selected)) postSelectedSweep()
+  if (store.ingest(msg.buf, msg.isStart, selected)) scheduleSweepPost()
   postTilts()
 }
