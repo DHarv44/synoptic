@@ -1,19 +1,10 @@
 import { Stack, Tooltip, UnstyledButton } from '@mantine/core'
-import { listFeatures } from '@/core/settings/registry'
-import { useSettings } from '@/core/settings/store'
 import { useTools } from '@/app/shell/toolStore'
+import { useAvailableTools } from '@/app/shell/toolRegistry'
 import { mapChromeStyle } from '@/ui/mapChrome'
 import type { ToolContribution } from '@/core/settings/types'
 
 const RAIL_WIDTH = 44
-
-/** Tools contributed by currently enabled features. */
-export function useAvailableTools(): ToolContribution[] {
-  const featureStates = useSettings((s) => s.features)
-  return listFeatures()
-    .filter((f) => featureStates[f.id]?.enabled ?? f.defaultEnabled ?? true)
-    .flatMap((f) => f.tools ?? [])
-}
 
 function ToolButton({ tool }: { tool: ToolContribution }) {
   const active = useTools((s) => s.active === tool.id)

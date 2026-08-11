@@ -8,6 +8,7 @@ import { ToolPanel } from '@/app/shell/ToolPanel'
 import { Viewport } from '@/app/shell/Viewport'
 import { useDock } from '@/app/shell/dockStore'
 import { useTools } from '@/app/shell/toolStore'
+import { useActiveTool } from '@/app/shell/toolRegistry'
 import { SearchSpotlight } from '@/features/search/SearchSpotlight'
 import { useChromeOpacity } from '@/ui/useChromeOpacity'
 
@@ -15,13 +16,13 @@ export const MOBILE_QUERY = '(max-width: 48em)'
 
 export function Shell() {
   const dockOpen = useDock((s) => s.open)
-  const toolActive = useTools((s) => s.active)
+  const activeTool = useActiveTool()
   const toolPct = useTools((s) => s.widthPct)
   const isMobile = useMediaQuery(MOBILE_QUERY) ?? false
   const { width } = useViewportSize()
   useChromeOpacity()
 
-  const toolOpen = !isMobile && toolActive !== null
+  const toolOpen = !isMobile && activeTool !== null
   const toolWidth = Math.round((width * toolPct) / 100)
 
   // The map must re-measure whenever the panels change its width.

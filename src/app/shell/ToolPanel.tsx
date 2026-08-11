@@ -2,17 +2,16 @@ import { useCallback, useEffect, useRef } from 'react'
 import { ActionIcon, Group, Stack, Text, Tooltip } from '@mantine/core'
 import { IconX } from '@tabler/icons-react'
 import { useTools } from '@/app/shell/toolStore'
-import { useAvailableTools } from '@/app/shell/ToolRail'
+import { useActiveTool } from '@/app/shell/toolRegistry'
 
 /**
  * Left tool panel. Hosts one workbench at a time and can be dragged wider
  * or narrower by its right edge; the map takes the remaining width.
  */
 export function ToolPanel() {
-  const active = useTools((s) => s.active)
   const close = useTools((s) => s.close)
   const setWidthPct = useTools((s) => s.setWidthPct)
-  const tools = useAvailableTools()
+  const tool = useActiveTool()
   const draggingRef = useRef(false)
 
   const onPointerMove = useCallback(
@@ -36,7 +35,6 @@ export function ToolPanel() {
     }
   }, [onPointerMove])
 
-  const tool = tools.find((t) => t.id === active)
   if (!tool) return null
   const Tool = tool.component
 

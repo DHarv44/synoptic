@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Stack, Text, Tooltip } from '@mantine/core'
 import { IconX } from '@tabler/icons-react'
 import { useTools } from '@/app/shell/toolStore'
-import { useAvailableTools } from '@/app/shell/ToolRail'
+import { useAvailableTools, useActiveTool } from '@/app/shell/toolRegistry'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
 /**
@@ -10,12 +10,11 @@ import { mapChromeStyle } from '@/ui/mapChrome'
  */
 export function MobileToolBar() {
   const tools = useAvailableTools()
-  const active = useTools((s) => s.active)
   const toggle = useTools((s) => s.toggle)
   const close = useTools((s) => s.close)
 
+  const tool = useActiveTool()
   if (tools.length === 0) return null
-  const tool = tools.find((t) => t.id === active)
 
   if (tool) {
     const Tool = tool.component
