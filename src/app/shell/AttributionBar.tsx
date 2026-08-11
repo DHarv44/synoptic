@@ -1,20 +1,5 @@
 import { Anchor, Group, Text } from '@mantine/core'
-
-interface Credit {
-  label: string
-  href: string
-}
-
-/** Visible attribution for every data source, as several require. */
-const CREDITS: Credit[] = [
-  { label: 'RainViewer', href: 'https://www.rainviewer.com/' },
-  { label: 'NEXRAD · Iowa Environmental Mesonet', href: 'https://mesonet.agron.iastate.edu/' },
-  { label: 'NWS', href: 'https://www.weather.gov/' },
-  { label: 'Open-Meteo', href: 'https://open-meteo.com/' },
-  { label: 'NASA GIBS', href: 'https://nasa-gibs.github.io/gibs-api-docs/' },
-  { label: 'Blitzortung', href: 'https://www.blitzortung.org/' },
-  { label: 'OpenFreeMap · OpenMapTiles · OpenStreetMap', href: 'https://openfreemap.org/' },
-]
+import { CREDITS } from '@/app/help/credits'
 
 /** Footer credit strip; replaces the map's floating attribution control. */
 export function AttributionBar() {

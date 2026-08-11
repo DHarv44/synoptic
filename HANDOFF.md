@@ -117,11 +117,12 @@ off and on moves it to the top (this is how radar came to cover warnings).
      locked), and validate on rehydrate (the timeline `merge` drops a scrub
      position that has aged out of the window and never resumes playback).
      Still open: shareable workspace URL (PLAN.md §3.12) and export/import.
-   - **Help + About panels**: interaction basics (probe click, drawing a
-     cross-section, ↑/↓ tilts), keyboard list, plain-language
-     notes on CAPE/SRH/hodograph/velocity folding; About with version, GitHub
-     repo link, license, full data-source attribution (only the map credit
-     shows today) and the "not a substitute for official warnings" line.
+   - **Help + About**: done, as a `help` dock tab (special-cased in
+     `DockContent` alongside `settings`) rather than a modal — help beside
+     the map beats help covering it. Content lives in `app/help/`; the
+     shortcut list there is hand-maintained, so update it when a binding
+     changes. `credits.ts` is the single source for attribution, read by
+     both the footer strip and About. Version comes from a Vite `define`.
    - Plus: timeline affordances, empty states, keyboard (tab switch, Esc),
      deferred polish (alert ticker, `.pal` tables,
      layer re-ordering, zone-alert geometry, globe projection restore).

@@ -32,9 +32,6 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Cross-section | Draw A→B on the map → RHI slice at true beam heights | ✅ |
 | 3D echo | Tilt surfaces in 3D over a basemap floor, threshold + orbit, heading tape | ✅ |
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
-| My location | Locate button → home point, remembered locally | ✅ |
-| Forecast | Next 24 hours hourly + 3/5/10-day outlook | ✅ |
-| Warning notifications | Desktop alerts for warnings covering your location | ✅ |
 | Radar quality + resolution | Clutter suppression, seamless zoom handoff, multi-site blending | ⚠️ needs work |
 | Dual-pol products | SW/ZDR/PHI/RHO decoded, but only REF/VEL can be displayed | ⚠️ needs work |
 | Scan time + VCP | Volume age and coverage pattern shown on the panel | 🔭 |
@@ -51,7 +48,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Hodograph | Height-colored with Bunkers right-mover | ✅ |
 | Severe indices | CAPE/CIN/LI/LCL/LFC/EL/PWAT/shear/SRH/storm motion | ✅ |
 | Model comparison | GFS/ECMWF/ICON/GEM/UKMO spaghetti + GFS ensemble | ✅ |
-| Forecast panels | Plain-language 24 h / 3-day / 7-day / 10-day outlooks per location | 🔭 |
+| Forecast panels | Next 24 hours hour-by-hour + 3/5/10-day outlook per location | ✅ |
 | Interactive parcel | Drag the surface parcel, watch CAPE recompute | 🔭 |
 | Radiosonde overlay | Real 00z/12z balloon data vs the model profile | 🔭 |
 
@@ -59,14 +56,14 @@ probes that point. Works on desktop and mobile, in dark or light.
 
 | Feature | What it does | Status |
 |---|---|---|
-| NWS alerts | Warning polygons + viewport-filtered panel, click to zoom | ✅ |
+| NWS alerts | Warning polygons above every layer + viewport-filtered panel, filtered by severity and category | ✅ |
 | Lightning | Live Blitzortung strikes, bolt icons with flash decay | ✅ |
 | Surface obs | METAR station models (temp/dewpoint/barb), decluttered | ✅ |
 | Satellite | NASA GIBS imagery, timeline-dated | ✅ |
 | Basemap | OpenFreeMap vector tiles — cities, roads, labels, dark/light | ✅ |
 | Wind particles | GPU flow field, surface → jet stream | ⚠️ built, disabled (see roadmap) |
-| My location | One-tap center/zoom on where you are | 🔭 |
-| Notifications | Desktop alerts for warnings and incoming rain at your location | 🔭 |
+| My location | Locate button → centre/zoom, remembered as home | ✅ |
+| Notifications | Desktop alerts for warnings covering your location (rain nowcast still planned) | ✅ |
 | Alert ticker | Top-bar scrolling severe ticker | 🔭 |
 
 ### Interface
@@ -74,15 +71,16 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Feature | What it does | Status |
 |---|---|---|
 | Map-first shell | Edge-to-edge map; a right-edge icon rail carries navigation above, layer toggles below | ✅ |
-| Analysis dock | Location / Nearby / Radar / Settings — one scrolling column of collapsible sections | ✅ |
+| Analysis dock | Location / Nearby / Radar / Settings / Help — one scrolling column of collapsible sections | ✅ |
 | Section expansion | Collapse/expand per section, persisted | ✅ |
 | Settings | Registry-generated, searchable, with per-feature and global reset | ✅ |
+| Session persistence | Camera, probe, timeline, tabs and radar selection survive a reload | ✅ |
 | Dark + light | Follows the OS by default; translucent map chrome with adjustable opacity | ✅ |
-| Units & time | Metric/imperial, independent temperature unit, local or UTC clock | ✅ |
+| Units & time | Metric/imperial, with temperature, wind, pressure and precipitation independently switchable; local or UTC clock | ✅ |
 | Loading + health | Live loading indicator plus per-source status dots | ✅ |
 | Mobile layout | Bottom tab bar with three panel heights; layers expand from a map button | ✅ |
-| Section summaries | Collapsed sections showing their headline value | 🔭 |
-| Help & About | Interaction guide, keyboard map, data-source credits | 🔭 |
+| Section summaries | Collapsed sections showing their headline value, alert-toned when it matters | ✅ |
+| Help & About | Help tab: interaction guide, keyboard map, instrument glossary, credits | ✅ |
 
 ✅ shipped · ⚠️ known issue · 🔭 planned
 
@@ -203,20 +201,15 @@ probes that point. Works on desktop and mobile, in dark or light.
      fields, the warning wash, then basemap labels, then point data, then
      warning outlines and annotations on top.
 
-   **Help & About** — nothing currently explains the app to a newcomer, and
-   several controls are undiscoverable. Add:
-   - A **help panel or drawer** covering the interaction basics (click to
-     probe, drawing a cross-section, tilt/moment controls, what the timeline
-     scrubs), a keyboard-shortcut list, and short plain-language notes on
-     reading the pro tools — what CAPE and SRH mean, how to read a hodograph,
-     why velocity folds. The tooltips already do some of this; this is the
-     place they graduate to.
-   - An **About panel** with the version/build, a link to the GitHub repo,
-     the license, full data-source attribution (currently only the map
-     credit is visible), and the standing "not a substitute for official
-     warnings" statement.
-   - Discoverability fixes alongside: hint text on first run, and surfacing
-     hidden gestures in the relevant panel rather than only in docs.
+   **Help & About** ✅ — a Help tab in the right rail, beside the map rather
+   than in a dialog, so instructions sit next to the thing they describe:
+   you can read how a cross-section is drawn while drawing one. Four
+   collapsible sections in the same pattern as every other tab — Getting
+   started (the interactions that aren't visible from the interface),
+   Keyboard, Reading the instruments (plain-language notes on dBZ, velocity
+   folding, VCP, beam height, CAPE, CIN, shear, SRH, hodographs, PWAT), and
+   About with version, GitHub link, license, per-source attribution and the
+   official-warnings disclaimer. Still open: first-run hint text.
    - **Teaching layer** *(later, after the structural work)* — the strongest
      moat against paid apps for the enthusiast audience, who want the pro
      tools *and* a ramp into them: contextual "why this matters" notes beside

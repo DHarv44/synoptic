@@ -1,7 +1,11 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
 import { getWindPayload } from './server/gfsWind.mjs'
+
+// Surfaced in the About panel, so a bug report can name a build.
+const { version } = createRequire(import.meta.url)('./package.json') as { version: string }
 
 /** Dev implementation of the data-proxy routes the prod Express server owns. */
 function windProxy(): Plugin {
@@ -26,6 +30,7 @@ function windProxy(): Plugin {
 }
 
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(version) },
   plugins: [react(), windProxy()],
   resolve: {
     alias: {

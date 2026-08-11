@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 import type { PanelGroup } from '@/core/settings/types'
 import { attachDevStore } from '@/dev/wx'
 
-export type DockTab = PanelGroup | 'settings'
+export type DockTab = PanelGroup | 'settings' | 'help'
 
 /** Mobile sheet heights: summary only, map + panel, or panel only. */
 export type SheetState = 'peek' | 'half' | 'full'

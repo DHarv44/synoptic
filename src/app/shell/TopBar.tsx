@@ -1,11 +1,13 @@
 import { ActionIcon, Group, Text, Tooltip, useMantineColorScheme } from '@mantine/core'
 import { spotlight } from '@mantine/spotlight'
-import { IconMoon, IconSearch, IconSun } from '@tabler/icons-react'
+import { IconHelp, IconMoon, IconSearch, IconSun } from '@tabler/icons-react'
 import { Clock } from '@/ui/Clock'
 import { HealthStrip } from '@/app/shell/HealthStrip'
+import { useDock } from '@/app/shell/dockStore'
 
 export function TopBar() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
+  const showHelp = useDock((s) => s.show)
 
   return (
     <Group h="100%" px="sm" justify="space-between" wrap="nowrap">
@@ -29,6 +31,16 @@ export function TopBar() {
 
       <Group gap="xs" wrap="nowrap">
         <HealthStrip />
+        <Tooltip label="Help and about">
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => showHelp('help')}
+            aria-label="Help and about"
+          >
+            <IconHelp size={17} stroke={1.6} />
+          </ActionIcon>
+        </Tooltip>
         <Tooltip label={colorScheme === 'dark' ? 'Light mode' : 'Dark mode'}>
           <ActionIcon
             variant="subtle"

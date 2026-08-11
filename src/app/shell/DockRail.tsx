@@ -2,6 +2,7 @@ import { Stack, Tooltip, UnstyledButton } from '@mantine/core'
 import {
   IconAdjustments,
   IconAlertTriangle,
+  IconHelp,
   IconMapPin,
   IconRadar,
   type IconProps,
@@ -23,6 +24,7 @@ export const RAIL_TABS: RailTab[] = [
   { key: 'nearby', label: 'Nearby', icon: IconAlertTriangle },
   { key: 'radar', label: 'Radar', icon: IconRadar },
   { key: 'settings', label: 'Settings', icon: IconAdjustments },
+  { key: 'help', label: 'Help', icon: IconHelp },
 ]
 
 const RAIL_WIDTH = 44

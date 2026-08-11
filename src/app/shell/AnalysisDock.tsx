@@ -7,6 +7,7 @@ import { useDock, type DockTab } from '@/app/shell/dockStore'
 import { RAIL_TABS } from '@/app/shell/DockRail'
 import { DockSection } from '@/app/shell/DockSection'
 import { SettingsPanel } from '@/app/settings/SettingsPanel'
+import { HelpPanel } from '@/app/help/HelpPanel'
 import type { PanelContribution, PanelGroup } from '@/core/settings/types'
 
 const EMPTY: Record<PanelGroup, string> = {
@@ -68,6 +69,7 @@ export function DockContent({ tab }: { tab: DockTab }) {
   const featureStates = useSettings((s) => s.features)
 
   if (tab === 'settings') return <SettingsPanel />
+  if (tab === 'help') return <HelpPanel />
 
   const panels = listFeatures()
     .filter((f) => featureStates[f.id]?.enabled ?? f.defaultEnabled ?? true)
