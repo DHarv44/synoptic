@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Badge, Group, Paper, Stack, Switch, Text } from '@mantine/core'
-import { fmtUtcDateTime } from '@/core/time/format'
+import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useCameraStore } from '@/map/cameraStore'
 import { bboxIntersects, useMapView, type Bbox } from '@/map/viewStore'
 import { alertColor, type AlertFeature } from '@/features/alerts/service'
@@ -23,6 +23,7 @@ function alertBbox(a: AlertFeature): Bbox | null {
 
 function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
   const requestFitBounds = useCameraStore((s) => s.requestFitBounds)
+  const fmt = useTimeFormat()
   return (
     <Paper
       withBorder
@@ -53,7 +54,7 @@ function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
             {a.properties.areaDesc}
           </Text>
           <Text size="xs" c="dimmed" ff="monospace">
-            until {fmtUtcDateTime(Date.parse(a.properties.expires))}
+            until {fmt.dateTime(Date.parse(a.properties.expires))}
           </Text>
         </div>
       </Group>

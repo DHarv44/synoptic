@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Stack, Switch, Text, Tooltip, UnstyledButton } from '@mantine/core'
+import { ActionIcon, Group, Stack, Text, Tooltip } from '@mantine/core'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled, useSettings } from '@/core/settings/store'
 import { useHealth } from '@/core/data/healthStore'
@@ -80,15 +80,17 @@ export function LayerToggles({ horizontal = false }: { horizontal?: boolean }) {
   const layers = listFeatures().filter((f) => f.layer)
 
   if (horizontal) {
-    // Mobile sheet: labelled rows are easier to hit and read than icons.
+    // Mobile sheet: the same icon buttons, wrapped into a grid.
     return (
-      <Stack gap={2}>
+      <Group gap={6} justify="center" py="xs">
         {GROUP_ORDER.flatMap((group) =>
           layers.filter((f) => (f.layerGroup ?? 'reference') === group),
         ).map((f) => (
-          <LayerRow key={f.id} manifest={f} />
+          <div key={f.id} style={{ width: 46 }}>
+            <LayerButton manifest={f} />
+          </div>
         ))}
-      </Stack>
+      </Group>
     )
   }
 
@@ -116,41 +118,5 @@ export function LayerToggles({ horizontal = false }: { horizontal?: boolean }) {
         )
       })}
     </Stack>
-  )
-}
-
-/** Full-width labelled toggle for the mobile layers sheet. */
-function LayerRow({ manifest }: { manifest: FeatureManifest }) {
-  const enabled = useFeatureEnabled(manifest.id)
-  const setEnabled = useSettings((s) => s.setEnabled)
-  const health = useWorstHealth(manifest.sourceIds)
-  const Icon = manifest.layerIcon
-
-  return (
-    <UnstyledButton
-      onClick={() => setEnabled(manifest.id, !enabled)}
-      aria-pressed={enabled}
-      style={{ padding: '10px 4px', borderRadius: 6 }}
-    >
-      <Group gap="sm" wrap="nowrap">
-        <div style={{ color: enabled ? 'var(--mantine-color-text)' : 'var(--mantine-color-dimmed)' }}>
-          {Icon ? <Icon size={19} stroke={1.6} /> : null}
-        </div>
-        <Text size="sm" c={enabled ? undefined : 'dimmed'} style={{ flex: 1 }}>
-          {manifest.title}
-        </Text>
-        {enabled && health && (
-          <div
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 3,
-              background: STATUS_COLOR[health.status],
-            }}
-          />
-        )}
-        <Switch size="xs" checked={enabled} readOnly tabIndex={-1} />
-      </Group>
-    </UnstyledButton>
   )
 }

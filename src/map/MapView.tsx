@@ -11,6 +11,7 @@ import { styleUrl } from '@/map/style'
 import { useProbe } from '@/core/probe/store'
 import { useCameraStore } from '@/map/cameraStore'
 import { useMapView } from '@/map/viewStore'
+import { useHealth } from '@/core/data/healthStore'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
 import { attachDevStore } from '@/dev/wx'
@@ -75,6 +76,10 @@ export function MapView() {
     }
     map.on('moveend', publishBounds)
     map.on('load', publishBounds)
+    // Tile/source loading is reported by the map, not by fetchJson.
+    const setBusy = (busy: boolean) => () => useHealth.getState().setMapBusy(busy)
+    map.on('dataloading', setBusy(true))
+    map.on('idle', setBusy(false))
     attachDevStore('map', map)
     return () => {
       map.remove()

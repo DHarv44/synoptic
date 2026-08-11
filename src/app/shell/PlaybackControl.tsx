@@ -8,7 +8,7 @@ import {
   stepSimTime,
   useTimeline,
 } from '@/core/time/timelineStore'
-import { fmtUtcDateTime, fmtUtcTime } from '@/core/time/format'
+import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
 const STEP_MS = 10 * 60_000 // ←/→ step: 10 min
@@ -40,6 +40,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
   const setSimTime = useTimeline((s) => s.setSimTime)
   const setPlaying = useTimeline((s) => s.setPlaying)
   const goLive = useTimeline((s) => s.goLive)
+  const fmt = useTimeFormat()
 
   useHotkeys([
     ['space', () => setPlaying(!playing)],
@@ -61,7 +62,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
         ...mapChromeStyle,
         position: 'absolute',
         // Mobile: full width just above the sheet peek. Desktop: bottom-left.
-        bottom: isMobile ? 100 : 8,
+        bottom: isMobile ? 64 : 8,
         left: 8,
         right: isMobile ? 8 : undefined,
         zIndex: 5,
@@ -85,7 +86,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
           </ActionIcon>
         </Tooltip>
         <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
-          {isMobile ? fmtUtcTime(simTime) : fmtUtcDateTime(simTime)}
+          {isMobile ? fmt.time(simTime) : fmt.dateTime(simTime)}
         </Text>
         <div style={{ flex: 1, position: 'relative', minWidth: 60 }}>
           <div
@@ -107,7 +108,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
             max={end}
             value={simTime}
             onChange={setSimTime}
-            label={(v) => fmtUtcDateTime(v)}
+            label={(v) => fmt.dateTime(v)}
             aria-label="Timeline scrubber"
           />
         </div>

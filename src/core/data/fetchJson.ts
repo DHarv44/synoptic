@@ -1,4 +1,4 @@
-import { reportError, reportOk } from '@/core/data/healthStore'
+import { reportError, reportOk, useHealth } from '@/core/data/healthStore'
 import { fixtureActive, loadFixture } from '@/core/data/fixtures'
 import type { SourceRef } from '@/core/data/types'
 
@@ -22,6 +22,8 @@ export async function fetchJson<T>(
     reportOk(source)
     return data
   }
+  const { beginRequest, endRequest } = useHealth.getState()
+  beginRequest()
   try {
     const res = await fetch(url, { signal: opts.signal })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -31,5 +33,7 @@ export async function fetchJson<T>(
   } catch (e) {
     reportError(source, e instanceof Error ? e.message : String(e))
     throw e
+  } finally {
+    endRequest()
   }
 }

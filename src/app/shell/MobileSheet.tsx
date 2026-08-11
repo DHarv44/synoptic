@@ -1,24 +1,35 @@
-import { ActionIcon, Badge, Group, ScrollArea, Stack, Text, UnstyledButton } from '@mantine/core'
+import { ActionIcon, Group, ScrollArea, Stack, Text, UnstyledButton } from '@mantine/core'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
-import { useDock, type DockTab, type SheetState } from '@/app/shell/dockStore'
+import { useDock, type SheetState } from '@/app/shell/dockStore'
 import { RAIL_TABS } from '@/app/shell/DockRail'
 import { ContextHeader, DockContent } from '@/app/shell/AnalysisDock'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
-const HEIGHT: Record<SheetState, string> = {
-  peek: '92px',
-  half: '52dvh',
+export const TAB_BAR_HEIGHT = 56
+
+const SHEET_HEIGHT: Record<SheetState, string> = {
+  peek: `${TAB_BAR_HEIGHT}px`,
+  half: '54dvh',
   full: 'calc(100dvh - 44px)',
 }
 
-/** Tab strip inside the sheet handle — always visible, thumb-reachable. */
-function SheetTabs() {
+/** Bottom tab bar — always visible, thumb-reachable, fixed height. */
+function TabBar() {
   const tab = useDock((s) => s.tab)
   const sheet = useDock((s) => s.sheet)
   const pressTab = useDock((s) => s.pressTab)
 
   return (
-    <Group gap={0} grow wrap="nowrap">
+    <Group
+      gap={0}
+      grow
+      wrap="nowrap"
+      style={{
+        height: TAB_BAR_HEIGHT,
+        flexShrink: 0,
+        borderTop: '1px solid var(--mantine-color-default-border)',
+      }}
+    >
       {RAIL_TABS.map((t) => {
         const Icon = t.icon
         const active = tab === t.key && sheet !== 'peek'
@@ -32,13 +43,15 @@ function SheetTabs() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: 2,
-              paddingBlock: 6,
+              justifyContent: 'center',
+              gap: 3,
+              height: '100%',
+              padding: '0 4px',
               color: active ? 'var(--mantine-color-text)' : 'var(--mantine-color-dimmed)',
               boxShadow: active ? 'inset 0 2px 0 var(--mantine-primary-color-filled)' : 'none',
             }}
           >
-            <Icon size={19} stroke={1.6} />
+            <Icon size={20} stroke={1.6} />
             <Text size="xs" lh={1}>
               {t.label}
             </Text>
@@ -50,17 +63,18 @@ function SheetTabs() {
 }
 
 /**
- * Mobile panel: a bottom sheet with three heights. Peek keeps the map and
- * shows the tabs; half shows panel content with the map still visible;
- * full hands the screen over for deep work. Tapping the active tab
- * returns to peek. (Drag-to-resize is planned — see the roadmap.)
+ * Mobile panel: a bottom tab bar pinned to the screen edge with panel
+ * content stacked above it. Peek is the bar alone (map keeps the screen);
+ * half shows content with the map still visible; full hands the screen
+ * over. Tapping the active tab returns to peek.
+ * (Drag-to-resize is on the roadmap — tap to cycle for now.)
  */
 export function MobileSheet() {
   const tab = useDock((s) => s.tab)
   const sheet = useDock((s) => s.sheet)
   const setSheet = useDock((s) => s.setSheet)
 
-  const grow: Partial<Record<SheetState, SheetState>> = { peek: 'half', half: 'full' }
+  const grow: Partial<Record<SheetState, SheetState>> = { half: 'full' }
   const shrink: Partial<Record<SheetState, SheetState>> = { full: 'half', half: 'peek' }
 
   return (
@@ -72,20 +86,17 @@ export function MobileSheet() {
         left: 0,
         right: 0,
         bottom: 0,
-        height: HEIGHT[sheet],
+        height: SHEET_HEIGHT[sheet],
         zIndex: 7,
         borderTop: '1px solid var(--mantine-color-default-border)',
-        borderTopLeftRadius: 10,
-        borderTopRightRadius: 10,
         transition: 'height 160ms ease',
       }}
     >
-      <SheetTabs />
       {sheet !== 'peek' && (
         <>
-          <Group gap={0} wrap="nowrap" justify="space-between" pr={4}>
+          <Group gap={0} wrap="nowrap" justify="space-between" pr={4} style={{ flexShrink: 0 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <ContextHeader tab={tab as DockTab} />
+              <ContextHeader tab={tab} />
             </div>
             <Group gap={0} wrap="nowrap">
               {shrink[sheet] && (
@@ -115,16 +126,7 @@ export function MobileSheet() {
           </ScrollArea>
         </>
       )}
-      {sheet === 'peek' && (
-        <Badge
-          size="xs"
-          variant="transparent"
-          c="dimmed"
-          style={{ alignSelf: 'center', pointerEvents: 'none' }}
-        >
-          tap a tab to open
-        </Badge>
-      )}
+      <TabBar />
     </Stack>
   )
 }

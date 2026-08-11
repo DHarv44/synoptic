@@ -19,6 +19,16 @@ registerFeature({
     },
     {
       kind: 'select',
+      key: 'timeZone',
+      label: 'Times shown in',
+      options: [
+        { value: 'local', label: 'Local time' },
+        { value: 'utc', label: 'UTC / Zulu' },
+      ],
+      defaultValue: 'local',
+    },
+    {
+      kind: 'select',
       key: 'temperature',
       label: 'Temperature',
       options: [

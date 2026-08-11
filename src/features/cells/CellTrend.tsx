@@ -1,5 +1,5 @@
 import { Group, Stack, Text } from '@mantine/core'
-import { fmtUtcTime } from '@/core/time/format'
+import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { trendFor, type TrendPoint } from '@/features/cells/history'
 
 const W = 260
@@ -35,6 +35,7 @@ function path(points: TrendPoint[], spec: SeriesSpec, min: number, max: number):
  */
 export function CellTrend({ cellKey, title }: { cellKey: string; title: string }) {
   const points = trendFor(cellKey)
+  const fmt = useTimeFormat()
 
   if (points.length < 2) {
     return (
@@ -79,7 +80,7 @@ export function CellTrend({ cellKey, title }: { cellKey: string; title: string }
           </Group>
         ))}
         <Text size="xs" c="dimmed" ff="monospace">
-          {fmtUtcTime(points[0].t)}→{fmtUtcTime(points[points.length - 1].t)}
+          {fmt.time(points[0].t)}→{fmt.time(points[points.length - 1].t)}
         </Text>
       </Group>
     </Stack>

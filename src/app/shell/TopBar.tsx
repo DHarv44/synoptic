@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Text, Tooltip, useMantineColorScheme } from '@mantine/core'
 import { spotlight } from '@mantine/spotlight'
 import { IconMoon, IconSearch, IconSun } from '@tabler/icons-react'
-import { UtcClock } from '@/ui/UtcClock'
+import { Clock } from '@/ui/Clock'
 import { HealthStrip } from '@/app/shell/HealthStrip'
 
 export function TopBar() {
@@ -25,7 +25,7 @@ export function TopBar() {
         </Tooltip>
       </Group>
 
-      <UtcClock />
+      <Clock />
 
       <Group gap="xs" wrap="nowrap">
         <HealthStrip />

@@ -4,12 +4,24 @@ import { attachDevStore } from '@/dev/wx'
 
 interface HealthState {
   sources: Record<string, SourceHealth>
+  /** Outstanding data requests across all sources. */
+  inFlight: number
+  /** Map tiles/sources still loading (MapLibre reports this separately). */
+  mapBusy: boolean
   report: (ref: SourceRef, status: SourceStatus, error?: string) => void
+  beginRequest: () => void
+  endRequest: () => void
+  setMapBusy: (busy: boolean) => void
 }
 
 /** Per-source connection health, rendered by the top-bar health strip. */
 export const useHealth = create<HealthState>((set) => ({
   sources: {},
+  inFlight: 0,
+  mapBusy: false,
+  beginRequest: () => set((s) => ({ inFlight: s.inFlight + 1 })),
+  endRequest: () => set((s) => ({ inFlight: Math.max(0, s.inFlight - 1) })),
+  setMapBusy: (mapBusy) => set({ mapBusy }),
   report: (ref, status, error) =>
     set((s) => {
       const prev = s.sources[ref.id]
