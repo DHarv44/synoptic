@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Stack, Text, Tooltip } from '@mantine/core'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled, useSettings } from '@/core/settings/store'
 import { useHealth } from '@/core/data/healthStore'
@@ -76,23 +76,8 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
  * perform while working; opacity, colour tables and products are
  * preferences and live in Settings.
  */
-export function LayerToggles({ horizontal = false }: { horizontal?: boolean }) {
+export function LayerToggles() {
   const layers = listFeatures().filter((f) => f.layer)
-
-  if (horizontal) {
-    // Mobile sheet: the same icon buttons, wrapped into a grid.
-    return (
-      <Group gap={6} justify="center" py="xs">
-        {GROUP_ORDER.flatMap((group) =>
-          layers.filter((f) => (f.layerGroup ?? 'reference') === group),
-        ).map((f) => (
-          <div key={f.id} style={{ width: 46 }}>
-            <LayerButton manifest={f} />
-          </div>
-        ))}
-      </Group>
-    )
-  }
 
   return (
     <Stack gap={4} align="center" px={2}>
