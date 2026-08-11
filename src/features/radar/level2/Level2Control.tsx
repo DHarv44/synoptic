@@ -1,65 +1,34 @@
-import { ActionIcon, Chip, Group, Paper, SegmentedControl, Stack, Table, Text } from '@mantine/core'
+import { ActionIcon, Chip, Group, Paper, SegmentedControl, Stack, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
-import type { ColumnEntry, TiltInfo } from '@/features/radar/level2/worker'
-
-const EFFECTIVE_EARTH_R = (4 / 3) * 6_371_000
-const DEG = Math.PI / 180
-
-function beamKft(rangeM: number, elevDeg: number): number {
-  const h = rangeM * Math.sin(elevDeg * DEG) + (rangeM * rangeM) / (2 * EFFECTIVE_EARTH_R)
-  return (h * 3.28084) / 1000
-}
-
-export interface ProbeReadout {
-  azDeg: number
-  rangeM: number
-  beamKft: number
-  values: Record<string, number>
-}
+import { mapChromeStyle } from '@/ui/mapChrome'
+import { useRadar } from '@/features/radar/level2/store'
 
 interface Level2ControlProps {
-  siteId: string
-  siteName: string
-  tilts: TiltInfo[]
-  elevNum: number
-  moment: string
-  onSelect: (elevNum: number, moment: string) => void
-  probe: ProbeReadout | null
-  /** All-Tilts values at the probed point */
-  column: ColumnEntry[] | null
-  srv: boolean
-  raw: boolean
+  onSelect: (elevNum: number, moment: string, raw?: boolean) => void
   onSrv: (on: boolean) => void
   onRaw: (on: boolean) => void
-  /** "245°/18 kt" style storm-motion annotation, when known */
+  /** "245°/18 kt" style storm-motion annotation, when known. */
   stormMotion: string | null
 }
 
-function fmtValue(moment: string, v: number): string {
-  if (moment === 'REF') return `${v.toFixed(1)} dBZ`
-  if (moment === 'VEL') return `${v.toFixed(1)} m/s`
-  if (moment === 'ZDR') return `${v.toFixed(2)} dB`
-  if (moment === 'RHO') return v.toFixed(3)
-  return v.toFixed(1)
-}
-
-/** Floating single-site radar control: tilt, moment, gate probe readout. */
-export function Level2Control({
-  siteId,
-  siteName,
-  tilts,
-  elevNum,
-  moment,
-  onSelect,
-  probe,
-  column,
-  srv,
-  raw,
-  onSrv,
-  onRaw,
-  stormMotion,
-}: Level2ControlProps) {
+/**
+ * Floating radar bench: only the controls that change what's on the map —
+ * site, tilt, moment, SRV/RAW — plus a one-line probe readout. The tables
+ * (All-Tilts, full gate values) live in the Radar panel; the 3D and
+ * cross-section views live in the left workbench.
+ */
+export function Level2Control({ onSelect, onSrv, onRaw, stormMotion }: Level2ControlProps) {
   const isMobile = useMediaQuery('(max-width: 48em)') ?? false
+  const site = useRadar((s) => s.site)
+  const tilts = useRadar((s) => s.tilts)
+  const elevNum = useRadar((s) => s.elevNum)
+  const moment = useRadar((s) => s.moment)
+  const raw = useRadar((s) => s.raw)
+  const srv = useRadar((s) => s.srv)
+  const probe = useRadar((s) => s.probe)
+
+  if (!site) return null
+
   const available = tilts.filter((t) => t.moments.includes(moment))
   const idx = available.findIndex((t) => t.num === elevNum)
   const current = available[idx] ?? available[0]
@@ -69,21 +38,22 @@ export function Level2Control({
       withBorder
       p={6}
       radius="sm"
-      // Desktop: above the playback control at bottom-left. Mobile: top-left,
-      // clear of the bottom sheet and the playback bar.
-      style={
-        isMobile
-          ? { position: 'absolute', top: 8, left: 8, zIndex: 5, maxWidth: 'calc(100% - 76px)' }
-          : { position: 'absolute', bottom: 56, left: 8, zIndex: 5, minWidth: 190 }
-      }
+      style={{
+        ...mapChromeStyle,
+        position: 'absolute',
+        zIndex: 5,
+        ...(isMobile
+          ? { top: 8, left: 60, maxWidth: 'calc(100% - 130px)' }
+          : { bottom: 56, left: 52, minWidth: 210 }),
+      }}
     >
       <Stack gap={4}>
         <Group justify="space-between" wrap="nowrap">
           <Text size="xs" fw={600} ff="monospace">
-            {siteId}
+            {site.id}
           </Text>
           <Text size="xs" c="dimmed" truncate>
-            {siteName}
+            {site.name}
           </Text>
         </Group>
         <Group gap={6} wrap="nowrap">
@@ -97,7 +67,7 @@ export function Level2Control({
           >
             ▼
           </ActionIcon>
-          <Text size="xs" ff="monospace" w={54} ta="center">
+          <Text size="xs" ff="monospace" w={46} ta="center">
             {current ? `${current.deg.toFixed(1)}°` : '—'}
           </Text>
           <ActionIcon
@@ -127,50 +97,16 @@ export function Level2Control({
             </Chip>
             {stormMotion && (
               <Text size="xs" c="dimmed" ff="monospace">
-                storm {stormMotion}
+                {stormMotion}
               </Text>
             )}
           </Group>
         )}
         {probe && (
           <Text size="xs" ff="monospace" c="dimmed">
-            {Math.round(probe.azDeg)}° / {(probe.rangeM / 1000).toFixed(0)} km · beam{' '}
-            {probe.beamKft.toFixed(1)} kft
-            {Object.entries(probe.values).map(([k, v]) => (
-              <span key={k}>
-                {' · '}
-                {k} {fmtValue(k, v)}
-              </span>
-            ))}
+            {Math.round(probe.azDeg)}° / {(probe.rangeM / 1000).toFixed(0)} km
+            {probe.values.REF !== undefined && ` · ${probe.values.REF.toFixed(1)} dBZ`}
           </Text>
-        )}
-        {probe && column && column.length > 1 && (
-          <Table withRowBorders={false} verticalSpacing={0} fz={10} ff="monospace">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th p={2}>tilt</Table.Th>
-                <Table.Th p={2} ta="right">kft</Table.Th>
-                <Table.Th p={2} ta="right">dBZ</Table.Th>
-                <Table.Th p={2} ta="right">m/s</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {[...column].reverse().map((e) => (
-                <Table.Tr key={e.elevNum}>
-                  <Table.Td p={2}>{e.elevationDeg.toFixed(1)}°</Table.Td>
-                  <Table.Td p={2} ta="right">
-                    {beamKft(probe.rangeM, e.elevationDeg).toFixed(0)}
-                  </Table.Td>
-                  <Table.Td p={2} ta="right">
-                    {e.REF !== null ? e.REF.toFixed(0) : '—'}
-                  </Table.Td>
-                  <Table.Td p={2} ta="right">
-                    {e.VEL !== null ? e.VEL.toFixed(0) : '—'}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
         )}
       </Stack>
     </Paper>

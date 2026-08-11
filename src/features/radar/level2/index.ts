@@ -1,7 +1,8 @@
 import { IconBox, IconRadar } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { Level2Layer } from '@/features/radar/level2/Level2Layer'
-import { Volume3D } from '@/features/radar/level2/Volume3D'
+import { RadarWorkbench } from '@/features/radar/level2/RadarWorkbench'
+import { RadarReadouts } from '@/features/radar/level2/RadarReadouts'
 
 /**
  * Single-site NEXRAD Level 2: streaming super-res reflectivity from the
@@ -16,7 +17,10 @@ registerFeature({
   layerIcon: IconRadar,
   layerComponent: Level2Layer,
   sourceIds: ['nexrad-l2'],
-  tools: [{ id: 'volume3d', title: '3D echo', icon: IconBox, component: Volume3D }],
+  tools: [{ id: 'radar-workbench', title: 'Radar views', icon: IconBox, component: RadarWorkbench }],
+  panels: [
+    { id: 'radar-readouts', title: 'Level 2', component: RadarReadouts, group: 'radar', order: 0 },
+  ],
   defaultEnabled: true,
   settings: [
     {
