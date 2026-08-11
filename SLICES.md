@@ -191,6 +191,14 @@ dependency order. Check boxes as slices land.
   pulse while attached. 3D echo now re-requests its volume as new elevations
   land — it previously asked once at mount and stayed empty until remounted.
 
+- [x] R10 — Radar fidelity + correctness: dual-pol moments displayable
+  (SW/ZDR/PHI/RHO, each with its own ramp; retained on low tilts only),
+  scan time + age + VCP on the panel, opt-in Level 2 smoothing (sentinel-
+  aware bilinear, not a hardware filter), and four correctness fixes —
+  stale ring-pass chunks ignored, sweep dropped on site change, exactly one
+  composite drawn at a time, global composite restored outside the mosaic
+  core. See HANDOFF "Radar composite rules".
+
 ## Phase 7 (coarse; slice when reached)
 
 Chase HUD: PWA → GPS → warnings → intercept/escape → placefiles → trainer.

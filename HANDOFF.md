@@ -24,8 +24,10 @@ Three surfaces, split by kind, not by topic:
   cross-section). Resizable, % width persisted. Features contribute via
   `FeatureManifest.tools`.
 - **Right rail + dock** (`DockRail`/`AnalysisDock`, `dockStore`) — *readouts*,
-  in four sections: Location (probe-driven), Nearby (viewport-driven), Radar
-  (Level 2 readouts), Settings. Each is a scrolling column of collapsible
+  in five tabs: Location (probe-driven), Nearby (viewport-driven), Radar
+  (Level 2 controls + readouts), Settings, Help. Settings and Help are
+  special-cased in `DockContent`; the rest come from the registry. Each is a
+  scrolling column of collapsible
   `DockSection`s; expansion persists. Features contribute via
   `FeatureManifest.panels` with a `group`.
 - Clicking the active rail tab collapses that panel; there are no separate
@@ -60,13 +62,61 @@ off and on moves it to the top (this is how radar came to cover warnings).
   with the safer approaches noted.
 - **Working state is clean**: no uncommitted work in flight. If you find dirty
   files, `git status` + diff them against this doc's claims before trusting either.
+- **Unverified end-to-end**: the surface-obs fix (sprite generation batched
+  across frames, cached, source no longer torn down per fetch) was justified
+  by wall-clock measurement — 80 stations cost 119 ms synchronously, 111 ms of
+  it `getImageData` — but the METAR feed was returning HTTP 502 upstream at
+  the time, so it was never watched working against live observations.
+  Re-check when the feed recovers.
 - **PHASE 6 RADAR SUITE COMPLETE (R1–R8)**: streaming L2 decode → polar
   WebGL render → tilts/probe/All-Tilts → dealiasing/SRV → storm cells +
   trends → cross-section → 3D echo view.
+- **Since then (all pushed)**: session persistence; alert filtering by
+  severity + category with cell/lightning thresholds; decoupled wind /
+  pressure / precipitation units; a Help dock tab; collapsed-section summary
+  lines; a profiled performance round; displayable dual-pol moments; scan
+  time + VCP on the radar panel; opt-in Level 2 smoothing; and a run of
+  radar-correctness fixes listed under "Radar composite rules" below.
 - **Next up is the end-game queue below** (wind bug → UI overhaul → Chase
   HUD). Optional radar polish if asked: raymarched isosurface instead of
   tilt surfaces, `.pal` color tables, dual-pol presets
   (TDS/hail auto-flagging — PLAN.md §3.3.3), volume-rollover blanking.
+
+## Radar composite rules (learned the hard way — don't undo these)
+
+The user reported for a long time that "the radar changes when I zoom" and I
+repeatedly explained it away instead of measuring. Four separate real causes
+were found. Keep all of these true:
+
+- **Exactly one composite draws at a time.** The global composite and the
+  CONUS mosaic are different products at different valid times, and the
+  mosaic's "no echo" is *transparent* — so stacking them blends rather than
+  overlays, and the blend rearranges whenever either layer's coverage
+  changes. `mosaicCovers` picks one: mosaic while it fully covers the
+  viewport, global composite otherwise.
+- **The hide test uses `MOSAIC_CORE`, not `CONUS`.** `CONUS` is deliberately
+  generous so tile requests aren't clipped; using it to hide the global layer
+  blanked the map over Cuba, the Gulf and central Canada.
+- **Level 2 chunk listings must drop earlier ring passes.** Volume prefixes
+  wrap 0–999 and old objects are never deleted, so a prefix holds both the
+  current pass and one from days ago. The stale pass owns the low sequence
+  numbers, so its start chunk reset the sweep store with three-day-old
+  radials. `currentPassChunks` filters on the timestamp in the key.
+- **A sweep belongs to its site.** `setSite` drops the retained sweep when the
+  origin moves, or old echo is redrawn around the new radar.
+
+What was *measured and found correct*, so don't re-litigate it: mosaic tiles
+are georeferenced consistently across zooms (870 points, z9 vs z10, 99.1%
+agreement at zero offset; every trial shift made it worse), and the Julian
+date decode matches S3 keys that embed their own timestamp to within seconds.
+
+**Still open on this thread**: the app requests the *live* IEM product, whose
+tiles are cached 5 minutes independently per zoom, so different zoom levels
+can resolve to different mosaic generations — the fix is to request an
+explicitly time-stamped `-mXXm` product so every tile shares a valid time
+(costs ~5 min of latency; the user has not chosen yet). And crossing the
+z5/z6 handoff still changes appearance because the two products use
+different colour tables.
 
 ## The end-game queue (user-agreed order: features first, then these)
 
@@ -192,6 +242,15 @@ off and on moves it to the top (this is how radar came to cover warnings).
   (pollers with `pauseWhenHidden` stall; rAF stalls — screenshots pump frames);
   the console log accumulates across reloads (old errors look current);
   Vite dep-optimizer discovery causes surprise full page reloads.
+- **Frame-rate numbers from the pane are worthless unless input is actively
+  being driven.** rAF is throttled when the pane isn't being interacted with,
+  so an idle measurement reports ~1 fps with two-second frames regardless of
+  workload — one run reported a 24-second "frame" while nothing was
+  happening. This cost hours: I bisected features against stalls that were
+  the instrument, not the app. Measure *wall-clock time of the work itself*
+  (e.g. 80 METAR sprites = 119 ms, 111 ms of it `getImageData`), never fps
+  across tool-call gaps. If fps is genuinely needed, drive real input in the
+  same evaluation and keep the whole measurement inside one JS call.
 - **User's standing orders**: between-phase dedup/monolith review (do it, they
   check); audit packages before installing (npm audit + downloads + install
   scripts — policy in CLAUDE.md); don't overthink; don't over-verify small
