@@ -14,13 +14,17 @@ Single entry point for continuing SYNOPTIC. Read in this order:
   https://github.com/DHarv44/synoptic (remote `origin`, branch `main`).
 - **Working state is clean**: no uncommitted work in flight. If you find dirty
   files, `git status` + diff them against this doc's claims before trusting either.
-- **In progress (R7, mostly done)**: All-Tilts SHIPPED (click → per-tilt
-  REF/VEL column; worker `probeColumn` + sweeps.ts). Cross-section SHIPPED
-  (shift+click A→B → worker `section` → SectionPlot RHI at true beam
-  heights + dashed map line). Remaining R7: cell trend charts — accumulate
-  IEM attr snapshots client-side keyed by `nexrad+storm_id` (no history
-  API), then plot max_dbz/VIL/top/hail over time in the Cells panel.
-  Then R8: 3D radar volume (react-three-fiber returns; deps still installed).
+- **R7 COMPLETE** (All-Tilts, cross-section, cell trends). Radar suite is
+  R1–R7 done.
+- **Next: R8 — 3D radar volume.** react-three-fiber + three are still in
+  package.json (unused since the Phase 2.5 map swap; `src/scene/` was
+  deleted, recreate it). Plan: an R3F canvas overlaid on / beside the map
+  showing the retained sweeps as a volume — simplest honest first cut is
+  stacked tilt surfaces (each sweep as a cone/disc at its true beam height,
+  textured with the same polar R8 texture the map layer uses), then
+  raymarched isosurface later. `SweepStore` already holds every tilt; the
+  worker can post all sweeps on demand (add a `volume` message mirroring
+  `postSelectedSweep`). PLAN.md §3.3.3 has the target feature set.
 
 ## The end-game queue (user-agreed order: features first, then these)
 

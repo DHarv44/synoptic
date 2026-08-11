@@ -1,5 +1,7 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Badge, Stack, Table, Text } from '@mantine/core'
+import { CellTrend } from '@/features/cells/CellTrend'
+import { cellKey, dbzDelta } from '@/features/cells/history'
 import { useCameraStore } from '@/map/cameraStore'
 import { bboxIntersects, useMapView } from '@/map/viewStore'
 import { cellSeverity, SEVERITY_COLORS, type CellFeature } from '@/features/cells/service'
@@ -18,6 +20,7 @@ export function CellsPanel() {
   const cells = useCellsData()
   const bounds = useMapView((s) => s.bounds)
   const requestFlyTo = useCameraStore((s) => s.requestFlyTo)
+  const [selected, setSelected] = useState<{ key: string; title: string } | null>(null)
   useEffect(() => acquireCellsFeed(), [])
 
   const visible = useMemo(() => {
@@ -41,6 +44,7 @@ export function CellsPanel() {
       <Text size="xs" c="dimmed">
         {visible.length} cells in view · NEXRAD storm attributes via IEM
       </Text>
+      {selected && <CellTrend cellKey={selected.key} title={selected.title} />}
       <Table withRowBorders={false} verticalSpacing={2} fz="xs" highlightOnHover>
         <Table.Thead>
           <Table.Tr>
@@ -55,11 +59,16 @@ export function CellsPanel() {
           {visible.slice(0, MAX_ROWS).map((c) => {
             const p = c.properties
             const badge = severityBadge(c)
+            const key = cellKey(c)
+            const delta = dbzDelta(key)
             return (
               <Table.Tr
-                key={`${p.nexrad}-${p.storm_id}`}
+                key={key}
                 style={{ cursor: 'pointer' }}
-                onClick={() => requestFlyTo(c.geometry.coordinates[1], c.geometry.coordinates[0])}
+                onClick={() => {
+                  setSelected({ key, title: `${p.nexrad} ${p.storm_id}` })
+                  requestFlyTo(c.geometry.coordinates[1], c.geometry.coordinates[0])
+                }}
               >
                 <Table.Td ff="monospace">
                   <span style={{ color: SEVERITY_COLORS[cellSeverity(p)] }}>●</span> {p.nexrad}{' '}
@@ -67,6 +76,11 @@ export function CellsPanel() {
                 </Table.Td>
                 <Table.Td ta="right" ff="monospace">
                   {p.max_dbz}
+                  {delta !== null && delta !== 0 && (
+                    <span style={{ color: delta > 0 ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-blue-4)' }}>
+                      {delta > 0 ? '▲' : '▼'}
+                    </span>
+                  )}
                 </Table.Td>
                 <Table.Td ta="right" ff="monospace">
                   {p.top.toFixed(0)}
