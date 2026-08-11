@@ -83,9 +83,9 @@ export function Volume3D() {
     }
   }, [])
 
-  // The worker only builds a volume when asked, so ask again whenever a new
-  // elevation lands. Radials filling in an existing tilt don't re-trigger —
-  // that would rebuild the whole grid every chunk; Refresh covers it.
+  // Ask again whenever a new elevation lands. Rebuilding every tilt surface
+  // measures ~8 ms for a full 17-tilt volume, so this is not worth
+  // coalescing — the cost is in the worker's resample, not here.
   useEffect(() => {
     if (!site) {
       setTilts([])
@@ -156,7 +156,17 @@ export function Volume3D() {
           overflow: 'hidden',
         }}
       >
-        <Canvas camera={{ position: [0, 150, 200], fov: 45, far: 4000 }} dpr={[1, 2]}>
+        {/*
+          * on-demand rendering: the scene is static between volumes, but R3F
+          * defaults to redrawing every frame, so an open panel kept a second
+          * WebGL context busy at 60 Hz next to the map's. drei's controls call
+          * invalidate() as you orbit, so interaction stays smooth.
+          */}
+        <Canvas
+          frameloop="demand"
+          camera={{ position: [0, 150, 200], fov: 45, far: 4000 }}
+          dpr={[1, 2]}
+        >
           <color attach="background" args={['#0b0e12']} />
           <GroundPlane
             radiusKm={GROUND_RADIUS_KM}

@@ -3,6 +3,14 @@ import { styleUrl } from '@/map/style'
 import { distanceKm } from '@/features/radar/level2/geometry'
 
 const SIZE = 1024
+/**
+ * Rendering a floor means constructing and tearing down a whole MapLibre
+ * instance, which is main-thread work. Panning between two radars would pay
+ * it every time, so keep the last few — bounded because each canvas is
+ * SIZE² × 4 bytes.
+ */
+const CACHE_MAX = 4
+const cache = new Map<string, GroundImage>()
 
 export interface GroundImage {
   canvas: HTMLCanvasElement
@@ -22,6 +30,9 @@ export function renderGroundImage(
   radiusKm: number,
   scheme: 'dark' | 'light',
 ): Promise<GroundImage> {
+  const cacheKey = `${site.lat.toFixed(3)},${site.lon.toFixed(3)}:${radiusKm}:${scheme}`
+  const hit = cache.get(cacheKey)
+  if (hit) return Promise.resolve(hit)
   return new Promise((resolve, reject) => {
     const host = document.createElement('div')
     host.style.cssText = `position:absolute;left:-99999px;top:0;width:${SIZE}px;height:${SIZE}px`
@@ -74,7 +85,10 @@ export function renderGroundImage(
         // ~330 ms this takes is waiting on tiles, off the main thread.
         ctx.drawImage(map.getCanvas(), 0, 0, SIZE, SIZE)
         cleanup()
-        resolve({ canvas, widthKm, heightKm })
+        const image = { canvas, widthKm, heightKm }
+        cache.set(cacheKey, image)
+        if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value as string)
+        resolve(image)
       } catch (e) {
         cleanup()
         reject(e instanceof Error ? e : new Error(String(e)))
