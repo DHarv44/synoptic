@@ -53,6 +53,10 @@ aviationweather.gov · NOMADS GFS · OpenFreeMap / OpenMapTiles / OpenStreetMap
 basemap. Attribution is displayed in-app. **Not a substitute for official
 warnings.**
 
+## License
+
+[MIT](LICENSE)
+
 ## Docs
 
 - [PLAN.md](PLAN.md) — full product spec (data catalog, feature areas, phases)
