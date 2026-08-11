@@ -163,7 +163,11 @@ dependency order. Check boxes as slices land.
   Nyquist parsed from the RAD block, storm-relative velocity applied in
   the shader with Bunkers right-mover motion computed from the site's
   model sounding (shown in the control, e.g. "storm 303°/26kt").
-- [ ] R6 — Level 3 products: meso/TVS/tracks/hail icons + storm cell table.
+- [x] R6 — Storm cells: NEXRAD storm attributes via IEM's GeoJSON re-serve
+  (no NIDS parsing needed — deferred until a product it can't provide):
+  severity-colored cell markers + id labels on the map, viewport-filtered
+  cell table (dBZ/top/hail/TVS/meso) with click-to-fly. Shared-feed
+  factory extracted (alerts refactored onto it).
 - [ ] R7 — All-Tilts, cross-section, cell trend charts.
 - [ ] R8 — 3D volume (R3F returns; raymarch/isosurface).
 

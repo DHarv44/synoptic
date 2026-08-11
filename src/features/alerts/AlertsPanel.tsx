@@ -4,7 +4,7 @@ import { fmtUtcDateTime } from '@/core/time/format'
 import { useCameraStore } from '@/map/cameraStore'
 import { bboxIntersects, useMapView, type Bbox } from '@/map/viewStore'
 import { alertColor, type AlertFeature } from '@/features/alerts/service'
-import { acquireAlertsFeed, useAlerts } from '@/features/alerts/store'
+import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
 
 const MAX_LISTED = 40
 
@@ -67,7 +67,7 @@ function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
  * have no polygon — they're behind the "unmapped" switch and not clickable.
  */
 export function AlertsPanel() {
-  const alerts = useAlerts((s) => s.alerts)
+  const alerts = useAlertsData()
   const bounds = useMapView((s) => s.bounds)
   const [showUnmapped, setShowUnmapped] = useState(false)
   useEffect(() => acquireAlertsFeed(), [])

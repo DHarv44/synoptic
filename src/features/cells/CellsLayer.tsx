@@ -1,0 +1,75 @@
+import { useEffect, useMemo } from 'react'
+import type { GeoJSONSource } from 'maplibre-gl'
+import { useMapLayer } from '@/map/useMapLayer'
+import { cellSeverity, SEVERITY_COLORS } from '@/features/cells/service'
+import { acquireCellsFeed, useCellsData } from '@/features/cells/store'
+
+/** Storm cell markers: colored by severity, storm-id labels when zoomed. */
+export function CellsLayer() {
+  const cells = useCellsData()
+  useEffect(() => acquireCellsFeed(), [])
+
+  const geojson = useMemo(
+    () => ({
+      type: 'FeatureCollection' as const,
+      features: cells.map((c) => ({
+        type: 'Feature' as const,
+        geometry: c.geometry,
+        properties: {
+          color: SEVERITY_COLORS[cellSeverity(c.properties)],
+          severity: cellSeverity(c.properties),
+          label: c.properties.storm_id,
+        },
+      })),
+    }),
+    [cells],
+  )
+
+  useMapLayer(
+    (map) => {
+      map.addSource('cells', { type: 'geojson', data: geojson })
+      map.addLayer({
+        id: 'cells',
+        type: 'circle',
+        source: 'cells',
+        minzoom: 5,
+        paint: {
+          'circle-color': 'transparent',
+          'circle-radius': ['+', 5, ['*', 2, ['get', 'severity']]],
+          'circle-stroke-color': ['get', 'color'],
+          'circle-stroke-width': 1.5,
+        },
+      })
+      map.addLayer({
+        id: 'cells-label',
+        type: 'symbol',
+        source: 'cells',
+        minzoom: 7,
+        layout: {
+          'text-field': ['get', 'label'],
+          'text-size': 9,
+          'text-offset': [0, 1.3],
+          'text-font': ['Noto Sans Regular'],
+        },
+        paint: { 'text-color': ['get', 'color'] },
+      })
+      return () => {
+        for (const id of ['cells', 'cells-label']) {
+          if (map.getLayer(id)) map.removeLayer(id)
+        }
+        if (map.getSource('cells')) map.removeSource('cells')
+      }
+    },
+    [],
+  )
+
+  useMapLayer(
+    (map) => {
+      const src = map.getSource('cells') as GeoJSONSource | undefined
+      src?.setData(geojson)
+    },
+    [geojson],
+  )
+
+  return null
+}

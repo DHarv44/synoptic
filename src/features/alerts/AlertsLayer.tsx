@@ -2,11 +2,11 @@ import { useEffect, useMemo } from 'react'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { firstSymbolLayerId, useMapLayer } from '@/map/useMapLayer'
 import { alertColor, withGeometry } from '@/features/alerts/service'
-import { acquireAlertsFeed, useAlerts } from '@/features/alerts/store'
+import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
 
 /** Warning polygons: translucent fill + colored outline (GeoJSON layers). */
 export function AlertsLayer() {
-  const alerts = useAlerts((s) => s.alerts)
+  const alerts = useAlertsData()
   useEffect(() => acquireAlertsFeed(), [])
 
   const geojson = useMemo(
