@@ -280,16 +280,26 @@ probes that point. Works on desktop and mobile, in dark or light.
    - **A low display floor.** Everything ≥ ~5 dBZ is drawn; a configurable
      floor (and a smarter transparency ramp near it) would remove most of
      the speckle without touching real echo.
-   - **Nearest-neighbour sampling** in the polar shader, producing hard
-     gate edges at high zoom. Add optional bilinear sampling across
-     azimuth/range as an opt-in "smoothing" setting, matching the presentation
-     smoothing paid apps offer — off by default, per the honesty rule.
+   - **Nearest-neighbour sampling** ✅ — Level 2 has an opt-in smoothing
+     setting that interpolates across azimuth and range, off by default per
+     the honesty rule. It is deliberately not a hardware LINEAR filter: raw
+     0 and 1 are sentinels for below-threshold and range-folded, so blending
+     them with real returns would paint mid-range echo along every data
+     edge. The shader renormalises over whichever neighbours are real, and
+     the gate under each fragment still decides *whether* to draw, so
+     smoothing softens colour steps without extending echo into gates that
+     measured nothing. The two composite layers honour the same Smoothing
+     switch through `raster-resampling`, which is what made an overzoomed
+     mosaic look blocky.
    - **Volume continuity** — partial sweeps show as wedges while a volume
      streams in, and there's a brief blank at volume rollover. Retain the
      previous complete sweep until the new one covers each azimuth.
-   - Also worth revisiting: dual-bin azimuth writes were a stopgap for
-     1°-spaced cuts and may be widening returns; range-folded and
-     below-threshold gates should be visually distinct from "no echo".
+   - Range-folded and below-threshold gates should be visually distinct
+     from "no echo" — all three currently just don't draw. (The dual-bin
+     azimuth write was previously listed here as possibly widening returns.
+     It isn't: each radial writes bins N and N+1, but for super-res 0.5°
+     data the next radial overwrites N+1, so it self-corrects and only fills
+     genuine gaps and the sweep's trailing edge.)
    - **Displayable dual-pol moments** ✅ — spectrum width, differential
      reflectivity, correlation coefficient and differential phase each have
      a colour ramp and can be painted, and the gate probe reads all six.

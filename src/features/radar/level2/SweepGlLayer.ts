@@ -49,6 +49,8 @@ export class SweepGlLayer implements CustomLayerInterface {
   }
 
   private lutMoment = 'REF'
+  /** Interpolate between gates rather than painting them as hard cells. */
+  smooth = false
 
   onAdd(map: MLMap, gl: WebGLRenderingContext | WebGL2RenderingContext): void {
     if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL2 required')
@@ -123,6 +125,8 @@ export class SweepGlLayer implements CustomLayerInterface {
     const srvActive = this.srvEnabled && this.meta.moment === 'VEL' ? 1 : 0
     gl.uniform1f(u('u_srv'), srvActive)
     gl.uniform2f(u('u_storm'), this.stormU, this.stormV)
+    gl.uniform1f(u('u_smooth'), this.smooth ? 1 : 0)
+    gl.uniform2f(u('u_texel'), 1 / this.meta.gates, 1 / this.meta.azBins)
     gl.activeTexture(gl.TEXTURE0)
     gl.bindTexture(gl.TEXTURE_2D, this.sweepTex)
     gl.uniform1i(u('u_sweep'), 0)

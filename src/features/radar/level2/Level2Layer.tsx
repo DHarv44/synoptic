@@ -53,6 +53,7 @@ export function Level2Layer() {
   const { map } = useMapContext()
   const bounds = useMapView((s) => s.bounds)
   const opacity = useFeatureOption<number>('level2', 'opacity')
+  const smooth = useFeatureOption<boolean>('level2', 'smooth')
   const site = useRadar((s) => s.site)
   const srv = useRadar((s) => s.srv)
   const storm = useRadar((s) => s.storm)
@@ -87,9 +88,12 @@ export function Level2Layer() {
   }, [])
 
   useEffect(() => {
-    if (layerRef.current) layerRef.current.opacity = opacity / 100
+    if (layerRef.current) {
+      layerRef.current.opacity = opacity / 100
+      layerRef.current.smooth = smooth
+    }
     map.triggerRepaint()
-  }, [opacity, map])
+  }, [opacity, smooth, map])
 
   // Section line drawn over the sweep.
   useMapLayer(

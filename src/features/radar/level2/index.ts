@@ -35,5 +35,13 @@ registerFeature({
       step: 5,
       defaultValue: 85,
     },
+    {
+      kind: 'boolean',
+      key: 'smooth',
+      // Off by default: a gate is a measurement volume, and interpolating
+      // between them shows detail the radar did not resolve.
+      label: 'Smoothing (interpolate between gates)',
+      defaultValue: false,
+    },
   ],
 })

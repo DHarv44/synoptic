@@ -65,7 +65,11 @@ export function RadarLayer() {
           id: 'radar-rv',
           type: 'raster',
           source: 'radar-rv',
-          paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
+          paint: {
+            'raster-opacity': opacity / 100,
+            'raster-fade-duration': 150,
+            'raster-resampling': smooth ? 'linear' : 'nearest',
+          },
         },
         'radar',
       )
@@ -82,9 +86,14 @@ export function RadarLayer() {
     (map) => {
       const src = map.getSource('radar-rv') as RasterTileSource | undefined
       if (src && rvTiles) src.setTiles([rvTiles])
-      if (map.getLayer('radar-rv')) map.setPaintProperty('radar-rv', 'raster-opacity', opacity / 100)
+      const resampling = smooth ? 'linear' : 'nearest'
+      for (const id of ['radar-rv', 'radar-iem']) {
+        if (!map.getLayer(id)) continue
+        map.setPaintProperty(id, 'raster-opacity', opacity / 100)
+        map.setPaintProperty(id, 'raster-resampling', resampling)
+      }
     },
-    [rvTiles, opacity],
+    [rvTiles, opacity, smooth],
   )
 
   // IEM CONUS high-res overlay (bounds-limited so no off-CONUS requests)
@@ -105,7 +114,11 @@ export function RadarLayer() {
           id: 'radar-iem',
           type: 'raster',
           source: 'radar-iem',
-          paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
+          paint: {
+            'raster-opacity': opacity / 100,
+            'raster-fade-duration': 150,
+            'raster-resampling': smooth ? 'linear' : 'nearest',
+          },
         },
         'radar-conus',
       )
@@ -114,7 +127,7 @@ export function RadarLayer() {
         if (map.getSource('radar-iem')) map.removeSource('radar-iem')
       }
     },
-    [conusEnabled, product, opacity],
+    [conusEnabled, product, opacity, smooth],
   )
 
   return null
