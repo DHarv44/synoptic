@@ -1,4 +1,4 @@
-import { IconRadar } from '@tabler/icons-react'
+import { IconBox, IconRadar } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { Level2Layer } from '@/features/radar/level2/Level2Layer'
 import { Volume3D } from '@/features/radar/level2/Volume3D'
@@ -16,7 +16,7 @@ registerFeature({
   layerIcon: IconRadar,
   layerComponent: Level2Layer,
   sourceIds: ['nexrad-l2'],
-  panels: [{ id: 'volume3d', title: '3D echo', component: Volume3D, group: 'radar', order: 0 }],
+  tools: [{ id: 'volume3d', title: '3D echo', icon: IconBox, component: Volume3D }],
   defaultEnabled: true,
   settings: [
     {

@@ -4,6 +4,8 @@ import { PlaybackControl } from '@/app/shell/PlaybackControl'
 import { MobileSheet, TAB_BAR_HEIGHT } from '@/app/shell/MobileSheet'
 import { MobileLayerButton } from '@/map/MobileLayerButton'
 import { LoadingIndicator } from '@/ui/LoadingIndicator'
+import { ToolRail } from '@/app/shell/ToolRail'
+import { MobileToolBar } from '@/app/shell/MobileToolBar'
 
 /**
  * Center viewport. Desktop: map with a persistent right-edge rail (tabs
@@ -19,10 +21,12 @@ export function Viewport({ isMobile }: { isMobile: boolean }) {
         <>
           <MobileLayerButton bottom={TAB_BAR_HEIGHT + 66} />
           <LoadingIndicator top={12} right={12} />
+          <MobileToolBar />
           <MobileSheet />
         </>
       ) : (
         <>
+          <ToolRail />
           <DockRail />
           <LoadingIndicator top={12} right={56} />
         </>

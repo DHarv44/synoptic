@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ActionIcon, Collapse, Group, Menu, Text, UnstyledButton } from '@mantine/core'
 import { IconChevronDown, IconGripVertical } from '@tabler/icons-react'
 import { useDock, type DockTab } from '@/app/shell/dockStore'
@@ -31,12 +31,16 @@ export function DockSection({
   const moveSection = useDock((s) => s.moveSection)
   const resetOrder = useDock((s) => s.resetOrder)
   const reorder = useDock((s) => s.reorder)
+  const [armed, setArmed] = useState(false)
 
   return (
     <div
       data-section={id}
-      draggable={reorderable}
+      // Only armed by a press on the grip: a permanently draggable container
+      // swallows every drag inside it (canvases, sliders, map interactions).
+      draggable={armed}
       onDragStart={(e) => e.dataTransfer.setData('text/section', id)}
+      onDragEnd={() => setArmed(false)}
       onDragOver={(e) => {
         if (reorderable) e.preventDefault()
       }}
@@ -62,6 +66,8 @@ export function DockSection({
                 variant="subtle"
                 color="gray"
                 aria-label={`Reorder ${title}`}
+                onPointerDown={() => setArmed(true)}
+                onPointerUp={() => setArmed(false)}
                 style={{ cursor: 'grab' }}
               >
                 <IconGripVertical size={13} stroke={1.6} />

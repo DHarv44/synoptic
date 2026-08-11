@@ -68,7 +68,7 @@ export function Volume3D() {
   const site = currentSite()
 
   return (
-    <Stack gap="xs">
+    <Stack gap="xs" h="100%" p="xs" style={{ minHeight: 0 }}>
       <Group justify="space-between" wrap="nowrap">
         <Text size="sm" fw={600}>
           {site ? `${site.id} · 3D echo` : '3D echo'}
@@ -103,7 +103,7 @@ export function Volume3D() {
           label={(v) => `${v} dBZ`}
         />
       </Group>
-      <div style={{ height: 280, borderRadius: 4, overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 220, borderRadius: 4, overflow: 'hidden' }}>
         <Canvas camera={{ position: [0, 90, 190], fov: 45, far: 4000 }} dpr={[1, 2]}>
           <color attach="background" args={['#0b0e12']} />
           <gridHelper args={[360, 12, '#2c3440', '#1d232c']} />

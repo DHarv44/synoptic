@@ -42,6 +42,18 @@ export interface PanelContribution {
 export type LayerGroup = 'radar' | 'observations' | 'analysis' | 'reference'
 
 /**
+ * A tool view: a workbench with its own camera/navigation (3D echo,
+ * cross-section) rather than a readout. Tools live in the left panel;
+ * readouts live in the right dock.
+ */
+export interface ToolContribution {
+  id: string
+  title: string
+  icon: ComponentType<{ size?: number | string; stroke?: number }>
+  component: ComponentType
+}
+
+/**
  * Everything a feature tells the shell about itself. The settings screen,
  * layer rail, and analysis dock are generated from these — a feature that
  * isn't registered doesn't exist.
@@ -60,6 +72,8 @@ export interface FeatureManifest {
   layerComponent?: ComponentType
   /** Analysis dock panels this feature contributes. */
   panels?: PanelContribution[]
+  /** Left-panel tool views this feature contributes. */
+  tools?: ToolContribution[]
   settings: SettingField[]
   /** Health-strip source ids this feature consumes (drives rail badges). */
   sourceIds?: string[]
