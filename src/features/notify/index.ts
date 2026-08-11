@@ -1,6 +1,7 @@
 import { registerFeature } from '@/core/settings/registry'
 import { NotifyWatcher } from '@/features/notify/NotifyWatcher'
 import { HomeAlertsPanel } from '@/features/notify/HomeAlertsPanel'
+import { HomeAlertsSummary } from '@/features/notify/HomeAlertsSummary'
 
 /** Desktop notifications for warnings covering the user's home location. */
 registerFeature({
@@ -9,7 +10,7 @@ registerFeature({
   description: 'Desktop notifications for warnings covering your saved location.',
   backgroundComponent: NotifyWatcher,
   panels: [
-    { id: 'home-alerts', title: 'At my location', component: HomeAlertsPanel, group: 'nearby', order: -1 },
+    { id: 'home-alerts', title: 'At my location', component: HomeAlertsPanel, group: 'nearby', order: -1, summary: HomeAlertsSummary },
   ],
   defaultEnabled: true,
   settings: [

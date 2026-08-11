@@ -2,6 +2,7 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { AlertsLayer } from '@/features/alerts/AlertsLayer'
 import { AlertsPanel } from '@/features/alerts/AlertsPanel'
+import { AlertsSummary } from '@/features/alerts/AlertsSummary'
 
 /** NWS active alerts: warning polygons + severity-sorted list. */
 registerFeature({
@@ -13,7 +14,7 @@ registerFeature({
   layerIcon: IconAlertTriangle,
   layerComponent: AlertsLayer,
   sourceIds: ['nws-alerts'],
-  panels: [{ id: 'alerts', title: 'Alerts', component: AlertsPanel, group: 'nearby', order: 0 }],
+  panels: [{ id: 'alerts', title: 'Alerts', component: AlertsPanel, group: 'nearby', order: 0, summary: AlertsSummary }],
   defaultEnabled: true,
   settings: [],
 })

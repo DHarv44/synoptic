@@ -81,11 +81,12 @@ off and on moves it to the top (this is how radar came to cover warnings).
    rebuilt settings + mobile bottom-tab layout + translucent chrome +
    loading indicator + local/UTC time preference are all in.
    Remaining, roughly in priority order:
-   - **Section summary lines**: `PanelContribution.summary` exists and
-     `DockSection` renders it as the collapsed-state hint — no feature fills
-     it yet. Add per-feature summaries (CAPE/shear for sounding, warning
-     count for alerts, site/tilt for radar) and a verdict line in the
-     Location header.
+   - **Section summary lines**: done. Every dock section fills
+     `PanelContribution.summary` with a `<SectionHint>`; `tone="alert"` is
+     for counts that mean something is happening. Viewport filtering moved
+     into `useVisibleAlerts`/`useVisibleCells` and sounding indices into
+     `sounding/indices.ts` so panel and summary can't disagree. Still open:
+     a plain-language verdict line in the Location header.
    - **Rail indicators**: mechanism is in — a feature declares
      `dockIndicator` in its manifest (a component that renders
      `<RailIndicator />`), and `DockRail` collects them by panel group, so

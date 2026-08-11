@@ -1,4 +1,5 @@
 import type { SourceRef } from '@/core/data/types'
+import type { Bbox } from '@/map/viewStore'
 
 export const NWS: SourceRef = { id: 'nws-alerts', label: 'NWS Alerts' }
 
@@ -61,4 +62,23 @@ export function alertWeight(event: string): number {
 /** Polygon-bearing alerts only (zone-referenced alerts render in the panel list). */
 export function withGeometry(features: AlertFeature[]): AlertFeature[] {
   return features.filter((f) => f.geometry?.type === 'Polygon')
+}
+
+/** Bounding box of an alert's polygon, or null for zone-referenced alerts. */
+export function alertBbox(a: AlertFeature): Bbox | null {
+  const rings = a.geometry?.coordinates
+  if (!rings) return null
+  let w = 180
+  let s = 90
+  let e = -180
+  let n = -90
+  for (const ring of rings) {
+    for (const [lon, lat] of ring) {
+      w = Math.min(w, lon)
+      e = Math.max(e, lon)
+      s = Math.min(s, lat)
+      n = Math.max(n, lat)
+    }
+  }
+  return [w, s, e, n]
 }

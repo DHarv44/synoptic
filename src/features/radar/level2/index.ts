@@ -3,6 +3,7 @@ import { registerFeature } from '@/core/settings/registry'
 import { Level2Layer } from '@/features/radar/level2/Level2Layer'
 import { RadarWorkbench } from '@/features/radar/level2/RadarWorkbench'
 import { RadarReadouts } from '@/features/radar/level2/RadarReadouts'
+import { RadarSummary } from '@/features/radar/level2/RadarSummary'
 import { Level2RailIndicator } from '@/features/radar/level2/Level2RailIndicator'
 
 /**
@@ -20,7 +21,7 @@ registerFeature({
   sourceIds: ['nexrad-l2'],
   tools: [{ id: 'radar-workbench', title: 'Radar views', icon: IconBox, component: RadarWorkbench }],
   panels: [
-    { id: 'radar-readouts', title: 'Level 2', component: RadarReadouts, group: 'radar', order: 0 },
+    { id: 'radar-readouts', title: 'Level 2', component: RadarReadouts, group: 'radar', order: 0, summary: RadarSummary },
   ],
   dockIndicator: Level2RailIndicator,
   defaultEnabled: true,

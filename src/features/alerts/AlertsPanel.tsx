@@ -1,25 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Badge, Group, Paper, Stack, Switch, Text } from '@mantine/core'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useCameraStore } from '@/map/cameraStore'
-import { bboxIntersects, useMapView, type Bbox } from '@/map/viewStore'
+import type { Bbox } from '@/map/viewStore'
 import { alertColor, type AlertFeature } from '@/features/alerts/service'
-import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
+import { useVisibleAlerts } from '@/features/alerts/useVisibleAlerts'
 
 const MAX_LISTED = 40
-
-function alertBbox(a: AlertFeature): Bbox | null {
-  const rings = a.geometry?.coordinates
-  if (!rings) return null
-  let w = 180, s = 90, e = -180, n = -90
-  for (const ring of rings) {
-    for (const [lon, lat] of ring) {
-      w = Math.min(w, lon); e = Math.max(e, lon)
-      s = Math.min(s, lat); n = Math.max(n, lat)
-    }
-  }
-  return [w, s, e, n]
-}
 
 function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
   const requestFitBounds = useCameraStore((s) => s.requestFitBounds)
@@ -68,18 +55,8 @@ function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
  * have no polygon — they're behind the "unmapped" switch and not clickable.
  */
 export function AlertsPanel() {
-  const alerts = useAlertsData()
-  const bounds = useMapView((s) => s.bounds)
   const [showUnmapped, setShowUnmapped] = useState(false)
-  useEffect(() => acquireAlertsFeed(), [])
-
-  const withBoxes = useMemo(() => alerts.map((a) => ({ a, bbox: alertBbox(a) })), [alerts])
-  const visible = useMemo(() => {
-    const mapped = withBoxes.filter(
-      ({ bbox }) => bbox !== null && (bounds === null || bboxIntersects(bbox, bounds)),
-    )
-    return showUnmapped ? [...mapped, ...withBoxes.filter(({ bbox }) => bbox === null)] : mapped
-  }, [withBoxes, bounds, showUnmapped])
+  const { all: alerts, visible } = useVisibleAlerts(showUnmapped)
 
   if (alerts.length === 0) {
     return (

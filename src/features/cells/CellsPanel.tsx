@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Badge, Stack, Table, Text } from '@mantine/core'
 import { CellTrend } from '@/features/cells/CellTrend'
 import { cellKey, dbzDelta } from '@/features/cells/history'
 import { useCameraStore } from '@/map/cameraStore'
-import { bboxIntersects, useMapView } from '@/map/viewStore'
 import { cellSeverity, SEVERITY_COLORS, type CellFeature } from '@/features/cells/service'
-import { acquireCellsFeed, useCellsData } from '@/features/cells/store'
+import { useVisibleCells } from '@/features/cells/useVisibleCells'
 
 const MAX_ROWS = 30
 
@@ -17,19 +16,9 @@ function severityBadge(c: CellFeature): string | null {
 
 /** Storm cell table (viewport-filtered): click a row to fly to the cell. */
 export function CellsPanel() {
-  const cells = useCellsData()
-  const bounds = useMapView((s) => s.bounds)
+  const { all: cells, visible } = useVisibleCells()
   const requestFlyTo = useCameraStore((s) => s.requestFlyTo)
   const [selected, setSelected] = useState<{ key: string; title: string } | null>(null)
-  useEffect(() => acquireCellsFeed(), [])
-
-  const visible = useMemo(() => {
-    if (!bounds) return cells
-    return cells.filter((c) => {
-      const [lon, lat] = c.geometry.coordinates
-      return bboxIntersects([lon, lat, lon, lat], bounds)
-    })
-  }, [cells, bounds])
 
   if (cells.length === 0) {
     return (

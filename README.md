@@ -129,12 +129,14 @@ probes that point. Works on desktop and mobile, in dark or light.
    progress.
 
    **Still to do.**
-   - **Section summary lines** — the plumbing shipped (`summary` on the panel
-     contract) but no feature fills it yet. A collapsed section should say
-     "SBCAPE 1886 · shear 45 kt" or "3 warnings in view", and the *Location*
-     header should carry a plain-language verdict ("Severe risk — moderately
-     unstable, strong shear"). This is the highest-leverage item left for the
-     hobbyist audience.
+   - **Section summary lines** ✅ — collapsed sections now report themselves:
+     "22°C · Partly cloudy", "23°C / 17°C · 40% from 13:00", "CAPE 1758 ·
+     shear 30 kt", "22 in view · 16 severe", "149 in view · 32 rotating",
+     "2 warnings". Counts that mean something is happening render in the
+     alert tone, so a collapsed stack still answers "is there anything here
+     for me". *Still open:* a plain-language verdict in the **Location
+     header** ("Severe risk — moderately unstable, strong shear"), which is
+     a writing problem more than a plumbing one.
    - **Rail indicators** — the mechanism shipped (features declare
      `dockIndicator`; the rail collects them by panel group, so the shell
      never reads a feature store) and Radar uses it for a slow green pulse
