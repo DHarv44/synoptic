@@ -9,6 +9,7 @@ import {
 import type { ComponentType } from 'react'
 import { useDock, type DockTab } from '@/app/shell/dockStore'
 import { mapChromeStyle } from '@/ui/mapChrome'
+import { LayerToggles } from '@/map/LayerToggles'
 
 export interface RailTab {
   key: DockTab
@@ -106,6 +107,17 @@ export function DockRail({
       {RAIL_TABS.map((t) => (
         <RailButton key={t.key} tab={t} indicator={indicators[t.key]} />
       ))}
+      {/* Layer visibility toggles sit at the foot of the same strip. */}
+      <div style={{ flex: 1 }} />
+      <div
+        style={{
+          borderTop: '1px solid var(--mantine-color-default-border)',
+          paddingTop: 6,
+          paddingBottom: 6,
+        }}
+      >
+        <LayerToggles />
+      </div>
     </Stack>
   )
 }

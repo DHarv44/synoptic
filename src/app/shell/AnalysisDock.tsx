@@ -98,7 +98,7 @@ export function AnalysisDock() {
   return (
     <Stack gap={0} h="100%" style={{ minHeight: 0 }}>
       <ContextHeader tab={tab} />
-      <ScrollArea flex={1} style={{ minHeight: 0 }} px={tab === 'settings' ? 'xs' : 0}>
+      <ScrollArea flex={1} style={{ minHeight: 0 }} px="xs">
         {body}
       </ScrollArea>
     </Stack>
