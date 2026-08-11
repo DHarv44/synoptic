@@ -131,11 +131,14 @@ is the only writer; bench, workbench and readouts all read from it.
    `Volume3D` (2,679 → 1,751 kB), live clock quantised to 10 s (136 → 3 idle
    notifications per ~35 s), decode worker no longer re-posts identical tilt
    lists or a 1.3 MB sweep copy per chunk, 3D mesh build ~245 → 58 ms, and
-   lightning skips no-op redraws. Still open: long-session memory and
-   retained-sweep caps, viewport filtering if lists grow, and the two
-   remaining main-thread blocks — the hidden MapLibre instance that renders
-   the 3D floor on site change, and mesh building still running during
-   render (moving it into the worker would remove it). Not yet done at all:
+   lightning skips no-op redraws. **The remaining big blocks are MapLibre's,
+   not ours**: with the site locked (no worker restart, no floor render, no
+   mesh rebuild) a cross-country `jumpTo` still cost one 1360 ms task —
+   vector-tile upload and symbol placement. A teleport is the worst case;
+   normal panning is far gentler. Don't chase this in feature code. The
+   floor render was suspected and cleared by measurement (readback ~0 ms).
+   Still open: long-session memory and retained-sweep caps, viewport
+   filtering if lists grow, mesh building moved into the worker, and a
    low-end/mobile device pass, which also de-risks the Chase HUD.
    Profiling recipe: `PerformanceObserver` on `longtask` in the dev hook;
    store churn via `window.__wx.stores.<x>.subscribe`.

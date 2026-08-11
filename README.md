@@ -315,10 +315,19 @@ probes that point. Works on desktop and mobile, in dark or light.
      full national list — cheap at ~900 items, worth bucketing if lists grow.
    - **Level 2 memory.** Sweeps are retained per tilt/moment (~1.3 MB each,
      tens of them) with no cap; long sessions are unmeasured.
-   - **Remaining main-thread blocks.** The worst survivor is the hidden
-     MapLibre instance rendering the 3D view's basemap floor on every site
-     change. Mesh building also still runs during render — moving it into the
-     worker would take it off the main thread entirely.
+   - **Remaining main-thread blocks are MapLibre's, not ours.** With the
+     radar site locked — no worker restart, no basemap-floor render, no mesh
+     rebuild — an instantaneous cross-country jump still produced a single
+     1360 ms task, which is vector-tile upload and symbol placement. Note
+     that a teleport is the pathological case; incremental panning loads far
+     fewer tiles. Levers are style complexity (layer and label count) and
+     preferring animated `flyTo` over `jumpTo`, which spreads the work.
+     The 3D view's hidden-map floor render was *suspected* and cleared by
+     measurement: the pixel readback is ~0 ms and teardown ~10 ms, with the
+     ~330 ms it takes being off-thread tile loading.
+   - **Mesh building still runs during render.** Now ~58 ms on a full
+     volume, and threshold drags commit on release rather than per tick, but
+     moving it into the worker would take it off the main thread entirely.
    - Still to measure: memory over a long session, and a low-end/mobile
      device pass (which also de-risks the Chase HUD).
 6. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,

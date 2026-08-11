@@ -48,6 +48,10 @@ function TiltSurfaces({ tilts, threshold }: { tilts: VolumeTilt[]; threshold: nu
  */
 export function Volume3D() {
   const [tilts, setTilts] = useState<VolumeTilt[]>([])
+  // Dragged value vs committed value. Every threshold change rebuilds every
+  // tilt surface (tens of ms on a full volume), so the meshes follow the
+  // release while the readout follows the thumb.
+  const [thresholdDrag, setThresholdDrag] = useState(30)
   const [threshold, setThreshold] = useState(30)
   const [groundOpacity, setGroundOpacity] = useState(55)
   const [bearing, setBearing] = useState(0)
@@ -114,7 +118,7 @@ export function Volume3D() {
       )}
       <Group gap="xs" wrap="nowrap">
         <Text size="xs" c="dimmed" w={54}>
-          ≥{threshold} dBZ
+          ≥{thresholdDrag} dBZ
         </Text>
         <Slider
           flex={1}
@@ -122,8 +126,9 @@ export function Volume3D() {
           min={10}
           max={60}
           step={5}
-          value={threshold}
-          onChange={setThreshold}
+          value={thresholdDrag}
+          onChange={setThresholdDrag}
+          onChangeEnd={setThreshold}
           label={(v) => `${v} dBZ`}
         />
       </Group>
