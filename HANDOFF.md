@@ -126,15 +126,19 @@ is the only writer; bench, workbench and readouts all read from it.
      Needs permission flow, background-safe polling (note: pollers with
      `pauseWhenHidden` stall when hidden — use a non-paused poller or a
      service worker), and per-alert de-duplication by NWS alert id.
-4. **Performance pass** (never profiled; README has the full list). Biggest
-   suspects: the 250 ms timeline tick re-rendering every simTime subscriber
-   (meteogram cursor, radar frame pick, sounding lookup) even when idle;
-   Level 2 sweep deep-copy + transfer on every chunk (~1.3 MB × tens of
-   retained sweeps); per-poll GeoJSON rebuilds (alerts, ~900 cells,
-   lightning every 1 s); eager three.js/R3F load for one panel; viewport
-   filtering over national lists on every `moveend`. Then measure: frame
-   timings while streaming, long-session memory, bundle analysis, low-end
-   mobile — which also de-risks the Chase HUD.
+4. **Performance pass — first round done and measured** (numbers in README
+   roadmap item 5): three.js split out of the initial bundle via a lazy
+   `Volume3D` (2,679 → 1,751 kB), live clock quantised to 10 s (136 → 3 idle
+   notifications per ~35 s), decode worker no longer re-posts identical tilt
+   lists or a 1.3 MB sweep copy per chunk, 3D mesh build ~245 → 58 ms, and
+   lightning skips no-op redraws. Still open: long-session memory and
+   retained-sweep caps, viewport filtering if lists grow, and the two
+   remaining main-thread blocks — the hidden MapLibre instance that renders
+   the 3D floor on site change, and mesh building still running during
+   render (moving it into the worker would remove it). Not yet done at all:
+   low-end/mobile device pass, which also de-risks the Chase HUD.
+   Profiling recipe: `PerformanceObserver` on `longtask` in the dev hook;
+   store churn via `window.__wx.stores.<x>.subscribe`.
 5. **Phase 7 Chase HUD** — PLAN.md §3.14.
 6. **Radar quality + resolution** (README roadmap item 4). Two halves:
    *resolution* — the three radar layers (RainViewer ~z7, IEM ~z12, Level 2)

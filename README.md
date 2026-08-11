@@ -284,27 +284,43 @@ probes that point. Works on desktop and mobile, in dark or light.
      a fresh one look identical. Every real radar app shows both — a
      4-minute severe-weather scan and a 10-minute clear-air scan are read
      differently. The decoder knows both; the panel just never shows them.
-5. **Performance pass** — the app has been built feature-first and never
-   profiled. Known suspects, roughly in order of expected payoff:
-   - **The live clock re-renders everything.** The timeline ticks 4×/second
-     and `simTime` drives the meteogram cursor, radar frame selection and
-     sounding lookup — so panels re-render continuously even when nothing
-     visible changed. Coarsen the live tick, or expose a throttled derived
-     time for subscribers that only need minute resolution.
-   - **Level 2 memory and copying.** Sweeps are retained per tilt/moment
-     (~1.3 MB each, tens of them) and the selected sweep is deep-copied and
-     transferred on *every* arriving chunk. Throttle posting to animation
-     cadence, cap retained tilts, and reuse buffers.
-   - **Per-poll GeoJSON rebuilds.** Alerts (hundreds of polygons) and cells
-     (~900 points) rebuild their whole FeatureCollection on each poll, and
-     lightning rebuilds up to 4096 features every second. Diff or reuse.
-   - **Code-splitting.** three.js/R3F/drei load eagerly for a single 3D
-     panel; d3 and the chart panels could split too. Lazy-load them.
-   - **Viewport work.** Cell/alert viewport filtering runs on every
-     `moveend` over the full national list — bucket spatially or debounce.
-   - Then measure properly: frame timings with radar streaming, memory over
-     a long session, bundle analysis, and a low-end/mobile device pass
-     (which also de-risks the Chase HUD).
+5. **Performance pass** — a first profiled round has landed. Done, with
+   measurements:
+   - **Initial bundle** 2,679 kB → 1,751 kB (762 → 511 kB gzip). three.js,
+     R3F and drei served one panel most sessions never open; everything
+     importing three hangs off `Volume3D`, so lazily importing that module
+     splits the whole subtree into a 916 kB on-demand chunk.
+   - **The live clock** took a new `simTime` on every 250 ms tick, re-rendering
+     the meteogram cursor, radar/satellite frame pickers and sounding lookup
+     four times a second while idle. Quantised to 10 s, returning the same
+     state object between steps so zustand skips the notify: 3 notifications
+     per 34 s idle, against 136.
+   - **Decode worker churn.** The tilt list was re-posted on every chunk
+     (8 array replacements per 36 s carrying 2 real changes — now 1:1), and
+     the ~1.3 MB selected sweep was copied and transferred per chunk, now
+     leading-edge throttled to 120 ms.
+   - **3D mesh build** ~245 ms → 58 ms on a 599k-vertex volume: per-vertex
+     colour went from a stop scan plus three `parseInt`s on hex substrings to
+     a precomputed table, and geometry from growing plain arrays to
+     preallocated `Float32Array`s written by index. Covered by tests now.
+   - **Lightning** rebuilt up to 4096 features and re-parsed its source every
+     second regardless of change; now redraws on new strikes or every 5 s for
+     the fade, and not at all when idle. *Reasoned, not profiled — the feed
+     was empty during testing.*
+
+   Still open:
+   - **Alert/cell GeoJSON** already memoise per poll (minutes apart), so they
+     are not hot — but a busy severe day is untested.
+   - **Viewport work.** Cell/alert filtering runs on every `moveend` over the
+     full national list — cheap at ~900 items, worth bucketing if lists grow.
+   - **Level 2 memory.** Sweeps are retained per tilt/moment (~1.3 MB each,
+     tens of them) with no cap; long sessions are unmeasured.
+   - **Remaining main-thread blocks.** The worst survivor is the hidden
+     MapLibre instance rendering the 3D view's basemap floor on every site
+     change. Mesh building also still runs during render — moving it into the
+     worker would take it off the main thread entirely.
+   - Still to measure: memory over a long session, and a low-end/mobile
+     device pass (which also de-risks the Chase HUD).
 6. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
    time-to-arrival from storm motion, SPC outlooks and mesoscale discussions,
    an intercept/escape route solver over OSM roads, placefile import, and a
