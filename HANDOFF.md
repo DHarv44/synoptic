@@ -86,7 +86,7 @@ off and on moves it to the top (this is how radar came to cover warnings).
 
 The user reported for a long time that "the radar changes when I zoom". I
 chased it across four commits (`1125cf5`, `60528ef`, `e53cd71`, `84d5cbe`)
-and **made it worse**, then reverted the lot in `2a0d5e5`. Read this before
+and **made it worse**, then reverted the lot in `e0c86f6`. Read this before
 touching [RadarLayer.tsx](src/features/radar/RadarLayer.tsx) again.
 
 **The mistake.** To stop the two composites blending, I hid the global one
