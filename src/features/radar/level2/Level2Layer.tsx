@@ -14,6 +14,7 @@ import { fetchChunk, findCurrentVolume, listVolumeChunks } from '@/features/rada
 import { RANGE_M, SweepGlLayer } from '@/features/radar/level2/SweepGlLayer'
 import { Level2Control } from '@/features/radar/level2/Level2Control'
 import { useRadar } from '@/features/radar/level2/store'
+import { useSectionDraw } from '@/features/radar/level2/useSectionDraw'
 import { distanceKm, sampleLine, toAzRange } from '@/features/radar/level2/geometry'
 import { emitVolume, setLevel2Worker } from '@/features/radar/level2/bridge'
 import type {
@@ -114,34 +115,7 @@ export function Level2Layer() {
     [sectionLine],
   )
 
-  // Cross-section drawing: crosshair cursor, rubber-band line, Esc cancels.
-  const drawing = useRadar((s) => s.drawing)
-  useEffect(() => {
-    if (!drawing) {
-      map.getCanvas().style.cursor = ''
-      return
-    }
-    map.getCanvas().style.cursor = 'crosshair'
-
-    const onMove = (e: MapMouseEvent): void => {
-      const start = useRadar.getState().drawStart
-      if (start) {
-        useRadar.getState().set({
-          sectionLine: [start, { lat: e.lngLat.lat, lon: e.lngLat.lng }],
-        })
-      }
-    }
-    const onKey = (e: KeyboardEvent): void => {
-      if (e.key === 'Escape') useRadar.getState().cancelDraw()
-    }
-    map.on('mousemove', onMove)
-    window.addEventListener('keydown', onKey)
-    return () => {
-      map.getCanvas().style.cursor = ''
-      map.off('mousemove', onMove)
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [drawing, map])
+  useSectionDraw(map)
 
   // Storm motion (Bunkers right-mover) from the model sounding at the site.
   useEffect(() => {

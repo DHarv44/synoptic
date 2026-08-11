@@ -6,12 +6,51 @@ Single entry point for continuing SYNOPTIC. Read in this order:
 3. [SLICES.md](SLICES.md) — per-slice status ledger (kept current; trust it).
 4. [PLAN.md](PLAN.md) — full product spec (the "why" behind everything).
 
+## Shell architecture (read before touching the UI)
+
+The layout rule that decides where anything goes:
+**settings are preferences that persist; controls are state you change while
+working.** Layer *visibility* is a control (on the map), layer *opacity* is a
+setting (in Settings). Radar tilt is a control (floating bench), default tilt
+would be a setting.
+
+Three surfaces, split by kind, not by topic:
+- **Map** — the hero, edge to edge. Carries the floating radar bench (only
+  what changes the map), the playback control, and the loading indicator.
+- **Left rail + tool panel** (`ToolRail`/`ToolPanel`, `toolStore`) — *views*
+  with their own camera/navigation. Today: the radar workbench (3D echo |
+  cross-section). Resizable, % width persisted. Features contribute via
+  `FeatureManifest.tools`.
+- **Right rail + dock** (`DockRail`/`AnalysisDock`, `dockStore`) — *readouts*,
+  in four sections: Location (probe-driven), Nearby (viewport-driven), Radar
+  (Level 2 readouts), Settings. Each is a scrolling column of collapsible
+  `DockSection`s; expansion persists. Features contribute via
+  `FeatureManifest.panels` with a `group`.
+- Clicking the active rail tab collapses that panel; there are no separate
+  collapse buttons. Mobile replaces the right rail with a bottom tab bar
+  (peek/half/full) and the tool rail with buttons across the top of the map;
+  layers expand from a map button into the same vertical icon strip.
+
+Radar state is centralised in `features/radar/level2/store.ts` — the map layer
+is the only writer; bench, workbench and readouts all read from it.
+
 ## Where things stand (2026-08-11)
 
-- **Done & verified live**: Phases 1, 2, 2.5, 4, 5 (tags exist) and radar suite
-  slices R1–R6 (Level 2 streaming decode → polar WebGL render → tilts/probe →
-  dealiasing/SRV → storm-cell table). Everything committed and pushed to
-  https://github.com/DHarv44/synoptic (remote `origin`, branch `main`).
+- **Done & verified live**: Phases 1, 2, 2.5, 4, 5 (tags) and the whole radar
+  suite R1–R8 (tag `phase-6`): streaming Level 2 decode → polar WebGL render →
+  tilts/probe/All-Tilts → dealiasing + SRV → storm cells with session trends →
+  cross-section → 3D echo. Plus the **UI overhaul** (see the shell
+  architecture above): rails, tool panel, four-section dock, rebuilt settings,
+  mobile layout, translucent chrome, loading indicator, local/UTC times.
+  Everything committed and pushed to https://github.com/DHarv44/synoptic
+  (remote `origin`, branch `main`).
+- **Recently removed on purpose**: section drag-and-drop (a permanently
+  draggable container swallows presses on its content — canvases, sliders,
+  map gestures; arming from a grip was still fragile and touch-hostile) and
+  shift+click for cross-sections (MapLibre binds shift to box zoom and
+  consumes it). Cross-sections are now drawn from an explicit Draw button
+  with a rubber-band line, Cancel/Esc, and Redraw. Both are on the roadmap
+  with the safer approaches noted.
 - **Working state is clean**: no uncommitted work in flight. If you find dirty
   files, `git status` + diff them against this doc's claims before trusting either.
 - **PHASE 6 RADAR SUITE COMPLETE (R1–R8)**: streaming L2 decode → polar
