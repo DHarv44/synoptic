@@ -70,6 +70,12 @@ export interface FeatureManifest {
   layerIcon?: ComponentType<{ size?: number | string; stroke?: number }>
   /** R3F component rendered inside the globe scene while the feature is enabled. */
   layerComponent?: ComponentType
+  /**
+   * Renders nothing, but stays mounted for as long as the feature is
+   * enabled — for watchers whose whole job is to run when nobody is
+   * looking at them. Independent of the map, unlike `layerComponent`.
+   */
+  backgroundComponent?: ComponentType
   /** Analysis dock panels this feature contributes. */
   panels?: PanelContribution[]
   /**

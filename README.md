@@ -32,6 +32,9 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Cross-section | Draw A→B on the map → RHI slice at true beam heights | ✅ |
 | 3D echo | Tilt surfaces in 3D over a basemap floor, threshold + orbit, heading tape | ✅ |
 | Storm cells | TVS/meso/hail attributes, table + session trend charts | ✅ |
+| My location | Locate button → home point, remembered locally | ✅ |
+| Forecast | Next 24 hours hourly + 3/5/10-day outlook | ✅ |
+| Warning notifications | Desktop alerts for warnings covering your location | ✅ |
 | Radar quality + resolution | Clutter suppression, seamless zoom handoff, multi-site blending | ⚠️ needs work |
 | Dual-pol products | SW/ZDR/PHI/RHO decoded, but only REF/VEL can be displayed | ⚠️ needs work |
 | Scan time + VCP | Volume age and coverage pattern shown on the panel | 🔭 |
@@ -218,23 +221,26 @@ probes that point. Works on desktop and mobile, in dark or light.
      hand-rolled pointer handling or a small dep like `vaul`), a "Data
      sources" entry to replace the footer that mobile hides, and a touch
      pass on the radar bench. This is the groundwork the Chase HUD builds on.
-3. **Make it personal** — three related features that turn the instrument into
-   something you'd keep open every day:
-   - **My location** — a small button on the map that centers and zooms to
-     where you are (browser geolocation), remembered as your home point so
-     panels and alerts can default to it.
-   - **Forecast panels** — plain-language outlooks alongside the existing
-     probe tabs (Now / Meteogram / Skew-T / Models): a **24-hour** hour-by-hour
-     strip, then **3-day**, **7-day**, and **10-day** summaries with daily
-     highs/lows, precip chance and totals, wind, and a short written
-     characterization. Same data path as the meteogram, so it's mostly
-     presentation; 10-day is the honest limit of useful skill from the free
-     model set (and model spread from the Models tab can annotate confidence).
-   - **Desktop notifications** — opt-in alerts for your home location: NWS
-     warnings as they're issued, "rain starting in ~20 minutes" nowcasts from
-     the radar trend, and severe-parameter thresholds crossing. Needs a
-     notification-permission flow, a background poll that survives a
-     backgrounded tab, and strict de-duplication so a single warning fires once.
+3. **Make it personal** — mostly shipped. The instrument now knows where you
+   are and what that means for you:
+   - **My location** ✅ — a locate button on the map centers and zooms to you,
+     probes the point so the analysis panels fill in, and remembers it as home
+     across reloads. Stored locally; it reaches the network only as the
+     coordinates of a forecast request.
+   - **Forecast panels** ✅ — "Next 24 hours" hour-by-hour and a 3/5/10-day
+     "Outlook" with highs/lows, precip chance and totals, and notable gusts,
+     in the Location tab beside Now / Meteogram / Skew-T / Models. 10-day is
+     the honest limit of useful skill from the free model set.
+   - **Desktop notifications** — warnings covering your home location fire
+     once each, opt-in via a permission prompt, with a severity threshold in
+     Settings and de-duplication by NWS alert id that survives reloads. The
+     alerts feed doesn't pause on a hidden tab, so it keeps working in the
+     background. *Still to do:* "rain starting in ~20 minutes" nowcasts from
+     the radar trend, and severe-parameter thresholds crossing — both need a
+     trend signal the app doesn't compute yet.
+   - Still open: a **written characterization** of the forecast (the
+     plain-language line that makes the outlook scannable), and annotating
+     confidence from the Models tab's spread.
 4. **Radar quality and resolution** — the biggest gap between SYNOPTIC and the
    paid apps is how radar *looks*, especially as you zoom in.
 
