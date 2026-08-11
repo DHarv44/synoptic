@@ -30,22 +30,20 @@ export function RadarReadouts() {
   const probe = useRadar((s) => s.probe)
   const column = useRadar((s) => s.column)
 
-  if (!site) {
-    return (
-      <Text size="xs" c="dimmed">
-        No Level 2 site attached. Zoom in past z6 over the United States and the
-        nearest WSR-88D takes over — single-site radar at full resolution, rather
-        than the blended national mosaic.
-      </Text>
-    )
-  }
-
   return (
     <Stack gap="xs">
       <RadarControls />
       <Divider />
 
-      {!probe && (
+      {!site && (
+        <Text size="xs" c="dimmed">
+          No radar attached. Zoom in past z6 over the United States and the nearest
+          WSR-88D takes over, or pick one above — this is a single radar at full
+          resolution rather than the blended national mosaic.
+        </Text>
+      )}
+
+      {site && !probe && (
         <Text size="xs" c="dimmed">
           Click the radar echo on the map to read gate values here.
         </Text>

@@ -195,7 +195,7 @@ probes that point. Works on desktop and mobile, in dark or light.
      not layout, and it should attach to panels whose shape has settled.
 
    Also still open: keyboard access (tab switching, Esc), and the deferred
-   polish items (alert ticker, manual radar site picker, zone-alert geometry
+   polish items (alert ticker, zone-alert geometry
    resolution, restoring globe projection once custom WebGL layers adopt
    MapLibre's projection API).
 

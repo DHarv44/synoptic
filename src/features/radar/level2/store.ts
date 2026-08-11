@@ -34,16 +34,37 @@ interface RadarState {
   /** Cross-section drawing mode: awaiting two map clicks. */
   drawing: boolean
   drawStart: LatLon | null
+  /**
+   * Pinned to a chosen site instead of following the map. Panning near a
+   * boundary otherwise swaps sites and discards the probe and section, so
+   * anyone working one storm wants this on.
+   */
+  locked: boolean
   set: (patch: Partial<RadarState>) => void
   resetSite: (site: RadarSite | null) => void
+  /** Choose a site by hand. Implies a lock — otherwise the next map move
+   *  would immediately undo the choice. */
+  pickSite: (site: RadarSite) => void
+  setLocked: (on: boolean) => void
   startDraw: () => void
   cancelDraw: () => void
 }
 
+/** Everything tied to one site's volume, dropped when the site changes. */
+const CLEARED = {
+  tilts: [],
+  probe: null,
+  column: null,
+  section: null,
+  sectionLine: null,
+  drawing: false,
+  drawStart: null,
+} satisfies Partial<RadarState>
+
 /**
- * Shared Level 2 state. The map layer is the only writer; the floating
- * bench, the readouts panel and the left-hand workbench all read from here
- * so the same volume drives every surface.
+ * Shared Level 2 state. The map layer owns the stream; the controls,
+ * readouts panel and left-hand workbench all read from here so the same
+ * volume drives every surface.
  */
 export const useRadar = create<RadarState>((set) => ({
   site: null,
@@ -59,18 +80,11 @@ export const useRadar = create<RadarState>((set) => ({
   sectionLine: null,
   drawing: false,
   drawStart: null,
+  locked: false,
   set: (patch) => set(patch),
-  resetSite: (site) =>
-    set({
-      site,
-      tilts: [],
-      probe: null,
-      column: null,
-      section: null,
-      sectionLine: null,
-      drawing: false,
-      drawStart: null,
-    }),
+  resetSite: (site) => set({ site, ...CLEARED }),
+  pickSite: (site) => set({ site, locked: true, ...CLEARED }),
+  setLocked: (on) => set({ locked: on }),
   startDraw: () => set({ drawing: true, drawStart: null, sectionLine: null, section: null }),
   cancelDraw: () => set({ drawing: false, drawStart: null, sectionLine: null }),
 }))

@@ -61,15 +61,19 @@ export function Level2Layer() {
   const lastClickRef = useRef<{ azDeg: number; rangeM: number } | null>(null)
   const sectionRangesRef = useRef<{ ranges: number[]; lengthKm: number } | null>(null)
 
-  // Nearest site to view centre while zoomed in.
+  // Nearest site to view centre while zoomed in. A locked site is the
+  // user's explicit choice and outranks the map entirely — including the
+  // zoom-out clear, so panning away doesn't silently detach it.
+  const locked = useRadar((s) => s.locked)
   useEffect(() => {
+    if (locked) return
     if (!bounds || map.getZoom() < MIN_ZOOM) {
       if (useRadar.getState().site) useRadar.getState().resetSite(null)
       return
     }
     const next = nearestSite((bounds[1] + bounds[3]) / 2, (bounds[0] + bounds[2]) / 2)
     if (next?.id !== useRadar.getState().site?.id) useRadar.getState().resetSite(next)
-  }, [bounds, map])
+  }, [bounds, map, locked])
 
   useMapLayer((m) => {
     const layer = new SweepGlLayer()

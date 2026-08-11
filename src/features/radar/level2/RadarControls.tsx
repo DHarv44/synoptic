@@ -1,6 +1,24 @@
-import { ActionIcon, Chip, Group, SegmentedControl, Stack, Text, Tooltip } from '@mantine/core'
-import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
+import { useMemo } from 'react'
+import {
+  ActionIcon,
+  Chip,
+  Group,
+  SegmentedControl,
+  Select,
+  Stack,
+  Text,
+  Tooltip,
+} from '@mantine/core'
+import {
+  IconChevronDown,
+  IconChevronUp,
+  IconCrosshair,
+  IconLock,
+  IconLockOpen,
+} from '@tabler/icons-react'
+import { useCameraStore } from '@/map/cameraStore'
 import { useRadar } from '@/features/radar/level2/store'
+import { SITES } from '@/features/radar/level2/sites'
 import { setMoment, setRaw, setSrv, stepTilt, tiltsFor } from '@/features/radar/level2/controls'
 
 const DEG = Math.PI / 180
@@ -19,21 +37,78 @@ const MOMENT_HINT: Record<string, string> = {
   VEL: 'Air motion toward or away from the radar.',
 }
 
-/**
- * What the radar is currently showing, and the controls that change it.
- * These used to float over the map with no labels, which read as a mystery
- * box — here each control can say what it is, next to the numbers it drives.
- */
-export function RadarControls() {
+/** Which radar, and whether the map is allowed to change it. */
+function SitePicker() {
   const site = useRadar((s) => s.site)
+  const locked = useRadar((s) => s.locked)
+
+  const options = useMemo(
+    () =>
+      [...SITES]
+        .sort((a, b) => a.id.localeCompare(b.id))
+        .map((s) => ({ value: s.id, label: `${s.id} · ${s.name.replace(',', ', ')}` })),
+    [],
+  )
+
+  return (
+    <>
+      <Label>Site</Label>
+      <Group gap={6} wrap="nowrap">
+        <Select
+          flex={1}
+          size="xs"
+          searchable
+          allowDeselect={false}
+          data={options}
+          value={site?.id ?? null}
+          placeholder="Choose a radar"
+          nothingFoundMessage="No matching site"
+          comboboxProps={{ withinPortal: true }}
+          onChange={(id) => {
+            const next = SITES.find((s) => s.id === id)
+            if (next) useRadar.getState().pickSite(next)
+          }}
+        />
+        <Tooltip label="Center the map on this radar">
+          <ActionIcon
+            size="md"
+            variant="default"
+            disabled={!site}
+            aria-label="Center map on radar"
+            onClick={() => site && useCameraStore.getState().requestFlyTo(site.lat, site.lon)}
+          >
+            <IconCrosshair size={15} />
+          </ActionIcon>
+        </Tooltip>
+        <Tooltip label={locked ? 'Unlock — follow the map again' : 'Lock to this radar'}>
+          <ActionIcon
+            size="md"
+            variant={locked ? 'filled' : 'default'}
+            aria-label={locked ? 'Unlock radar site' : 'Lock radar site'}
+            aria-pressed={locked}
+            onClick={() => useRadar.getState().setLocked(!locked)}
+          >
+            {locked ? <IconLock size={15} /> : <IconLockOpen size={15} />}
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+      <Text size="xs" c="dimmed">
+        {locked
+          ? 'Locked. The map can roam without changing radar.'
+          : 'Following the map — whichever radar is nearest the view.'}
+      </Text>
+    </>
+  )
+}
+
+/** What the attached site is painting: which cut, which moment. */
+function SweepControls() {
   const tilts = useRadar((s) => s.tilts)
   const elevNum = useRadar((s) => s.elevNum)
   const moment = useRadar((s) => s.moment)
   const raw = useRadar((s) => s.raw)
   const srv = useRadar((s) => s.srv)
   const storm = useRadar((s) => s.storm)
-
-  if (!site) return null
 
   const available = tiltsFor(tilts, moment)
   const idx = available.findIndex((t) => t.num === elevNum)
@@ -46,16 +121,7 @@ export function RadarControls() {
         )} kt`
 
   return (
-    <Stack gap={6}>
-      <Group justify="space-between" wrap="nowrap" gap="xs">
-        <Text size="sm" fw={600} ff="monospace">
-          {site.id}
-        </Text>
-        <Text size="xs" c="dimmed" truncate>
-          {site.name}
-        </Text>
-      </Group>
-
+    <>
       <Label>Elevation</Label>
       <Group gap={6} wrap="nowrap">
         <ActionIcon
@@ -130,6 +196,22 @@ export function RadarControls() {
           )}
         </Group>
       )}
+    </>
+  )
+}
+
+/**
+ * What the radar is currently showing, and the controls that change it.
+ * These used to float over the map with no labels, which read as a mystery
+ * box — here each control can say what it is, next to the numbers it drives.
+ */
+export function RadarControls() {
+  const site = useRadar((s) => s.site)
+
+  return (
+    <Stack gap={6}>
+      <SitePicker />
+      {site && <SweepControls />}
     </Stack>
   )
 }

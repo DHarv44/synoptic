@@ -60,7 +60,7 @@ is the only writer; bench, workbench and readouts all read from it.
   trends → cross-section → 3D echo view.
 - **Next up is the end-game queue below** (wind bug → UI overhaul → Chase
   HUD). Optional radar polish if asked: raymarched isosurface instead of
-  tilt surfaces, manual site picker, `.pal` color tables, dual-pol presets
+  tilt surfaces, `.pal` color tables, dual-pol presets
   (TDS/hail auto-flagging — PLAN.md §3.3.3), volume-rollover blanking.
 
 ## The end-game queue (user-agreed order: features first, then these)
@@ -108,7 +108,7 @@ is the only writer; bench, workbench and readouts all read from it.
      repo link, license, full data-source attribution (only the map credit
      shows today) and the "not a substitute for official warnings" line.
    - Plus: timeline affordances, empty states, keyboard (tab switch, Esc),
-     deferred polish (alert ticker, `.pal` tables, manual site picker,
+     deferred polish (alert ticker, `.pal` tables,
      layer re-ordering, zone-alert geometry, globe projection restore).
    - **Mobile/responsive pass** (drawers as bottom sheets, touch targets,
      phone timeline) — shares groundwork with the Chase HUD, do it
