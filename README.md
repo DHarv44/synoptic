@@ -77,17 +77,46 @@ probes that point.
    either `grib2class` mis-decoding VGRD or a u/v assembly bug. Resume steps are
    recorded in [SLICES.md](SLICES.md) (Phase 3) and [HANDOFF.md](HANDOFF.md).
 2. **UI overhaul pass** — the interface has grown organically across seven phases
-   and is due a deliberate design pass: panel/dock ergonomics, layer rail,
-   timeline affordances, information density, and the deferred polish items
-   (alert ticker, manual radar site picker, layer re-ordering, zone-alert
-   geometry resolution, restoring globe projection once custom WebGL layers
-   adopt MapLibre's projection API).
+   and is due a deliberate design pass. The map should be the hero; chrome
+   should be summonable, not permanent.
+
+   **Chrome restructure**
+   - **Fold Layers into Settings** and retire the permanent left rail. Layer
+     toggles, opacity, and source health are settings — they don't need to
+     occupy a column full-time. Reclaims that width for the map.
+   - **Settings becomes a drawer**, not a modal: slides in over the edge,
+     dismissible with Esc or a click outside, scrollable, with the existing
+     registry-generated sections plus the layer stack at the top.
+
+   **Right panel reorganization** — the dock has grown to seven tabs
+   (Alerts, Cells, Now, Meteogram, Skew-T, Models, 3D) and forecast panels
+   would push it past ten; the tab strip already wraps. The real problem
+   isn't count, it's that the tabs mix two different mental models:
+   *"tell me about this point"* (probe-driven) and *"what's happening around
+   here"* (viewport-driven). Proposed collapse to three top-level tabs:
+   - **Place** — everything about the probed point, grouped by how deep you
+     want to go: conditions + forecast at the top (a scrollable stack, not
+     tabs — they're one story at different time scales), with Sounding and
+     Models as sub-views for when you want the full analysis.
+   - **Nearby** — the viewport-driven situation: active warnings and storm
+     cells merged into one severity/distance-ranked list rather than two
+     separate tabs answering the same question.
+   - **Radar** — the radar tool bench: site, tilt, moment, SRV/RAW, the 3D
+     echo view, and the cross-section, all in one place. This also gives the
+     floating site control a real home instead of hovering over the map.
+
+   Also in scope: timeline affordances, information density, empty states,
+   keyboard access (tab switching, Esc to dismiss drawers), and the deferred
+   polish items (alert ticker, manual radar site picker, layer re-ordering,
+   zone-alert geometry resolution, restoring globe projection once custom
+   WebGL layers adopt MapLibre's projection API).
+
    - **Mobile / responsive view** — the workstation layout currently assumes a
-     desktop-width screen. Needs a real small-screen story: collapsible
-     rail and dock as sheets, touch-sized controls, a phone-appropriate
-     timeline, and sensible defaults for what's on screen at once. This is
-     also the groundwork the Chase HUD builds on (it's the same problem
-     solved for a truck mount), so it lands before or alongside item 3.
+     desktop-width screen. Needs a real small-screen story: drawers as
+     bottom sheets, touch-sized controls, a phone-appropriate timeline, and
+     sensible defaults for what's on screen at once. This is also the
+     groundwork the Chase HUD builds on (it's the same problem solved for a
+     truck mount), so it lands before or alongside item 4.
 3. **Make it personal** — three related features that turn the instrument into
    something you'd keep open every day:
    - **My location** — a small button on the map that centers and zooms to

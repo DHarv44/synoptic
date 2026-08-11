@@ -30,13 +30,25 @@ Single entry point for continuing SYNOPTIC. Read in this order:
    Also re-test after any fix WITH the globe/mercator note below in mind —
    part of the original misplacement was the globe-projection matrix issue.
    The wind feature ships `defaultEnabled: false` until fixed.
-2. **UI overhaul** — user will provide a gripe list against the current build;
-   deferred items to fold in: alert ticker, radar color-table `.pal` support,
-   manual Level 2 site picker, layer re-ordering, zone-alert geometry
-   resolution, globe projection restoration (needs maplibre projection
-   shader API in custom layers). **Includes a mobile/responsive pass**
-   (rail + dock as sheets, touch targets, phone timeline) — shares
-   groundwork with the Chase HUD, so do it before/with item 3.
+2. **UI overhaul** — user will provide a gripe list; agreed direction so far
+   (full rationale in README roadmap):
+   - Fold **Layers into Settings**, retire the permanent left rail
+     (`app/shell/LayerRail.tsx` content moves into the settings screen).
+   - **Settings becomes a drawer** (Mantine `Drawer`, not `Modal`) —
+     `app/settings/SettingsModal.tsx` is the file to convert.
+   - **Collapse the 7-tab dock to 3**: *Place* (probe-driven: conditions +
+     forecast stacked, sounding/models as sub-views), *Nearby* (viewport-
+     driven: alerts + cells merged, ranked by severity/distance), *Radar*
+     (site/tilt/moment/SRV + 3D + cross-section; gives the floating
+     Level2Control a real home). Note this changes the registry's panel
+     contribution model — panels currently register flat; they'll need a
+     group/slot field in `FeatureManifest`.
+   - Plus: timeline affordances, empty states, keyboard (tab switch, Esc),
+     deferred polish (alert ticker, `.pal` tables, manual site picker,
+     layer re-ordering, zone-alert geometry, globe projection restore).
+   - **Mobile/responsive pass** (drawers as bottom sheets, touch targets,
+     phone timeline) — shares groundwork with the Chase HUD, do it
+     before/with item 4.
 3. **"Make it personal" trio** (user-requested, see README roadmap):
    - **My location button** on the map (browser geolocation) → center/zoom,
      stored as a home point that panels/alerts default to. Small: reuse
