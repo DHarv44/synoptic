@@ -37,7 +37,20 @@ Single entry point for continuing SYNOPTIC. Read in this order:
    shader API in custom layers). **Includes a mobile/responsive pass**
    (rail + dock as sheets, touch targets, phone timeline) — shares
    groundwork with the Chase HUD, so do it before/with item 3.
-3. **Phase 7 Chase HUD** — PLAN.md §3.14.
+3. **"Make it personal" trio** (user-requested, see README roadmap):
+   - **My location button** on the map (browser geolocation) → center/zoom,
+     stored as a home point that panels/alerts default to. Small: reuse
+     `useCameraStore.requestFlyTo` + the probe store.
+   - **Forecast panels** — 24 h hourly strip + 3/7/10-day summaries as new
+     dock tabs beside Now/Meteogram/Skew-T/Models. Data already flows via
+     `core/data/openMeteo` (`useForecast`); mostly a presentation slice.
+     Consider annotating confidence from the Models tab's spread.
+   - **Desktop notifications** — opt-in, home-location scoped: NWS warnings,
+     radar-trend "rain in ~20 min" nowcast, severe-parameter thresholds.
+     Needs permission flow, background-safe polling (note: pollers with
+     `pauseWhenHidden` stall when hidden — use a non-paused poller or a
+     service worker), and per-alert de-duplication by NWS alert id.
+4. **Phase 7 Chase HUD** — PLAN.md §3.14.
 4. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
 

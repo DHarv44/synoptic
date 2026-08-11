@@ -43,6 +43,7 @@ probes that point.
 | Hodograph | Height-colored with Bunkers right-mover | ✅ |
 | Severe indices | CAPE/CIN/LI/LCL/LFC/EL/PWAT/shear/SRH/storm motion | ✅ |
 | Model comparison | GFS/ECMWF/ICON/GEM/UKMO spaghetti + GFS ensemble | ✅ |
+| Forecast panels | Plain-language 24 h / 3-day / 7-day / 10-day outlooks per location | 🔭 |
 | Interactive parcel | Drag the surface parcel, watch CAPE recompute | 🔭 |
 | Radiosonde overlay | Real 00z/12z balloon data vs the model profile | 🔭 |
 
@@ -56,6 +57,8 @@ probes that point.
 | Satellite | NASA GIBS imagery, timeline-dated | ✅ |
 | Basemap | OpenFreeMap vector tiles — cities, roads, labels, dark/light | ✅ |
 | Wind particles | GPU flow field, surface → jet stream | ⚠️ built, disabled (see roadmap) |
+| My location | One-tap center/zoom on where you are | 🔭 |
+| Notifications | Desktop alerts for warnings and incoming rain at your location | 🔭 |
 | Alert ticker | Top-bar scrolling severe ticker | 🔭 |
 
 ✅ shipped · ⚠️ known issue · 🔭 planned
@@ -85,7 +88,24 @@ probes that point.
      timeline, and sensible defaults for what's on screen at once. This is
      also the groundwork the Chase HUD builds on (it's the same problem
      solved for a truck mount), so it lands before or alongside item 3.
-3. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
+3. **Make it personal** — three related features that turn the instrument into
+   something you'd keep open every day:
+   - **My location** — a small button on the map that centers and zooms to
+     where you are (browser geolocation), remembered as your home point so
+     panels and alerts can default to it.
+   - **Forecast panels** — plain-language outlooks alongside the existing
+     probe tabs (Now / Meteogram / Skew-T / Models): a **24-hour** hour-by-hour
+     strip, then **3-day**, **7-day**, and **10-day** summaries with daily
+     highs/lows, precip chance and totals, wind, and a short written
+     characterization. Same data path as the meteogram, so it's mostly
+     presentation; 10-day is the honest limit of useful skill from the free
+     model set (and model spread from the Models tab can annotate confidence).
+   - **Desktop notifications** — opt-in alerts for your home location: NWS
+     warnings as they're issued, "rain starting in ~20 minutes" nowcasts from
+     the radar trend, and severe-parameter thresholds crossing. Needs a
+     notification-permission flow, a background poll that survives a
+     backgrounded tab, and strict de-duplication so a single warning fires once.
+4. **Chase HUD** *(PLAN.md §3.14)* — a mobile-first second face: GPS-on-radar,
    time-to-arrival from storm motion, SPC outlooks and mesoscale discussions,
    an intercept/escape route solver over OSM roads, placefile import, and a
    replay trainer over archived events.
