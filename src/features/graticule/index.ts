@@ -1,3 +1,4 @@
+import { IconGridDots } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { GraticuleLayer } from '@/features/graticule/GraticuleLayer'
 
@@ -8,6 +9,7 @@ registerFeature({
   description: 'Latitude/longitude grid lines on the map.',
   layer: true,
   layerGroup: 'reference',
+  layerIcon: IconGridDots,
   layerComponent: GraticuleLayer,
   defaultEnabled: true,
   settings: [

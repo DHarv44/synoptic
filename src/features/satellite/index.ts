@@ -1,3 +1,4 @@
+import { IconSatellite } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { SatelliteLayer } from '@/features/satellite/SatelliteLayer'
 
@@ -8,6 +9,7 @@ registerFeature({
   description: 'NASA GIBS satellite imagery (daily VIIRS; timeline-dated).',
   layer: true,
   layerGroup: 'analysis',
+  layerIcon: IconSatellite,
   layerComponent: SatelliteLayer,
   sourceIds: ['gibs'],
   defaultEnabled: false,

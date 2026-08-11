@@ -31,6 +31,11 @@ export interface PanelContribution {
   group: PanelGroup
   /** Sort order within the group (lower first). */
   order?: number
+  /**
+   * One-line status shown on the section header while collapsed — since
+   * sections start collapsed, this is what makes the stack scannable.
+   */
+  summary?: ComponentType
 }
 
 /** Grouping for the map's layer toggle popover. */
@@ -49,6 +54,8 @@ export interface FeatureManifest {
   layer?: boolean
   /** Which group the layer toggle appears under. */
   layerGroup?: LayerGroup
+  /** Icon for the map layer toggle (a Tabler icon component). */
+  layerIcon?: ComponentType<{ size?: number | string; stroke?: number }>
   /** R3F component rendered inside the globe scene while the feature is enabled. */
   layerComponent?: ComponentType
   /** Analysis dock panels this feature contributes. */

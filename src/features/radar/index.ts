@@ -1,3 +1,4 @@
+import { IconRadar2 } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { RadarLayer } from '@/features/radar/RadarLayer'
 
@@ -8,6 +9,7 @@ registerFeature({
   description: 'Global composite precipitation radar (RainViewer, 10-min updates).',
   layer: true,
   layerGroup: 'radar',
+  layerIcon: IconRadar2,
   layerComponent: RadarLayer,
   sourceIds: ['rainviewer', 'iem-nexrad'],
   defaultEnabled: true,

@@ -1,18 +1,15 @@
-import { ActionIcon, Divider, Group, Popover, Stack, Switch, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Stack, Text, Tooltip } from '@mantine/core'
+import { IconSettings } from '@tabler/icons-react'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled, useSettings } from '@/core/settings/store'
 import { useHealth } from '@/core/data/healthStore'
 import { fmtUtcTime } from '@/core/time/format'
 import { mapChromeStyle } from '@/ui/mapChrome'
+import { useDock } from '@/app/shell/dockStore'
 import type { FeatureManifest, LayerGroup } from '@/core/settings/types'
 import type { SourceHealth } from '@/core/data/types'
 
-const GROUP_ORDER: Array<{ key: LayerGroup; label: string }> = [
-  { key: 'radar', label: 'Radar' },
-  { key: 'observations', label: 'Observations' },
-  { key: 'analysis', label: 'Analysis' },
-  { key: 'reference', label: 'Reference' },
-]
+const GROUP_ORDER: LayerGroup[] = ['radar', 'observations', 'analysis', 'reference']
 
 const STATUS_COLOR: Record<SourceHealth['status'], string> = {
   idle: 'var(--mantine-color-gray-6)',
@@ -22,103 +19,101 @@ const STATUS_COLOR: Record<SourceHealth['status'], string> = {
   disabled: 'var(--mantine-color-gray-7)',
 }
 
-function HealthDot({ sourceIds }: { sourceIds: string[] }) {
+function useWorstHealth(sourceIds: string[] | undefined): SourceHealth | null {
   const sources = useHealth((s) => s.sources)
+  if (!sourceIds) return null
   const mine = sourceIds.map((id) => sources[id]).filter((s): s is SourceHealth => s !== undefined)
   if (mine.length === 0) return null
-  const worst =
-    mine.find((s) => s.status === 'error') ?? mine.find((s) => s.status === 'stale') ?? mine[0]
-  const age = worst.lastSuccess !== undefined ? ` · ${fmtUtcTime(worst.lastSuccess)}` : ''
   return (
-    <Tooltip label={`${worst.label}: ${worst.status}${age}`} position="left">
-      <div
+    mine.find((s) => s.status === 'error') ?? mine.find((s) => s.status === 'stale') ?? mine[0]
+  )
+}
+
+function LayerButton({ manifest }: { manifest: FeatureManifest }) {
+  const enabled = useFeatureEnabled(manifest.id)
+  const setEnabled = useSettings((s) => s.setEnabled)
+  const health = useWorstHealth(manifest.sourceIds)
+  const Icon = manifest.layerIcon
+
+  const age = health?.lastSuccess !== undefined ? ` · ${fmtUtcTime(health.lastSuccess)}` : ''
+  const label = enabled
+    ? `${manifest.title}${health ? ` — ${health.status}${age}` : ''}`
+    : `${manifest.title} (off)`
+
+  return (
+    <Tooltip label={label} position="left" openDelay={200}>
+      <ActionIcon
+        size="lg"
+        variant="default"
+        aria-label={`${manifest.title} layer`}
+        aria-pressed={enabled}
+        onClick={() => setEnabled(manifest.id, !enabled)}
         style={{
-          width: 6,
-          height: 6,
-          borderRadius: 3,
-          background: STATUS_COLOR[worst.status],
-          flexShrink: 0,
+          ...mapChromeStyle,
+          position: 'relative',
+          color: enabled
+            ? 'var(--mantine-color-text)'
+            : 'var(--mantine-color-dimmed)',
+          opacity: enabled ? 1 : 0.55,
         }}
-      />
+      >
+        {Icon ? <Icon size={18} stroke={1.6} /> : <Text size="xs">{manifest.title[0]}</Text>}
+        {enabled && health && (
+          <div
+            style={{
+              position: 'absolute',
+              right: 3,
+              bottom: 3,
+              width: 5,
+              height: 5,
+              borderRadius: 3,
+              background: STATUS_COLOR[health.status],
+            }}
+          />
+        )}
+      </ActionIcon>
     </Tooltip>
   )
 }
 
-function LayerRow({ manifest }: { manifest: FeatureManifest }) {
-  const enabled = useFeatureEnabled(manifest.id)
-  const setEnabled = useSettings((s) => s.setEnabled)
-  return (
-    <Group gap={6} wrap="nowrap" justify="space-between">
-      <Switch
-        size="xs"
-        label={manifest.title}
-        checked={enabled}
-        onChange={(e) => setEnabled(manifest.id, e.currentTarget.checked)}
-      />
-      {enabled && manifest.sourceIds && <HealthDot sourceIds={manifest.sourceIds} />}
-    </Group>
-  )
-}
-
 /**
- * Map layer toggles: visibility only. Opacity, colour tables and per-layer
- * options live in Settings — visibility is an operation you perform while
- * working, the rest are preferences you set once.
+ * Standalone layer toggles down the right edge of the map: one button per
+ * layer, single click on/off, grouped by kind with a status dot when a
+ * layer's source is live. Visibility is an operation — opacity, colour
+ * tables and products are preferences and live in Settings.
  */
-export function MapLayerControl({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function MapLayerControl() {
   const layers = listFeatures().filter((f) => f.layer)
-  const activeCount = useSettings(
-    (s) => layers.filter((f) => s.features[f.id]?.enabled ?? f.defaultEnabled ?? true).length,
-  )
+  const showSettings = useDock((s) => s.show)
 
   return (
-    <Popover position="left-start" withinPortal shadow="md" offset={6}>
-      <Popover.Target>
-        <Tooltip label="Layers" position="left">
-          <ActionIcon
-            variant="default"
-            size="lg"
-            aria-label="Map layers"
-            style={{ ...mapChromeStyle, position: 'absolute', top: 8, right: 8, zIndex: 5 }}
-          >
-            <Stack gap={0} align="center">
-              <Text size="sm" lh={1}>
-                ▤
-              </Text>
-              <Text size={'8px' as never} lh={1} c="dimmed">
-                {activeCount}
-              </Text>
-            </Stack>
-          </ActionIcon>
-        </Tooltip>
-      </Popover.Target>
-      <Popover.Dropdown p="xs" style={mapChromeStyle}>
-        <Stack gap={6} miw={190}>
-          {GROUP_ORDER.map(({ key, label }) => {
-            const group = layers.filter((f) => (f.layerGroup ?? 'reference') === key)
-            if (group.length === 0) return null
-            return (
-              <Stack key={key} gap={4}>
-                <Text size="xs" c="dimmed" fw={600} tt="uppercase" lts={1}>
-                  {label}
-                </Text>
-                {group.map((f) => (
-                  <LayerRow key={f.id} manifest={f} />
-                ))}
-              </Stack>
-            )
-          })}
-          <Divider my={2} />
-          <Text
-            size="xs"
-            c="dimmed"
-            style={{ cursor: 'pointer' }}
-            onClick={onOpenSettings}
-          >
-            ⚙ Layer options…
-          </Text>
-        </Stack>
-      </Popover.Dropdown>
-    </Popover>
+    <Stack
+      gap={6}
+      style={{ position: 'absolute', bottom: 34, right: 8, zIndex: 5 }}
+      align="center"
+    >
+      {GROUP_ORDER.map((group) => {
+        const inGroup = layers.filter((f) => (f.layerGroup ?? 'reference') === group)
+        if (inGroup.length === 0) return null
+        return (
+          <Stack key={group} gap={3} align="center">
+            {inGroup.map((f) => (
+              <LayerButton key={f.id} manifest={f} />
+            ))}
+          </Stack>
+        )
+      })}
+      <Tooltip label="Layer options & settings" position="left" openDelay={200}>
+        <ActionIcon
+          size="lg"
+          variant="default"
+          aria-label="Layer options"
+          onClick={() => showSettings('settings')}
+          style={{ ...mapChromeStyle, color: 'var(--mantine-color-dimmed)' }}
+        >
+          <IconSettings size={18} stroke={1.6} />
+        </ActionIcon>
+      </Tooltip>
+    </Stack>
   )
 }

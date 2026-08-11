@@ -1,3 +1,4 @@
+import { IconBolt } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { LightningLayer } from '@/features/lightning/LightningLayer'
 
@@ -8,6 +9,7 @@ registerFeature({
   description: 'Live strikes from the Blitzortung community network (seconds latency).',
   layer: true,
   layerGroup: 'observations',
+  layerIcon: IconBolt,
   layerComponent: LightningLayer,
   sourceIds: ['blitzortung'],
   defaultEnabled: true,

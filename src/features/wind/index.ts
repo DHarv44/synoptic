@@ -1,3 +1,4 @@
+import { IconWind } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { WindLayer } from '@/features/wind/WindLayer'
 
@@ -8,6 +9,7 @@ registerFeature({
   description: 'GFS wind as GPU particle flow — surface up to the jet stream.',
   layer: true,
   layerGroup: 'analysis',
+  layerIcon: IconWind,
   layerComponent: WindLayer,
   sourceIds: ['gfs-wind'],
   // Off by default until the pinned wind-field corruption is fixed (SLICES.md).

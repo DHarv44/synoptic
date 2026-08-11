@@ -1,3 +1,4 @@
+import { IconTemperature } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { MetarLayer } from '@/features/metar/MetarLayer'
 
@@ -8,6 +9,7 @@ registerFeature({
   description: 'METAR station plots (temp, dewpoint, wind barb) when zoomed in.',
   layer: true,
   layerGroup: 'observations',
+  layerIcon: IconTemperature,
   layerComponent: MetarLayer,
   sourceIds: ['metar'],
   defaultEnabled: true,

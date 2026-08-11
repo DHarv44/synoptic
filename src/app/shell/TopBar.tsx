@@ -1,14 +1,10 @@
 import { ActionIcon, Group, Text, Tooltip, useMantineColorScheme } from '@mantine/core'
 import { spotlight } from '@mantine/spotlight'
+import { IconMoon, IconSearch, IconSun } from '@tabler/icons-react'
 import { UtcClock } from '@/ui/UtcClock'
 import { HealthStrip } from '@/app/shell/HealthStrip'
 
-interface TopBarProps {
-  onToggleDock: () => void
-  onOpenSettings: () => void
-}
-
-export function TopBar({ onToggleDock, onOpenSettings }: TopBarProps) {
+export function TopBar() {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
   return (
@@ -24,7 +20,7 @@ export function TopBar({ onToggleDock, onOpenSettings }: TopBarProps) {
             onClick={() => spotlight.open()}
             aria-label="Search locations"
           >
-            🔍
+            <IconSearch size={17} stroke={1.6} />
           </ActionIcon>
         </Tooltip>
       </Group>
@@ -40,17 +36,7 @@ export function TopBar({ onToggleDock, onOpenSettings }: TopBarProps) {
             onClick={toggleColorScheme}
             aria-label="Toggle color scheme"
           >
-            {colorScheme === 'dark' ? '☀' : '☾'}
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Settings">
-          <ActionIcon variant="subtle" color="gray" onClick={onOpenSettings} aria-label="Open settings">
-            ⚙
-          </ActionIcon>
-        </Tooltip>
-        <Tooltip label="Analysis dock">
-          <ActionIcon variant="subtle" color="gray" onClick={onToggleDock} aria-label="Toggle analysis dock">
-            ▤
+            {colorScheme === 'dark' ? <IconSun size={17} stroke={1.6} /> : <IconMoon size={17} stroke={1.6} />}
           </ActionIcon>
         </Tooltip>
       </Group>

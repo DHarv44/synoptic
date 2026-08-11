@@ -1,57 +1,105 @@
-import { useState } from 'react'
-import { ScrollArea, SegmentedControl, Stack, Tabs, Text } from '@mantine/core'
+import { ActionIcon, Group, ScrollArea, Stack, Text, Tooltip } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
+import { IconChevronRight } from '@tabler/icons-react'
 import { listFeatures } from '@/core/settings/registry'
 import { useSettings } from '@/core/settings/store'
+import { useProbe } from '@/core/probe/store'
+import { fmtLatLon } from '@/core/units/format'
+import { applyOrder, useDock, type DockTab } from '@/app/shell/dockStore'
+import { DockRail, RAIL_TABS } from '@/app/shell/DockRail'
+import { DockSection } from '@/app/shell/DockSection'
+import { SettingsPanel } from '@/app/settings/SettingsPanel'
 import type { PanelContribution, PanelGroup } from '@/core/settings/types'
 
-const GROUPS: Array<{ key: PanelGroup; label: string; empty: string }> = [
-  {
-    key: 'place',
-    label: 'Place',
-    empty: 'Click anywhere on the map for conditions, forecast, and a sounding.',
-  },
-  { key: 'nearby', label: 'Nearby', empty: 'No active weather in view.' },
-  { key: 'radar', label: 'Radar', empty: 'Zoom in to a radar site for interrogation tools.' },
-]
+const EMPTY: Record<PanelGroup, string> = {
+  place: 'Click anywhere on the map to analyse that point.',
+  nearby: 'No active warnings or storm cells in view.',
+  radar: 'Zoom in to a radar site for interrogation tools.',
+}
 
-function GroupContent({ panels, empty }: { panels: PanelContribution[]; empty: string }) {
-  const [active, setActive] = useState(panels[0]?.id)
-  if (panels.length === 0) {
+/** Contextual header: what this tab is currently about. */
+function ContextHeader({ tab }: { tab: DockTab }) {
+  const point = useProbe((s) => s.point)
+  const label = RAIL_TABS.find((t) => t.key === tab)?.label ?? ''
+
+  return (
+    <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
+      <Text size="sm" fw={600} truncate>
+        {tab === 'place' && point
+          ? (point.name ?? fmtLatLon(point.lat, point.lon))
+          : label}
+      </Text>
+      <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+        {tab === 'place' && point?.name && (
+          <Text size="xs" c="dimmed" ff="monospace">
+            {fmtLatLon(point.lat, point.lon)}
+          </Text>
+        )}
+        <Tooltip label="Collapse panel" position="left">
+          <ActionIcon
+            size="sm"
+            variant="subtle"
+            color="gray"
+            aria-label="Collapse analysis panel"
+            onClick={() => useDock.getState().toggleOpen()}
+          >
+            <IconChevronRight size={15} stroke={1.7} />
+          </ActionIcon>
+        </Tooltip>
+      </Group>
+    </Group>
+  )
+}
+
+function SectionStack({ tab, panels }: { tab: PanelGroup; panels: PanelContribution[] }) {
+  const savedOrder = useDock((s) => s.order[tab])
+  const ids = applyOrder(
+    savedOrder,
+    panels.map((p) => p.id),
+  )
+  const ordered = ids
+    .map((id) => panels.find((p) => p.id === id))
+    .filter((p): p is PanelContribution => p !== undefined)
+
+  if (ordered.length === 0) {
     return (
       <Text size="xs" c="dimmed" p="sm">
-        {empty}
+        {EMPTY[tab]}
       </Text>
     )
   }
-  const current = panels.find((p) => p.id === active) ?? panels[0]
-  const Panel = current.component
 
   return (
-    <Stack gap="xs" h="100%" style={{ minHeight: 0 }}>
-      {panels.length > 1 && (
-        <SegmentedControl
-          size="xs"
-          fullWidth
-          value={current.id}
-          onChange={setActive}
-          data={panels.map((p) => ({ value: p.id, label: p.title }))}
-        />
-      )}
-      <ScrollArea flex={1} style={{ minHeight: 0 }}>
-        <Panel />
-      </ScrollArea>
+    <Stack gap={0}>
+      {ordered.map((p) => {
+        const Panel = p.component
+        const Summary = p.summary
+        return (
+          <DockSection
+            key={p.id}
+            id={p.id}
+            tab={tab}
+            title={p.title}
+            hint={Summary ? <Summary /> : undefined}
+          >
+            <Panel />
+          </DockSection>
+        )
+      })}
     </Stack>
   )
 }
 
 /**
- * Analysis dock, three top-level sections by mental model: Place answers
- * "tell me about this point", Nearby answers "what's happening around here",
- * Radar holds the storm-interrogation tools.
+ * Analysis dock: a tab rail plus a single scrolling column of collapsible
+ * sections. Sections start collapsed and can be reordered per tab, so the
+ * panel adapts to whether you're monitoring, forecasting or interrogating.
  */
 export function AnalysisDock() {
   // Subscribe so enable/disable updates the panel set live.
   const featureStates = useSettings((s) => s.features)
+  const tab = useDock((s) => s.tab)
+  const isMobile = useMediaQuery('(max-width: 48em)') ?? false
 
   const panelsFor = (group: PanelGroup): PanelContribution[] =>
     listFeatures()
@@ -60,20 +108,25 @@ export function AnalysisDock() {
       .filter((p) => p.group === group)
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
+  const body =
+    tab === 'settings' ? <SettingsPanel /> : <SectionStack tab={tab} panels={panelsFor(tab)} />
+
   return (
-    <Tabs defaultValue="place" h="100%" display="flex" style={{ flexDirection: 'column' }}>
-      <Tabs.List grow>
-        {GROUPS.map((g) => (
-          <Tabs.Tab key={g.key} value={g.key} fz="xs">
-            {g.label}
-          </Tabs.Tab>
-        ))}
-      </Tabs.List>
-      {GROUPS.map((g) => (
-        <Tabs.Panel key={g.key} value={g.key} flex={1} p="xs" style={{ minHeight: 0 }}>
-          <GroupContent panels={panelsFor(g.key)} empty={g.empty} />
-        </Tabs.Panel>
-      ))}
-    </Tabs>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        height: '100%',
+        minHeight: 0,
+      }}
+    >
+      <DockRail horizontal={isMobile} />
+      <Stack gap={0} style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+        <ContextHeader tab={tab} />
+        <ScrollArea flex={1} style={{ minHeight: 0 }} px={tab === 'settings' ? 'xs' : 0}>
+          {body}
+        </ScrollArea>
+      </Stack>
+    </div>
   )
 }
