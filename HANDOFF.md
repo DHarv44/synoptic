@@ -338,13 +338,16 @@ it on the viewport made it flip while panning. It is a setting on purpose.
    store churn via `window.__wx.stores.<x>.subscribe`.
 5. **Phase 7 Chase HUD** — PLAN.md §3.14.
 6. **Radar quality + resolution** (README roadmap item 4). Two halves:
-   *resolution* — the three radar layers (RainViewer ~z7, IEM ~z12, Level 2)
-   are separate user-managed toggles that blur or run out as you zoom;
-   want one layer that hands off automatically, plus multi-site blending so
-   a single site's cone of silence and long-range beam climb are filled in.
-   *quality* — clutter/biological returns aren't suppressed (use the CC and
-   CFP fields we already decode), the display floor is too low, sampling is
-   nearest-neighbour, and partial sweeps show as wedges mid-volume.
+   *resolution* — one composite now draws (chosen by `radar.source`) and it
+   shares a colour table and display floor with Level 2, so the groundwork is
+   in; what remains is fading Level 2 in over a zoom range so it reads as
+   detail resolving, plus multi-site blending so a single site's cone of
+   silence and long-range beam climb are filled in.
+   *quality* — the display floor is done (`radar.floor`, 15 dBZ). Clutter and
+   biological returns still aren't suppressed; the CC and CFP fields we decode
+   can do it for Level 2, but not for the composite, where IEM has already
+   discarded the dual-pol moments. Sampling is nearest-neighbour, and partial
+   sweeps show as wedges mid-volume.
 7. **Historical mode** — needs a design pass before code (README has the
    open questions): period picking (curated named events + free date entry),
    showing per-source coverage on the timeline (radar→1991, models→1940),
@@ -352,7 +355,19 @@ it on the viewport made it flip while panning. It is a setting on purpose.
    (own Level 2 volumes / GRIB / CSV — needs format + validation decisions
    and a hard boundary so imported data never mixes with live feeds), and
    replay-specific playback controls (loop, step-by-volume, export).
-4. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
+8. **Everything hurricane** (README roadmap item 8) — a tropical mode in the
+   same sense as the Chase HUD. Nearly all of it is free and keyless from
+   NHC. Core: active storms as selectable objects, track + cone, 34/50/64 kt
+   wind radii (which is what gives arrival time at the home location),
+   tropical watches/warnings, storm surge. Then spaghetti/ensemble tracks,
+   recon HDOB and dropsondes, a satellite floater that follows the storm, and
+   an intensity trace. Two things to settle before code: whether it is a mode
+   or just layers that appear when storms are active, and how the 6-hourly
+   advisory cadence sits on a timeline built for continuous radar. Two things
+   to get right rather than fast: the cone shows where the *centre* may go,
+   not where the effects reach, and surge is the layer most likely to be read
+   as a promise.
+9. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
 
 ## Traps that cost hours (all reproducible, all documented)

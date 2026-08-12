@@ -395,9 +395,53 @@ probes that point. Works on desktop and mobile, in dark or light.
    - **Playback controls** distinct from live scrubbing: loop a window, step
      by volume, and export a frame or animation for sharing.
 
+8. **Everything hurricane** — a tropical mode, in the way the Chase HUD is a
+   severe-convective mode: the same map and timeline, refocused on a storm
+   rather than a county. Almost all of it is free and keyless from the
+   National Hurricane Center, and several pieces reuse machinery that already
+   exists here.
+
+   The core, in rough dependency order:
+   - **Active storms as first-class objects** — a list with position,
+     intensity (Vmax/MSLP), category, motion and advisory age, each selectable
+     to focus the map. NHC publishes current storms as GIS products; the
+     advisory cycle is 6-hourly with intermediate updates, which the timeline
+     already knows how to represent.
+   - **Track and cone** — past track, forecast points labelled by time and
+     intensity, and the forecast cone. Worth stating plainly in the UI that
+     the cone is where the *centre* may go, not where the effects reach —
+     that misreading is the single most consequential one in tropical
+     forecasting, and a display that doesn't address it is part of the problem.
+   - **Wind radii** — 34/50/64 kt quadrants from the forecast/advisory, which
+     are what actually answer "when do conditions get bad here". Combined with
+     the home location from *Make it personal*, this gives arrival time of
+     tropical-storm-force winds at a specific place.
+   - **Watches and warnings** — coastal segments. The alerts layer already
+     renders NWS polygons; tropical products need their own styling and
+     ordering so a hurricane warning doesn't read like a routine advisory.
+   - **Storm surge** — potential inundation. The highest-value and highest-risk
+     layer in the whole suite: it is what kills people, and it is the easiest
+     to render misleadingly. Needs a careful pass on what the product does and
+     does not claim before it ships.
+
+   Then the analysis layers:
+   - **Spaghetti / ensemble tracks** from ATCF a-deck guidance, with the
+     honest caveat that model spread is not probability.
+   - **Recon** — aircraft HDOB traces and dropsondes, the only direct
+     observations inside the core.
+   - **Satellite floater** — the existing GIBS layer retargeted to follow the
+     storm, with IR and visible loops.
+   - **Intensity history** — a Vmax/MSLP trace over the storm's life, which is
+     the meteogram in a different coordinate system.
+
+   Open questions: whether tropical is a *mode* (like the Chase HUD) or just
+   layers that appear when storms are active; how the timeline handles the
+   6-hourly advisory cadence against continuous radar; and how to present
+   forecast uncertainty without either burying it or overstating it.
+
 **Later** — run-to-run
 forecast trends (dProg/dt), forecast verification, shareable workspace URLs,
-virtual-temperature CAPE correction, hurricane mode, aurora/space weather.
+virtual-temperature CAPE correction, aurora/space weather.
 
 ---
 
