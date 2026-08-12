@@ -56,9 +56,9 @@ export function n0qIndexByRgb(): Map<number, number> {
       (bytes.charCodeAt(i * 3) << 16) |
       (bytes.charCodeAt(i * 3 + 1) << 8) |
       bytes.charCodeAt(i * 3 + 2)
-    // Duplicate colours exist at the very top of the ramp; first wins, so a
-    // pixel always resolves to the lowest dBZ that can produce it.
-    if (!map.has(rgb)) map.set(rgb, i)
+    // All 256 entries are distinct, so every colour resolves to exactly one
+    // reading — no ambiguity to break a tie over.
+    map.set(rgb, i)
   }
   indexByRgb = map
   return map

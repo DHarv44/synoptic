@@ -25,9 +25,9 @@ describe('n0q palette', () => {
     for (const s of Object.values(SAMPLES)) expect(n0qDbz(s.index)).toBe(s.dbz)
   })
 
-  it('covers the whole 256-level ramp', () => {
-    // Duplicates exist at the top of the ramp, so this is a floor not an equality.
-    expect(n0qIndexByRgb().size).toBeGreaterThan(240)
+  it('covers the whole ramp with no two levels sharing a colour', () => {
+    // 256 distinct entries means every pixel resolves to exactly one reading.
+    expect(n0qIndexByRgb().size).toBe(256)
   })
 })
 
