@@ -54,6 +54,10 @@ export function Level2Layer() {
   const bounds = useMapView((s) => s.bounds)
   const opacity = useFeatureOption<number>('level2', 'opacity')
   const smooth = useFeatureOption<boolean>('level2', 'smooth')
+  // Deliberately the composite's setting, not one of our own: a site view and
+  // the national picture disagreeing about what counts as an echo is exactly
+  // the seam this layer exists to avoid.
+  const floorDbz = useFeatureOption<number>('radar', 'floor')
   const site = useRadar((s) => s.site)
   const srv = useRadar((s) => s.srv)
   const storm = useRadar((s) => s.storm)
@@ -91,9 +95,10 @@ export function Level2Layer() {
     if (layerRef.current) {
       layerRef.current.opacity = opacity / 100
       layerRef.current.smooth = smooth
+      layerRef.current.setFloor(floorDbz)
     }
     map.triggerRepaint()
-  }, [opacity, smooth, map])
+  }, [opacity, smooth, floorDbz, map])
 
   // Section line drawn over the sweep.
   useMapLayer(

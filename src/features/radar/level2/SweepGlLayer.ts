@@ -1,6 +1,6 @@
 import type { CustomLayerInterface, Map as MLMap } from 'maplibre-gl'
 import { SWEEP_FRAG, SWEEP_VERT } from '@/features/radar/level2/shaders'
-import { LUT_RANGES, lutFor } from '@/features/radar/level2/colormap'
+import { DEFAULT_FLOOR_DBZ, LUT_RANGES, lutFor } from '@/features/radar/level2/colormap'
 import type { SweepMessage } from '@/features/radar/level2/worker'
 import { linkProgram } from '@/map/glUtils'
 
@@ -44,9 +44,7 @@ export class SweepGlLayer implements CustomLayerInterface {
     if (!gl) return
     if (msg.moment !== this.lutMoment) {
       this.lutMoment = msg.moment
-      gl.bindTexture(gl.TEXTURE_2D, this.lutTex)
-      const lut = lutFor(msg.moment)
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, lut)
+      this.uploadLut()
     }
     gl.bindTexture(gl.TEXTURE_2D, this.sweepTex)
     gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
@@ -55,8 +53,28 @@ export class SweepGlLayer implements CustomLayerInterface {
   }
 
   private lutMoment = 'REF'
+  private floorDbz = DEFAULT_FLOOR_DBZ
   /** Interpolate between gates rather than painting them as hard cells. */
   smooth = false
+
+  /**
+   * Weakest return to draw. Shared with the composite mosaic so a site and
+   * the national picture never disagree about what counts as an echo.
+   */
+  setFloor(dbz: number): void {
+    if (dbz === this.floorDbz) return
+    this.floorDbz = dbz
+    this.uploadLut()
+    this.map?.triggerRepaint()
+  }
+
+  private uploadLut(): void {
+    const gl = this.gl
+    if (!gl) return
+    gl.bindTexture(gl.TEXTURE_2D, this.lutTex)
+    const lut = lutFor(this.lutMoment, this.floorDbz)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, lut)
+  }
 
   onAdd(map: MLMap, gl: WebGLRenderingContext | WebGL2RenderingContext): void {
     if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL2 required')
@@ -82,8 +100,7 @@ export class SweepGlLayer implements CustomLayerInterface {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT)
 
     this.lutTex = gl.createTexture()
-    gl.bindTexture(gl.TEXTURE_2D, this.lutTex)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, lutFor('REF'))
+    this.uploadLut()
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)

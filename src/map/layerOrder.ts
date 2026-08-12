@@ -18,11 +18,9 @@ type AddLayerObject = Parameters<MLMap['addLayer']>[0]
  */
 export const LAYER_ORDER = [
   'satellite',
-  // Radar stacks by resolution, coarsest first: the global composite tops
-  // out at z7 and overzooms into mush beyond it, so the CONUS mosaic and
-  // then single-site super-res have to sit above it, not under it.
+  // One composite occupies 'radar' — they are alternatives, never a stack.
+  // Single-site super-res is the genuine detail upgrade and sits above it.
   'radar',
-  'radar-conus',
   'radar-level2',
   'wind',
   'graticule',

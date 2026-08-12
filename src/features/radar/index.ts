@@ -2,11 +2,11 @@ import { IconRadar2 } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { RadarLayer } from '@/features/radar/RadarLayer'
 
-/** Global composite precipitation radar (RainViewer tiles, 10-min cadence). */
+/** Composite reflectivity: US NEXRAD mosaic, or a worldwide fallback. */
 registerFeature({
   id: 'radar',
   title: 'Radar',
-  description: 'Global composite precipitation radar (RainViewer, 10-min updates).',
+  description: 'Composite reflectivity — US NEXRAD mosaic, or worldwide coverage.',
   layer: true,
   layerGroup: 'radar',
   layerIcon: IconRadar2,
@@ -16,8 +16,27 @@ registerFeature({
   settings: [
     {
       kind: 'select',
+      key: 'source',
+      label: 'Source',
+      options: [
+        { value: 'mosaic', label: 'US NEXRAD mosaic (high-res)' },
+        { value: 'global', label: 'Worldwide composite' },
+      ],
+      defaultValue: 'mosaic',
+    },
+    {
+      kind: 'number',
+      key: 'floor',
+      label: 'Display floor dBZ',
+      min: -30,
+      max: 40,
+      step: 5,
+      defaultValue: 15,
+    },
+    {
+      kind: 'select',
       key: 'scheme',
-      label: 'Color table',
+      label: 'Color table (worldwide only)',
       options: [
         { value: '6', label: 'NEXRAD Level 3' },
         { value: '2', label: 'Universal Blue' },
@@ -26,12 +45,11 @@ registerFeature({
       ],
       defaultValue: '6',
     },
-    { kind: 'boolean', key: 'smooth', label: 'Smoothing', defaultValue: false },
     {
       kind: 'boolean',
-      key: 'conus',
-      label: 'CONUS high-res (IEM NEXRAD)',
-      defaultValue: true,
+      key: 'smooth',
+      label: 'Smoothing (worldwide only)',
+      defaultValue: false,
     },
     {
       kind: 'number',

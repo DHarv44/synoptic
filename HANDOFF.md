@@ -159,6 +159,41 @@ any timestamp); only the `-t.cgi` variant honours it. Cost of the WMS is
 rather than serving pre-cut tiles. That is the price of every tile agreeing
 on what time it is.
 
+### Values, not pictures (`features/radar/mosaic/`)
+
+Mosaic tiles are translated back to reflectivity and recoloured with *our*
+table before MapLibre sees them. This is what makes the composite and the
+Level 2 sweep one product rather than two that resemble each other.
+
+How it works, and why each piece is the way it is:
+
+- **`addProtocol`, not a custom layer.** `synoptic-mosaic://<floor>/<upstream>`
+  intercepts the fetch; MapLibre keeps tiling, caching, overzoom and fading.
+  Confirmed against the installed source — a protocol handler may return an
+  `ImageBitmap` directly, so there is no PNG re-encode.
+- **The floor rides in the URL.** MapLibre caches on URL, so changing it
+  invalidates tiles. Put it anywhere else and old colours linger.
+- **The reverse lookup is exact, not nearest-match.** n0q renders from a
+  256-level indexed raster where `dBZ = index / 2 - 32` — the same indexing
+  `reflectivityLut()` already used, so translation is index to index with no
+  arithmetic between. Verified on live tiles: alpha is only ever 0 or 255 (no
+  antialiasing) and all 14 sampled colours were exact palette entries.
+- **The palette came from IEM's own raster.** The archive composites at
+  `/archive/data/YYYY/MM/DD/GIS/uscomp/n0q_YYYYMMDDHHMI.png` are 8-bit indexed
+  and carry it in the PNG `PLTE` chunk. Regenerate from there if it changes.
+  Dead ends already checked: `GetLegendGraphic` returns a blank 75-byte PNG,
+  and `FORMAT=image/png; mode=8bit` gives a *per-tile adaptive* 111-entry
+  quantization, not the canonical ramp.
+- **Cost, measured:** 1.18 ms recolour + 0.3 ms decode per tile, ~30 ms across
+  a 20-tile viewport, interleaved with network waits. `buildTranslation` is
+  0.7 ms and memoized per floor. No worker needed; `recolor` is pure, so
+  moving it to one is a lift-and-shift if that changes.
+
+**One composite draws, and the user picks it** (`radar.source`). The two are
+different products with different valid times and colour tables, so drawing
+both blends rather than overlays. Deciding automatically was worse — keying
+it on the viewport made it flip while panning. It is a setting on purpose.
+
 ## The end-game queue (user-agreed order: features first, then these)
 
 1. **Pinned wind bug** — full diagnosis state in SLICES.md "Phase 3". Resume at:

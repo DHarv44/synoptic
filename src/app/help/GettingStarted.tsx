@@ -23,8 +23,8 @@ const BASICS: Step[] = [
     body: 'The radar workbench draws the volume in 3D and cuts vertical cross-sections. Drag its right edge to resize.',
   },
   {
-    title: 'Radar is three layers, not one',
-    body: 'A global composite, a sharper CONUS mosaic, and single-site Level 2 that streams raw volumes once you zoom past z6. Level 2 gives you tilts, velocity and the 3D view; the mosaics give you coverage.',
+    title: 'One composite, plus single-site detail',
+    body: 'The composite covers wide areas — the US NEXRAD mosaic by default, or a worldwide one from Settings. Zoom past z6 and single-site Level 2 streams raw volumes on top, adding tilts, velocity and the 3D view. Both share a colour table and display floor, so zooming in resolves detail rather than switching products.',
   },
   {
     title: 'Drawing a cross-section',

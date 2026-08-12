@@ -21,8 +21,8 @@ probes that point. Works on desktop and mobile, in dark or light.
 
 | Feature | What it does | Status |
 |---|---|---|
-| Global composite | RainViewer tiles, animated on the timeline | ✅ |
-| CONUS mosaic | IEM NEXRAD high-res, 5-min + archive steps | ✅ |
+| Composite reflectivity | US NEXRAD mosaic or worldwide, one at a time, pinned to an explicit valid time | ✅ |
+| Our colours on the mosaic | Tiles translated back to dBZ and recoloured, so the composite and Level 2 share a table and a display floor | ✅ |
 | **Level 2 streaming** | Single-site super-res, decoded radial-by-radial from the real-time chunk feed | ✅ |
 | Polar rendering | Native gates via WebGL (no rasterized tiles), NWS color table | ✅ |
 | Tilt control | Every elevation, split-cut aware | ✅ |
@@ -196,10 +196,10 @@ probes that point. Works on desktop and mobile, in dark or light.
      export/import.
    - Deliberately *not* exposing per-layer draw order — the stacking is
      meaningful and mostly offers users a way to break their own display.
-     It is declared once in `map/layerOrder.ts`: imagery, then radar by
-     resolution (global composite → CONUS mosaic → single-site Level 2),
-     fields, the warning wash, then basemap labels, then point data, then
-     warning outlines and annotations on top.
+     It is declared once in `map/layerOrder.ts`: imagery, then the composite,
+     then single-site Level 2 above it, fields, the warning wash, then
+     basemap labels, then point data, then warning outlines and annotations
+     on top.
 
    **Help & About** ✅ — a Help tab in the right rail, beside the map rather
    than in a dialog, so instructions sit next to the thing they describe:
@@ -253,21 +253,23 @@ probes that point. Works on desktop and mobile, in dark or light.
 4. **Radar quality and resolution** — the biggest gap between SYNOPTIC and the
    paid apps is how radar *looks*, especially as you zoom in.
 
-   **Resolution.** The composite layers are pre-rendered raster tiles that
-   run out of detail well before the map does: RainViewer's global mosaic
-   stops around zoom 7 and is overzoomed (blurred) beyond it, and the IEM
-   CONUS mosaic tops out near zoom 12. Level 2 is the answer — it's true
-   super-resolution data (250 m gates, 0.5° azimuth) rendered natively in
-   polar coordinates, so it stays sharp at any zoom — but today it only
-   appears past zoom 6 as a separate layer you have to notice. Goals:
-   - **Seamless handoff** — one "Radar" layer that silently upgrades from
-     global composite → CONUS mosaic → single-site Level 2 as you zoom,
-     rather than three layers the user manages by hand.
+   **Resolution.** Each tier runs out at a predictable zoom, because
+   Mercator resolution is `156543 × cos(lat) / 2^z` m/px: the 1 km mosaic is
+   pixel-perfect near z8 and visibly blocky by z10, while Level 2's 250 m
+   gates hold to about z10 near a site. Level 2 is the real answer at close
+   range — true super-resolution (250 m gates, 0.5° azimuth) rendered
+   natively in polar coordinates, where azimuthal detail degrades with range
+   exactly as the beam actually spreads. Goals:
+   - **Seamless handoff** — the composite and Level 2 now share values, a
+     valid time and a colour table, which is the precondition. What remains
+     is fading Level 2 in over a zoom range so it reads as detail resolving
+     rather than a layer appearing.
    - **Multi-site blending** — a single site leaves a cone of silence
      overhead and degrades at long range as the beam climbs; nearby sites
-     should fill in, which is exactly what a proper mosaic does.
-   - Raise the per-source zoom ceilings and stop overzooming blurred tiles
-     where sharper data exists.
+     should fill in, weighted by beam height rather than simple max.
+   - **Lowest usable tilt** rather than a fixed one: at 100 km the 0.5° beam
+     is already ~1.5 km up, so a hybrid scan is what keeps low levels
+     coherent.
 
    **Quality.** The single-site layer reads noisy and speckled next to the
    composites. Suspects, in order:
@@ -277,9 +279,11 @@ probes that point. Works on desktop and mobile, in dark or light.
      spikes. The dual-pol fields we already decode are the standard fix:
      mask gates with low correlation coefficient (non-meteorological), and
      optionally use the clutter filter power removed (CFP) field.
-   - **A low display floor.** Everything ≥ ~5 dBZ is drawn; a configurable
-     floor (and a smarter transparency ramp near it) would remove most of
-     the speckle without touching real echo.
+   - **A low display floor** ✅ — `radar.floor` (default 15 dBZ) applies to
+     the composite and Level 2 alike. A radar reports far below anything
+     meteorological, and drawing all of it gives every pixel a colour, which
+     reads as weather everywhere and leaves storm structure competing with
+     noise. Raising the floor is what lets a leading edge stand out.
    - **Nearest-neighbour sampling** ✅ — Level 2 has an opt-in smoothing
      setting that interpolates across azimuth and range, off by default per
      the honesty rule. It is deliberately not a hardware LINEAR filter: raw
@@ -288,9 +292,7 @@ probes that point. Works on desktop and mobile, in dark or light.
      edge. The shader renormalises over whichever neighbours are real, and
      the gate under each fragment still decides *whether* to draw, so
      smoothing softens colour steps without extending echo into gates that
-     measured nothing. The two composite layers honour the same Smoothing
-     switch through `raster-resampling`, which is what made an overzoomed
-     mosaic look blocky.
+     measured nothing.
    - **Volume continuity** — partial sweeps show as wedges while a volume
      streams in, and there's a brief blank at volume rollover. Retain the
      previous complete sweep until the new one covers each azimuth.

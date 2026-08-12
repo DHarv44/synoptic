@@ -5,20 +5,18 @@ export const IEM: SourceRef = { id: 'iem-nexrad', label: 'IEM NEXRAD mosaic' }
 /** Time-aware WMS. The `/cache/tile.py` products ignore valid time — see below. */
 const WMS = 'https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0q-t.cgi'
 
-/** CONUS-ish bounds (generous) for showing the high-res mosaic. */
+/**
+ * Generous bounds for the mosaic source, so MapLibre skips tiles that can
+ * only come back empty. Deliberately wider than the data: clipping tightly
+ * would cut real echo off at the edges.
+ */
 export const CONUS = { latMin: 20, latMax: 55, lonMin: -130, lonMax: -60 }
-
-export function overConus(lat: number, lon: number): boolean {
-  return lat >= CONUS.latMin && lat <= CONUS.latMax && lon >= CONUS.lonMin && lon <= CONUS.lonMax
-}
 
 /** Mosaic generations are 5 minutes apart. */
 const STEP_MS = 5 * 60_000
 
 /**
- * The mosaic valid time to draw, quantized to a generation — or null once
- * the timeline scrubs past what this service usefully covers, where
- * RainViewer's 2h of frames takes over.
+ * The mosaic valid time to draw, quantized to a generation.
  *
  * One generation, requested explicitly, is the whole point. The cached tile
  * products (`nexrad-n0q-900913` and its `-mXXm` siblings) cannot give that:
@@ -30,10 +28,13 @@ const STEP_MS = 5 * 60_000
  * minutes displaced, in visibly different places. Neighbouring tiles could
  * disagree the same way, which is where the hard rectangular seams came
  * from. An absolute TIME pins every tile at every zoom to one generation.
+ *
+ * The service is an archive, so the timeline can scrub back freely; there is
+ * no window past which this has to hand over to another product.
  */
-export function iemValidTime(simTimeMs: number, nowMs: number): number | null {
-  if ((nowMs - simTimeMs) / 60_000 > 50) return null
+export function iemValidTime(simTimeMs: number, nowMs: number): number {
   // Step back one generation: the most recent one certain to be complete.
+  // Radar has no forecast, so a sim time in the future clamps to now.
   return Math.floor((Math.min(simTimeMs, nowMs) - STEP_MS) / STEP_MS) * STEP_MS
 }
 

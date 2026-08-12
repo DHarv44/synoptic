@@ -25,7 +25,7 @@ describe('pickFrame', () => {
 
 describe('iemValidTime', () => {
   const now = Date.parse('2026-08-11T23:18:40Z')
-  const at = (ms: number | null): string | null => (ms === null ? null : iemTimeParam(ms))
+  const at = (ms: number): string => iemTimeParam(ms)
 
   it('quantizes to a 5-minute generation, one step back from now', () => {
     expect(at(iemValidTime(now, now))).toBe('2026-08-11T23:10:00Z')
@@ -35,12 +35,12 @@ describe('iemValidTime', () => {
     expect(at(iemValidTime(now - 20 * 60_000, now))).toBe('2026-08-11T22:50:00Z')
   })
 
-  it('never asks for a time in the future', () => {
-    expect(iemValidTime(now + 60 * 60_000, now)).toBeLessThan(now)
+  it('keeps working hours back — the service is an archive', () => {
+    expect(at(iemValidTime(now - 6 * 3600_000, now))).toBe('2026-08-11T17:10:00Z')
   })
 
-  it('returns null beyond 50 minutes, where RainViewer takes over', () => {
-    expect(iemValidTime(now - 60 * 60_000, now)).toBeNull()
+  it('clamps a future sim time to now, since radar has no forecast', () => {
+    expect(iemValidTime(now + 60 * 60_000, now)).toBe(iemValidTime(now, now))
   })
 })
 

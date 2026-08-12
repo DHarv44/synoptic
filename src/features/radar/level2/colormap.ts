@@ -168,23 +168,33 @@ const RAMPS: Record<string, Stop[]> = {
   RHO: RHO_STOPS,
 }
 
+/** Weakest return the ramp will draw at all, absent a user setting. */
+export const DEFAULT_FLOOR_DBZ = 5
+
 /** The 256×1 RGBA table for a moment, for upload as a shader texture. */
-export function lutFor(moment: string): Uint8Array {
+export function lutFor(moment: string, floorDbz = DEFAULT_FLOOR_DBZ): Uint8Array {
   if (moment === 'VEL') return velocityLut()
-  if (moment === 'REF') return reflectivityLut()
+  if (moment === 'REF') return reflectivityLut(floorDbz)
   const stops = RAMPS[moment]
-  if (!stops) return reflectivityLut()
+  if (!stops) return reflectivityLut(floorDbz)
   return rampLut(stops, LUT_RANGES[moment] ?? [0, 1])
 }
 
 /**
  * 256×1 RGBA LUT indexed by dBZ mapped over [-32, 95): lut[i] covers
- * dBZ = i/2 − 32. Below 5 dBZ is transparent.
+ * dBZ = i/2 − 32, transparent below `floorDbz`.
+ *
+ * The floor is the display's honesty control. A radar reports returns far
+ * below anything meteorological — clutter, insects, clear-air refraction —
+ * and drawing all of it gives every pixel a colour, which reads as weather
+ * everywhere and leaves storm structure competing with noise for attention.
+ * Raising the floor is what lets a leading edge and a core stand out.
  */
-export function reflectivityLut(): Uint8Array {
+export function reflectivityLut(floorDbz = DEFAULT_FLOOR_DBZ): Uint8Array {
   const lut = new Uint8Array(256 * 4)
   for (let i = 0; i < 256; i++) {
     const dbz = i / 2 - 32
+    if (dbz < floorDbz) continue
     let color: string | null = null
     for (const [t, c] of REF_STOPS) {
       if (dbz >= t) color = c
