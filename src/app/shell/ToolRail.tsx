@@ -4,7 +4,7 @@ import { useAvailableTools } from '@/app/shell/toolRegistry'
 import { mapChromeStyle } from '@/ui/mapChrome'
 import type { ToolContribution } from '@/core/settings/types'
 
-const RAIL_WIDTH = 44
+export const RAIL_WIDTH = 44
 
 function ToolButton({ tool }: { tool: ToolContribution }) {
   const active = useTools((s) => s.active === tool.id)

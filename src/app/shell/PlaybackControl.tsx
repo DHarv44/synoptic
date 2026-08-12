@@ -12,6 +12,8 @@ import {
   useTimeline,
 } from '@/core/time/timelineStore'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
+import { useAvailableTools } from '@/app/shell/toolRegistry'
+import { RAIL_WIDTH } from '@/app/shell/ToolRail'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
 const STEP_MS = 10 * 60_000 // ←/→ step: 10 min
@@ -90,6 +92,10 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
   const setFrameMs = useTimeline((s) => s.setFrameMs)
   const goLive = useTimeline((s) => s.goLive)
   const warmFrames = useTimeline((s) => s.warmFrames)
+  // The left tool rail only exists once a tool does — the radar workbench
+  // appears with Level 2 — and it draws above this bar, so it landed on top
+  // of the transport controls the moment you zoomed in far enough.
+  const railVisible = useAvailableTools().length > 0 && !isMobile
   const fmt = useTimeFormat()
   const speedLabel = SPEED_LABELS[FRAME_SPEEDS.indexOf(frameMs as never)] ?? 'Custom'
   // Early on, the loop cycles two or three frames while the rest load. Saying
@@ -117,8 +123,8 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
         position: 'absolute',
         // Mobile: full width just above the sheet peek. Desktop: bottom-left.
         bottom: isMobile ? 64 : 8,
-        left: 8,
-        right: isMobile ? 8 : undefined,
+        left: railVisible ? RAIL_WIDTH + 15 : 15,
+        right: isMobile ? 15 : undefined,
         zIndex: 5,
         width: isMobile ? undefined : 420,
         // Desktop reserve clears the rail plus the reorient button.
