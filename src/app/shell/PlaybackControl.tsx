@@ -148,27 +148,6 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
             )}
           </ActionIcon>
         </Tooltip>
-        <Menu position="top-start" withinPortal>
-          <Menu.Target>
-            <Tooltip label={`Loop speed: ${speedLabel}`}>
-              <ActionIcon variant="subtle" color="gray" aria-label="Loop speed">
-                <IconGauge size={17} stroke={1.7} />
-              </ActionIcon>
-            </Tooltip>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Label>Loop speed</Menu.Label>
-            {FRAME_SPEEDS.map((ms, i) => (
-              <Menu.Item
-                key={ms}
-                onClick={() => setFrameMs(ms)}
-                fw={ms === frameMs ? 600 : undefined}
-              >
-                {SPEED_LABELS[i]}
-              </Menu.Item>
-            ))}
-          </Menu.Dropdown>
-        </Menu>
         <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
           {isMobile ? fmt.hm(simTime) : fmt.dateTime(simTime)}
         </Text>
@@ -205,6 +184,33 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
         >
           LIVE
         </Badge>
+        {/*
+          Speed lives at the far end, not beside play. Sitting next to it —
+          same size, same colour — it turned the left edge of the bar into two
+          interchangeable circles, and the transport control stopped being
+          findable at a glance.
+        */}
+        <Menu position="top-end" withinPortal>
+          <Menu.Target>
+            <Tooltip label={`Loop speed: ${speedLabel}`}>
+              <ActionIcon variant="subtle" color="gray" size="sm" aria-label="Loop speed">
+                <IconGauge size={15} stroke={1.6} />
+              </ActionIcon>
+            </Tooltip>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Loop speed</Menu.Label>
+            {FRAME_SPEEDS.map((ms, i) => (
+              <Menu.Item
+                key={ms}
+                onClick={() => setFrameMs(ms)}
+                fw={ms === frameMs ? 600 : undefined}
+              >
+                {SPEED_LABELS[i]}
+              </Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
       </Group>
     </Paper>
   )
