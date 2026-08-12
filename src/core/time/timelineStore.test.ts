@@ -98,6 +98,51 @@ describe('advanceFrame', () => {
   })
 })
 
+describe('warm-frame gating', () => {
+  const frameAt = (i: number): number => loopStart(NOW) + i * LOOP_FRAME_MS
+
+  it('cycles only the frames that have loaded', () => {
+    useTimeline.setState({ simTime: frameAt(2), isLive: false, playing: true, warmFrames: 3 })
+    state().advanceFrame()
+    expect(state().simTime).toBe(loopStart(NOW))
+  })
+
+  it('lengthens the loop as more frames arrive', () => {
+    useTimeline.setState({ simTime: frameAt(2), isLive: false, playing: true, warmFrames: 6 })
+    state().advanceFrame()
+    expect(state().simTime).toBe(frameAt(3))
+  })
+
+  it('runs ungated when nothing is reporting — the worldwide source has no prefetcher', () => {
+    useTimeline.setState({ simTime: frameAt(2), isLive: false, playing: true, warmFrames: null })
+    state().advanceFrame()
+    expect(state().simTime).toBe(frameAt(3))
+  })
+
+  it('holds on the oldest frame while a loader has nothing ready yet', () => {
+    useTimeline.setState({ simTime: loopStart(NOW), isLive: false, playing: true, warmFrames: 0 })
+    state().advanceFrame()
+    expect(state().simTime).toBe(loopStart(NOW))
+  })
+
+  it('still stops at now even when more frames claim to be warm', () => {
+    useTimeline.setState({
+      simTime: newestFrame(NOW),
+      isLive: false,
+      playing: true,
+      warmFrames: 99,
+    })
+    state().advanceFrame()
+    expect(state().simTime).toBe(loopStart(NOW))
+  })
+
+  it('forgets what was warm when playback stops', () => {
+    useTimeline.setState({ warmFrames: 5, playing: true })
+    state().setPlaying(false)
+    expect(state().warmFrames).toBeNull()
+  })
+})
+
 describe('tick', () => {
   it('follows the wall clock while live', () => {
     vi.setSystemTime(NOW + 45_000)

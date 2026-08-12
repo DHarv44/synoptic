@@ -18,6 +18,9 @@ const STEP_MS = 10 * 60_000 // ←/→ step: 10 min
 
 const SPEED_LABELS = ['Slow', 'Medium', 'Fast', 'Fastest'] as const
 
+/** Below this many warmed frames the loop is still visibly filling in. */
+const MIN_SMOOTH_FRAMES = 6
+
 /** Follows the wall clock while live. Cheap: the store no-ops between steps. */
 function useLiveClock() {
   const tick = useTimeline((s) => s.tick)
@@ -86,8 +89,12 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
   const setPlaying = useTimeline((s) => s.setPlaying)
   const setFrameMs = useTimeline((s) => s.setFrameMs)
   const goLive = useTimeline((s) => s.goLive)
+  const warmFrames = useTimeline((s) => s.warmFrames)
   const fmt = useTimeFormat()
   const speedLabel = SPEED_LABELS[FRAME_SPEEDS.indexOf(frameMs as never)] ?? 'Custom'
+  // Early on, the loop cycles two or three frames while the rest load. Saying
+  // so is the difference between "still filling in" and "this is broken".
+  const buffering = playing && warmFrames !== null && warmFrames < MIN_SMOOTH_FRAMES
 
   useHotkeys([
     ['space', () => setPlaying(!playing)],
@@ -119,10 +126,18 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
       }}
     >
       <Group gap={8} wrap="nowrap">
-        <Tooltip label={playing ? 'Pause (space)' : 'Play the last hour (space)'}>
+        <Tooltip
+          label={
+            buffering
+              ? 'Loading frames…'
+              : playing
+                ? 'Pause (space)'
+                : 'Play the last hour (space)'
+          }
+        >
           <ActionIcon
             variant="subtle"
-            color="gray"
+            color={buffering ? 'blue' : 'gray'}
             onClick={() => setPlaying(!playing)}
             aria-label={playing ? 'Pause' : 'Play'}
           >

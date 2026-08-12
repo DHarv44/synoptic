@@ -43,13 +43,18 @@ export function MosaicLayer() {
   useEffect(() => {
     if (!playing) return
     const controller = new AbortController()
+    const { setWarmFrames } = useTimeline.getState()
     const run = (): void => {
       const now = Date.now()
       const urls = loopFrames(now).map((t) => iemTileTemplate(iemValidTime(t, now)))
+      // A new sweep re-warms from the oldest frame, so what was ready for the
+      // previous viewport says nothing about this one.
+      setWarmFrames(0)
       void prefetchFrames(
         (bbox, i) => urls[i].replace('{bbox-epsg-3857}', bbox),
         urls.length,
         controller.signal,
+        setWarmFrames,
       )
     }
     // Debounced, and deliberately not immediate: every sweep is multiplied by
@@ -68,6 +73,8 @@ export function MosaicLayer() {
       clearTimeout(pending)
       map.off('moveend', schedule)
       clearInterval(id)
+      // No sweep, no reporter — the loop must not wait on us.
+      setWarmFrames(null)
     }
   }, [playing, map])
 

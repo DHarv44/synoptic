@@ -64,11 +64,19 @@ interface TimelineState {
   playing: boolean
   /** Real ms each loop frame is held. */
   frameMs: number
+  /**
+   * Frames warmed from the oldest. `null` means nothing is reporting — the
+   * worldwide composite has no prefetcher — and the loop must run ungated
+   * rather than wait for news that will never come. 0 means a loader is
+   * active but has nothing ready yet, which is a hold, not a free pass.
+   */
+  warmFrames: number | null
   setSimTime: (ms: number) => void
   goLive: () => void
   setPlaying: (playing: boolean) => void
   setFrameMs: (ms: number) => void
-  /** Step one frame, wrapping at the newest. Driven by the clock. */
+  setWarmFrames: (count: number | null) => void
+  /** Step one frame, wrapping at the newest or at the warm edge. */
   advanceFrame: () => void
   /** Follow the wall clock while live (called by the clock driver). */
   tick: () => void
@@ -81,6 +89,7 @@ export const useTimeline = create<TimelineState>()(
       isLive: true,
       playing: false,
       frameMs: DEFAULT_FRAME_MS,
+      warmFrames: null,
       setSimTime: (ms) =>
         set(() => {
           const now = Date.now()
@@ -90,7 +99,8 @@ export const useTimeline = create<TimelineState>()(
       goLive: () => set({ simTime: Date.now(), isLive: true, playing: false }),
       setPlaying: (playing) =>
         set((s) => {
-          if (!playing) return { playing: false }
+          // Stopping ends the sweep, so nothing is reporting again.
+          if (!playing) return { playing: false, warmFrames: null }
           const now = Date.now()
           const start = loopStart(now)
           // Resume where it was paused, as long as that is still a frame the
@@ -101,13 +111,25 @@ export const useTimeline = create<TimelineState>()(
           return { playing: true, isLive: false, simTime: resumable ? s.simTime : start }
         }),
       setFrameMs: (ms) => set({ frameMs: ms }),
+      setWarmFrames: (count) =>
+        set((s) => (s.warmFrames === count ? s : { warmFrames: count })),
       advanceFrame: () =>
         set((s) => {
           const now = Date.now()
+          const start = loopStart(now)
           const next = s.simTime + LOOP_FRAME_MS
+          // Cycle only what has loaded. Running past the warm edge is what
+          // made the loop stall on cold frames and then lurch as several
+          // landed at once; instead the loop is short at first and lengthens
+          // as frames arrive. At 0 this holds on the oldest frame — the
+          // control shows it is loading — which beats animating tiles that
+          // have not arrived.
+          const pastWarm =
+            s.warmFrames !== null && (next - start) / LOOP_FRAME_MS >= s.warmFrames
           // Wrapping re-reads the window, so a loop left running keeps
           // picking up new scans instead of cycling a frozen hour.
-          return { simTime: next > newestFrame(now) ? loopStart(now) : next, isLive: false }
+          const wrap = pastWarm || next > newestFrame(now)
+          return { simTime: wrap ? start : next, isLive: false }
         }),
       tick: () =>
         set((s) => {
