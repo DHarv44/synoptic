@@ -10,6 +10,7 @@
 
 import maplibregl from 'maplibre-gl'
 import { buildTranslation, recolor, type Translation } from '@/features/radar/mosaic/recolor'
+import { noteRequestedUrl } from '@/features/radar/mosaic/prefetch'
 
 export const MOSAIC_PROTOCOL = 'synoptic-mosaic'
 
@@ -44,6 +45,9 @@ export function registerMosaicProtocol(): void {
 
   maplibregl.addProtocol(MOSAIC_PROTOCOL, async (params, abortController) => {
     const { floorDbz, upstream } = parse(params.url)
+    // Records the tile geometry MapLibre wants, so the loop can prefetch the
+    // same bboxes at other valid times without re-deriving its tile maths.
+    noteRequestedUrl(upstream)
     const res = await fetch(upstream, { signal: abortController.signal })
     if (!res.ok) throw new Error(`mosaic tile HTTP ${res.status}`)
 

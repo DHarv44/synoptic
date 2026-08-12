@@ -215,6 +215,32 @@ the forecast while the radar sat frozen, because radar has no forecast.
   poller measuring it was clamped too. Verify the sequence by calling
   `advanceFrame()` directly instead.
 
+### Prefetching the loop (`mosaic/prefetch.ts`)
+
+Cold, a frame's tiles take ~800 ms; cached, ~11 ms. Without prefetching, the
+first pass of a loop is a slideshow and every later pass is smooth — an
+inconsistency that reads as the app being broken. Playback now warms all 13
+frames, so the whole loop runs from cache.
+
+- **The tile geometry comes from MapLibre, not from re-deriving its maths.**
+  The protocol handler records the `BBOX` of every URL it is asked for, and
+  prefetch reissues those bboxes at the other valid times. MapLibre 5.24 does
+  not expose source caches at a stable path, and its covering-tile rules
+  (a 256 px source requests `round(zoom) + 1`) are easy to get subtly wrong.
+- **Measure with real URLs, never hand-built ones.** Bboxes are floating-point
+  strings; a hand-computed one will not byte-match MapLibre's, so it misses
+  the cache and every frame looks cold. That produced a completely false
+  reading once. Pull URLs out of `performance.getEntriesByType('resource')`
+  instead — those are exactly what was issued.
+- **Verified:** 13 frames warmed, oldest and newest both 11 ms for 20 tiles,
+  against a 1445 ms cold control on the same bboxes at an unvisited time.
+- Sweeps are debounced 500 ms after `moveend`, bboxes expire after 12 s and
+  are capped at 48. Every extra bbox is multiplied by the frame count — before
+  those limits a session was issuing 1191 requests per sweep against 540 now.
+- `raster-fade-duration` drops to 0 while playing. At 175 ms per frame a
+  150 ms cross-fade leaves two frames dissolving into each other for most of
+  the loop, smearing the motion the loop exists to show.
+
 **One composite draws, and the user picks it** (`radar.source`). The two are
 different products with different valid times and colour tables, so drawing
 both blends rather than overlays. Deciding automatically was worse — keying

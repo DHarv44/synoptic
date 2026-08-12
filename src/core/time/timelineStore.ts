@@ -47,6 +47,13 @@ export function newestFrame(nowMs: number): number {
   return Math.floor(nowMs / LOOP_FRAME_MS) * LOOP_FRAME_MS
 }
 
+/** Every frame in the loop, oldest first. */
+export function loopFrames(nowMs: number): number[] {
+  const out: number[] = []
+  for (let t = loopStart(nowMs); t <= newestFrame(nowMs); t += LOOP_FRAME_MS) out.push(t)
+  return out
+}
+
 /**
  * The one clock every layer obeys (PLAN.md §3.11). simTime is UTC ms.
  * isLive: simTime tracks wall clock; scrubbing detaches it.

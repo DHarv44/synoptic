@@ -75,6 +75,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Section expansion | Collapse/expand per section, persisted | ✅ |
 | Settings | Registry-generated, searchable, with per-feature and global reset | ✅ |
 | Radar loop | Play cycles the last hour in 5-min frames, four speeds, holds on the newest | ✅ |
+| Loop prefetch | All frames warmed on play, so the first pass runs as smoothly as the rest (~800 ms → 11 ms) | ✅ |
 | Session persistence | Camera, probe, timeline, tabs and radar selection survive a reload | ✅ |
 | Dark + light | Follows the OS by default; translucent map chrome with adjustable opacity | ✅ |
 | Units & time | Metric/imperial, with temperature, wind, pressure and precipitation independently switchable; local or UTC clock | ✅ |
