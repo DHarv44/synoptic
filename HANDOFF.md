@@ -189,6 +189,32 @@ How it works, and why each piece is the way it is:
   0.7 ms and memoized per floor. No worker needed; `recolor` is pure, so
   moving it to one is a lift-and-shift if that changes.
 
+### Playback is a loop, not a scrub
+
+`play` cycles `LOOP_WINDOW_MS` (1 h) in `LOOP_FRAME_MS` (5 min) steps — 13
+frames — and wraps, holding the newest for `LOOP_END_HOLD` frames so the
+cycle is readable. It used to run `simTime` forward continuously from now,
+which meant pressing play at LIVE (the default state) advanced the clock into
+the forecast while the radar sat frozen, because radar has no forecast.
+
+- The **accumulator lives in the driver, not the store.** Each frame schedules
+  the next via `setTimeout`; putting a counter in the store would notify every
+  subscriber several times a second to report that nothing had changed.
+- **Wrapping re-reads the window**, so a loop left running picks up new scans
+  instead of cycling a frozen hour. Stepping past the old newest frame simply
+  continues when newer generations have since arrived.
+- **The mosaic source must not be rebuilt per frame.** `MosaicLayer` creates it
+  once and uses `setTiles`; keying `useMapLayer` on the tile URL threw away the
+  source's tile cache on every frame. Measured before/after: 2 rebuilds in 8 s
+  → 0.
+- **Known freshness cost:** `iemValidTime` steps back one generation, so the
+  newest loop frame is 5–10 minutes old. Deliberate — the current generation
+  may be incomplete — but it is the thing to revisit if latency matters.
+- **Do not trust playback-rate measurements taken in the Browser pane.** Timers
+  are clamped there; a 350 ms frame interval sampled as ~1.5 s, and the 60 ms
+  poller measuring it was clamped too. Verify the sequence by calling
+  `advanceFrame()` directly instead.
+
 **One composite draws, and the user picks it** (`radar.source`). The two are
 different products with different valid times and colour tables, so drawing
 both blends rather than overlays. Deciding automatically was worse — keying

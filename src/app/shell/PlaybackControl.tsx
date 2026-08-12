@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
-import { ActionIcon, Badge, Group, Paper, Slider, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Badge, Group, Menu, Paper, Slider, Text, Tooltip } from '@mantine/core'
 import { useHotkeys } from '@mantine/hooks'
-import { IconPlayerPause, IconPlayerPlay } from '@tabler/icons-react'
+import { IconGauge, IconPlayerPause, IconPlayerPlay } from '@tabler/icons-react'
 import {
+  FRAME_SPEEDS,
   FUTURE_RANGE_MS,
+  LOOP_END_HOLD,
   PAST_RANGE_MS,
+  newestFrame,
   stepSimTime,
   useTimeline,
 } from '@/core/time/timelineStore'
@@ -13,18 +16,42 @@ import { mapChromeStyle } from '@/ui/mapChrome'
 
 const STEP_MS = 10 * 60_000 // ←/→ step: 10 min
 
-/** Clock driver: ticks the timeline store while mounted. */
-function useTimelineClock() {
+const SPEED_LABELS = ['Slow', 'Medium', 'Fast', 'Fastest'] as const
+
+/** Follows the wall clock while live. Cheap: the store no-ops between steps. */
+function useLiveClock() {
   const tick = useTimeline((s) => s.tick)
   useEffect(() => {
-    let last = performance.now()
-    const id = setInterval(() => {
-      const now = performance.now()
-      tick(now - last)
-      last = now
-    }, 250)
+    const id = setInterval(tick, 250)
     return () => clearInterval(id)
   }, [tick])
+}
+
+/**
+ * Loop driver. Each frame schedules the next, so changing speed takes effect
+ * on the following frame and the accumulator never lives in the store —
+ * keeping a counter there would notify every subscriber several times a
+ * second to say nothing had changed yet.
+ */
+function useLoopDriver() {
+  const playing = useTimeline((s) => s.playing)
+  const frameMs = useTimeline((s) => s.frameMs)
+  useEffect(() => {
+    if (!playing) return
+    let timer = 0
+    const schedule = (): void => {
+      const onNewest = useTimeline.getState().simTime >= newestFrame(Date.now())
+      timer = window.setTimeout(
+        () => {
+          useTimeline.getState().advanceFrame()
+          schedule()
+        },
+        onNewest ? frameMs * LOOP_END_HOLD : frameMs,
+      )
+    }
+    schedule()
+    return () => window.clearTimeout(timer)
+  }, [playing, frameMs])
 }
 
 /**
@@ -33,14 +60,18 @@ function useTimelineClock() {
  * boundary — the timeline is honest about which side of "now" you're on.
  */
 export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
-  useTimelineClock()
+  useLiveClock()
+  useLoopDriver()
   const simTime = useTimeline((s) => s.simTime)
   const isLive = useTimeline((s) => s.isLive)
   const playing = useTimeline((s) => s.playing)
+  const frameMs = useTimeline((s) => s.frameMs)
   const setSimTime = useTimeline((s) => s.setSimTime)
   const setPlaying = useTimeline((s) => s.setPlaying)
+  const setFrameMs = useTimeline((s) => s.setFrameMs)
   const goLive = useTimeline((s) => s.goLive)
   const fmt = useTimeFormat()
+  const speedLabel = SPEED_LABELS[FRAME_SPEEDS.indexOf(frameMs as never)] ?? 'Custom'
 
   useHotkeys([
     ['space', () => setPlaying(!playing)],
@@ -72,7 +103,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
       }}
     >
       <Group gap={8} wrap="nowrap">
-        <Tooltip label={playing ? 'Pause (space)' : 'Play (space)'}>
+        <Tooltip label={playing ? 'Pause (space)' : 'Play the last hour (space)'}>
           <ActionIcon
             variant="subtle"
             color="gray"
@@ -86,6 +117,27 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
             )}
           </ActionIcon>
         </Tooltip>
+        <Menu position="top-start" withinPortal>
+          <Menu.Target>
+            <Tooltip label={`Loop speed: ${speedLabel}`}>
+              <ActionIcon variant="subtle" color="gray" aria-label="Loop speed">
+                <IconGauge size={17} stroke={1.7} />
+              </ActionIcon>
+            </Tooltip>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Label>Loop speed</Menu.Label>
+            {FRAME_SPEEDS.map((ms, i) => (
+              <Menu.Item
+                key={ms}
+                onClick={() => setFrameMs(ms)}
+                fw={ms === frameMs ? 600 : undefined}
+              >
+                {SPEED_LABELS[i]}
+              </Menu.Item>
+            ))}
+          </Menu.Dropdown>
+        </Menu>
         <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
           {isMobile ? fmt.hm(simTime) : fmt.dateTime(simTime)}
         </Text>

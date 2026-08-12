@@ -74,6 +74,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Analysis dock | Location / Nearby / Radar / Settings / Help — one scrolling column of collapsible sections | ✅ |
 | Section expansion | Collapse/expand per section, persisted | ✅ |
 | Settings | Registry-generated, searchable, with per-feature and global reset | ✅ |
+| Radar loop | Play cycles the last hour in 5-min frames, four speeds, holds on the newest | ✅ |
 | Session persistence | Camera, probe, timeline, tabs and radar selection survive a reload | ✅ |
 | Dark + light | Follows the OS by default; translucent map chrome with adjustable opacity | ✅ |
 | Units & time | Metric/imperial, with temperature, wind, pressure and precipitation independently switchable; local or UTC clock | ✅ |
@@ -144,6 +145,9 @@ probes that point. Works on desktop and mobile, in dark or light.
    - **Timeline as an information display** — radar frame ticks, warning
      issue/expiry bars, model-run boundaries, and a precip-probability
      sparkline for the probed point, so scrubbing has a visible purpose.
+     The loop makes this more pressing: an hour of frames is a sliver of a
+     −48 h/+16 d scrubber, so playback barely moves the handle. A loop-range
+     inset, or a scrubber that rescales while playing, would show it.
    - **Desktop panel resize** — 360 px is cramped for a skew-T; a drag handle
      would let it widen for analysis and narrow for monitoring.
    - **Section reordering, done safely** — briefly shipped with native HTML5

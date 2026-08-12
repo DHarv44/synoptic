@@ -1,3 +1,4 @@
+import type { RasterTileSource } from 'maplibre-gl'
 import { useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
 import { useMapLayer } from '@/map/useMapLayer'
@@ -50,18 +51,21 @@ export function MosaicLayer() {
         if (map.getSource('radar-mosaic')) map.removeSource('radar-mosaic')
       }
     },
-    // Valid time and floor both live in the tile URL, so a change to either
-    // has to rebuild the source — reusing it would keep serving stale pixels.
-    [tiles],
+    // Built once per style. The valid time and floor live in the tile URL and
+    // change on every loop frame, so rebuilding the source for them would
+    // throw away its tile cache several times a second while playing.
+    [],
   )
 
   useMapLayer(
     (map) => {
+      const src = map.getSource('radar-mosaic') as RasterTileSource | undefined
+      if (src) src.setTiles([tiles])
       if (map.getLayer('radar-mosaic')) {
         map.setPaintProperty('radar-mosaic', 'raster-opacity', opacity / 100)
       }
     },
-    [opacity],
+    [tiles, opacity],
   )
 
   return null
