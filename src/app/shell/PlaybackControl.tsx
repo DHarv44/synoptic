@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ActionIcon, Badge, Group, Menu, Paper, Slider, Text, Tooltip } from '@mantine/core'
 import { useHotkeys } from '@mantine/hooks'
 import { IconGauge, IconPlayerPause, IconPlayerPlay } from '@tabler/icons-react'
@@ -28,30 +28,46 @@ function useLiveClock() {
 }
 
 /**
- * Loop driver. Each frame schedules the next, so changing speed takes effect
- * on the following frame and the accumulator never lives in the store —
- * keeping a counter there would notify every subscriber several times a
- * second to say nothing had changed yet.
+ * Loop driver. Each frame schedules the next, so the accumulator never lives
+ * in the store — keeping a counter there would notify every subscriber
+ * several times a second to say nothing had changed yet.
+ *
+ * Changing speed re-times the frame already on screen instead of restarting
+ * it. Rescheduling from scratch charged a full new dwell on top of however
+ * long the frame had already been up, so switching to a faster speed still
+ * held that frame for the old duration — the change felt like it lagged a
+ * beat behind the button.
  */
 function useLoopDriver() {
   const playing = useTimeline((s) => s.playing)
   const frameMs = useTimeline((s) => s.frameMs)
+  const shownAt = useRef(0)
   useEffect(() => {
     if (!playing) return
     let timer = 0
     const schedule = (): void => {
       const onNewest = useTimeline.getState().simTime >= newestFrame(Date.now())
+      const dwell = onNewest ? frameMs * LOOP_END_HOLD : frameMs
+      const elapsed = Date.now() - shownAt.current
       timer = window.setTimeout(
         () => {
           useTimeline.getState().advanceFrame()
+          shownAt.current = Date.now()
           schedule()
         },
-        onNewest ? frameMs * LOOP_END_HOLD : frameMs,
+        Math.max(0, dwell - elapsed),
       )
     }
+    if (shownAt.current === 0) shownAt.current = Date.now()
     schedule()
     return () => window.clearTimeout(timer)
   }, [playing, frameMs])
+
+  // A fresh press of play starts its first frame's clock now, not from
+  // whenever the previous session happened to stop.
+  useEffect(() => {
+    if (playing) shownAt.current = Date.now()
+  }, [playing])
 }
 
 /**
