@@ -4,9 +4,13 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite --port 5192",
     "build": "tsc --noEmit && vite build",
+    "start": "node server/index.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "preview": "vite preview --port 5192"
@@ -23,6 +27,7 @@
     "d3-geo": "^3.1.1",
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0",
+    "express": "^5.2.1",
     "grib2class": "^1.0.7",
     "idb": "^8.0.3",
     "maplibre-gl": "^5.24.0",
