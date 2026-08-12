@@ -123,23 +123,41 @@ date decode matches S3 keys that embed their own timestamp to within seconds.
 echo" is transparent, so inside CONUS the picture is mosaic-over-global
 rather than mosaic alone. Living with a blend beats a hard swap.
 
-**Still open — per-zoom generation skew.** The app requests the live product
-`nexrad-n0q-900913`, `Cache-Control: max-age=300`. Two fetches a minute apart
-returned different bytes, so content turns over faster than the cache window
-and zoom levels fetched at different moments can hold different generations
-(~1–2 min of storm motion). Measured, so don't re-derive:
+### The actual bug, and the fix
 
-- `-mXXm` products do **not** fix this — same `max-age=300`, and the offset is
-  relative to now, so they roll exactly like the live one. My earlier claim
-  that they pin a valid time was wrong.
-- `wms/nexrad/n0q.cgi` ignores `TIME` (identical bytes for any timestamp).
-- `wms/nexrad/n0q-t.cgi` with `LAYERS=nexrad-n0q-wmst` **does** honour `TIME`,
-  including recent times, and its output at 23:20Z was byte-identical to the
-  live tile fetched at 23:21 — so it is the same imagery, addressable by
-  absolute time. Cost: ~0.5–0.75 s/tile vs ~0.3 s for the cached tile.py, and
-  it is a WMS (`{bbox-epsg-3857}`), not a tilecache.
+Every zoom level was serving a **different generation of the mosaic**. The
+cached tile products (`nexrad-n0q-900913` and its `-mXXm` siblings) are
+rolling images with `Cache-Control: max-age=300`, so each tile shows whatever
+generation existed at its own fetch moment. Proved by sampling one lat/lon at
+one instant: **z7 read deep red `198,0,0`, z10 read yellow `255,226,0`** — and
+ten minutes later z10 had caught up to red. Same weather, minutes apart, per
+zoom level. Storms move between generations, so each zoom step redrew the
+echo somewhere else. Neighbouring tiles skewed the same way, which is where
+the hard rectangular seams in the user's screenshots came from.
 
-Switching is the real fix but doubles tile latency; the user has not chosen.
+This is what the user reported from the very beginning, in these words: it
+gains fidelity as you zoom (correct, expected) but the sharper data lands in
+the wrong place. It is **not** a projection or georeferencing fault — tiles
+are correctly placed, which is why the tile-agreement measurement passed and
+then got misused for months to dismiss the complaint.
+
+Fixed by pinning an absolute valid time on every request:
+
+- `iemValidTime()` quantizes to a 5-minute generation, one step back from now.
+- `iemTileTemplate()` targets `wms/nexrad/n0q-t.cgi`,
+  `LAYERS=nexrad-n0q-wmst`, `TIME=<iso>`, `BBOX={bbox-epsg-3857}`.
+
+Verified after: 16-point grid, z7 vs z10, same pinned time — 7 exact colour
+matches, 15/16 within one shade, worst case bright green vs dark green (one
+intensity step, i.e. resolution). Before, the same comparison flipped whole
+intensity categories.
+
+Don't go back to `/cache/tile.py` for this layer. Also don't reach for
+`wms/nexrad/n0q.cgi` — it accepts `TIME` and ignores it (identical bytes for
+any timestamp); only the `-t.cgi` variant honours it. Cost of the WMS is
+~0.5–0.75 s/tile against ~0.3 s for the tilecache: it renders on demand
+rather than serving pre-cut tiles. That is the price of every tile agreeing
+on what time it is.
 
 ## The end-game queue (user-agreed order: features first, then these)
 

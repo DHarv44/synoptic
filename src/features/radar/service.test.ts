@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { pickFrame, type RadarFrame } from '@/features/radar/service'
-import { iemProduct } from '@/features/radar/iem'
+import { iemValidTime, iemTileTemplate, iemTimeParam } from '@/features/radar/iem'
 
 const frames: RadarFrame[] = [
   { time: 1000, path: '/a' },
@@ -23,18 +23,40 @@ describe('pickFrame', () => {
   })
 })
 
-describe('iemProduct', () => {
-  const now = 10_000_000
-  it('uses the current product near now', () => {
-    expect(iemProduct(now - 60_000, now)).toBe('nexrad-n0q-900913')
+describe('iemValidTime', () => {
+  const now = Date.parse('2026-08-11T23:18:40Z')
+  const at = (ms: number | null): string | null => (ms === null ? null : iemTimeParam(ms))
+
+  it('quantizes to a 5-minute generation, one step back from now', () => {
+    expect(at(iemValidTime(now, now))).toBe('2026-08-11T23:10:00Z')
   })
-  it('steps back in 5-minute archive products', () => {
-    expect(iemProduct(now - 10 * 60_000, now)).toBe('nexrad-n0q-900913-m10m')
+
+  it('follows the timeline backwards', () => {
+    expect(at(iemValidTime(now - 20 * 60_000, now))).toBe('2026-08-11T22:50:00Z')
   })
-  it('pads single-digit steps', () => {
-    expect(iemProduct(now - 4 * 60_000, now)).toBe('nexrad-n0q-900913-m05m')
+
+  it('never asks for a time in the future', () => {
+    expect(iemValidTime(now + 60 * 60_000, now)).toBeLessThan(now)
   })
-  it('returns null beyond 50 minutes', () => {
-    expect(iemProduct(now - 60 * 60_000, now)).toBeNull()
+
+  it('returns null beyond 50 minutes, where RainViewer takes over', () => {
+    expect(iemValidTime(now - 60 * 60_000, now)).toBeNull()
+  })
+})
+
+describe('iemTileTemplate', () => {
+  const url = iemTileTemplate(Date.parse('2026-08-11T23:10:00Z'))
+
+  it('pins an explicit valid time, so every zoom draws one generation', () => {
+    expect(url).toContain('TIME=2026-08-11T23:10:00Z')
+  })
+
+  it('leaves the bbox token for maplibre to substitute', () => {
+    expect(url).toContain('BBOX={bbox-epsg-3857}')
+  })
+
+  it('requests the time-aware layer, not the rolling tile cache', () => {
+    expect(url).toContain('LAYERS=nexrad-n0q-wmst')
+    expect(url).not.toContain('tile.py')
   })
 })
