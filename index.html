@@ -4,6 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SYNOPTIC</title>
+    <meta
+      name="description"
+      content="A web-native weather workstation: radar, satellite, models and observations on one clock."
+    />
+
+    <!--
+      Installable app. The manifest is what turns "create shortcut" into a real
+      install with its own icon and window. Every size is the same artwork,
+      resized. Regenerate the whole set with scripts/build-icons.mjs.
+    -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Matches the app chrome, so the window frame doesn't flash white. -->
+    <meta name="theme-color" content="#16181d" />
+    <meta name="color-scheme" content="dark light" />
+
+    <!-- iOS home-screen launch, which predates the manifest and ignores it. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SYNOPTIC" />
   </head>
   <body>
     <div id="root"></div>
