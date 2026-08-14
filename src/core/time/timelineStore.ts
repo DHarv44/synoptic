@@ -82,6 +82,51 @@ interface TimelineState {
   tick: () => void
 }
 
+/** What survives a reload. Only the loop speed is a preference. */
+export function persistedTimeline(s: TimelineState): { frameMs: number } {
+  return { frameMs: s.frameMs }
+}
+
+/**
+ * Carry the loop speed across schema changes. Without this a version bump
+ * throws the whole blob away, so the one setting worth keeping resets.
+ * v1's `speed` was sim-seconds per real second and means nothing to a
+ * frame-based loop, so it is dropped rather than reinterpreted.
+ */
+export function migrateTimeline(persisted: unknown): { frameMs: number } {
+  const p = (persisted ?? {}) as { frameMs?: unknown }
+  return { frameMs: typeof p.frameMs === 'number' ? p.frameMs : DEFAULT_FRAME_MS }
+}
+
+/**
+ * A load always starts live.
+ *
+ * Restoring the scrub position sounded considerate and was not: reopen a tab
+ * an hour later and the map silently shows an hour-old sky, with nothing but
+ * a small timestamp to say so. Playback made it far more likely, because
+ * looping leaves `isLive` false — close the tab mid-loop and you come back in
+ * the past. A weather display defaulting to anything other than now is a
+ * safety problem, not a convenience.
+ *
+ * Playback never resumes either; a display that starts animating by itself is
+ * alarming.
+ */
+export function rehydrateTimeline(
+  persisted: unknown,
+  current: TimelineState,
+  nowMs: number,
+): TimelineState {
+  const p = (persisted ?? {}) as Partial<TimelineState>
+  return {
+    ...current,
+    frameMs: p.frameMs ?? current.frameMs,
+    simTime: nowMs,
+    isLive: true,
+    playing: false,
+    warmFrames: null,
+  }
+}
+
 export const useTimeline = create<TimelineState>()(
   persist(
     (set) => ({
@@ -142,32 +187,12 @@ export const useTimeline = create<TimelineState>()(
     {
       name: 'synoptic.timeline',
       // v2: `speed` (sim-seconds per real second) became `frameMs` (real ms
-      // per loop frame). Old blobs simply fall back to the default.
-      version: 2,
-      partialize: (s) => ({ simTime: s.simTime, isLive: s.isLive, frameMs: s.frameMs }),
-      /**
-       * A scrub position only means something while it's still inside the
-       * window. Come back tomorrow and yesterday's offset sits off the left
-       * edge, so fall back to live rather than restoring a position that
-       * can't be seen. Playback never resumes on load — a display that
-       * starts animating by itself is alarming.
-       */
-      merge: (persisted, current) => {
-        const p = (persisted ?? {}) as Partial<TimelineState>
-        const now = Date.now()
-        const inWindow =
-          typeof p.simTime === 'number' &&
-          p.simTime >= now - PAST_RANGE_MS &&
-          p.simTime <= now + FUTURE_RANGE_MS
-        const live = p.isLive !== false || !inWindow
-        return {
-          ...current,
-          frameMs: p.frameMs ?? current.frameMs,
-          playing: false,
-          isLive: live,
-          simTime: live ? now : (p.simTime as number),
-        }
-      },
+      // per loop frame). v3: the clock position is no longer persisted at all.
+      // Old blobs simply fall back to the defaults.
+      version: 3,
+      partialize: persistedTimeline,
+      migrate: migrateTimeline,
+      merge: (persisted, current) => rehydrateTimeline(persisted, current, Date.now()),
     },
   ),
 )

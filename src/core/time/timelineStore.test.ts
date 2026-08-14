@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  DEFAULT_FRAME_MS,
   LOOP_FRAME_MS,
   LOOP_WINDOW_MS,
+  migrateTimeline,
   loopStart,
   newestFrame,
+  persistedTimeline,
+  rehydrateTimeline,
   useTimeline,
 } from '@/core/time/timelineStore'
 
@@ -140,6 +144,54 @@ describe('warm-frame gating', () => {
     useTimeline.setState({ warmFrames: 5, playing: true })
     state().setPlaying(false)
     expect(state().warmFrames).toBeNull()
+  })
+})
+
+describe('rehydration', () => {
+  const rehydrate = (stored: unknown) => rehydrateTimeline(stored, state(), NOW)
+
+  it('starts live even though the tab was closed hours into the past', () => {
+    const out = rehydrate({ simTime: NOW - 6 * 3600_000, isLive: false, playing: true })
+    expect(out).toMatchObject({ isLive: true, simTime: NOW, playing: false })
+  })
+
+  it('starts live even from a position still inside the window', () => {
+    expect(rehydrate({ simTime: NOW - 20 * 60_000, isLive: false })).toMatchObject({
+      isLive: true,
+      simTime: NOW,
+    })
+  })
+
+  it('never resumes playback', () => {
+    expect(rehydrate({ playing: true, warmFrames: 8 })).toMatchObject({
+      playing: false,
+      warmFrames: null,
+    })
+  })
+
+  it('keeps loop speed, which is a real preference', () => {
+    expect(rehydrate({ frameMs: 1000 }).frameMs).toBe(1000)
+  })
+
+  it('copes with an empty or absent blob', () => {
+    expect(rehydrate({})).toMatchObject({ isLive: true, simTime: NOW })
+    expect(rehydrate(undefined)).toMatchObject({ isLive: true, simTime: NOW })
+  })
+
+  it('persists the speed and nothing about the clock', () => {
+    const kept = persistedTimeline({ ...state(), simTime: NOW, isLive: false, frameMs: 600 })
+    expect(Object.keys(kept)).toEqual(['frameMs'])
+  })
+
+  it('carries the speed across a version bump instead of dropping the blob', () => {
+    expect(migrateTimeline({ frameMs: 1000, simTime: NOW, isLive: false })).toEqual({
+      frameMs: 1000,
+    })
+  })
+
+  it('drops v1 `speed`, which meant something else entirely', () => {
+    expect(migrateTimeline({ speed: 60 })).toEqual({ frameMs: DEFAULT_FRAME_MS })
+    expect(migrateTimeline(undefined)).toEqual({ frameMs: DEFAULT_FRAME_MS })
   })
 })
 

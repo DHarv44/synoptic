@@ -292,8 +292,13 @@ it on the viewport made it flip while panning. It is a setting on purpose.
      versioned (add a version + migration to any new one, per CLAUDE.md).
      Two rules worth keeping: persist choices, not downloads (the radar
      store partializes to selection only, and keeps `site` just while
-     locked), and validate on rehydrate (the timeline `merge` drops a scrub
-     position that has aged out of the window and never resumes playback).
+     locked), and **don't persist the clock** — `rehydrateTimeline` always
+     returns live, and `persistedTimeline` keeps only the loop speed.
+     Restoring a scrub position meant a tab reopened hours later showed an
+     old sky with only a timestamp to say so, and the loop made it routine
+     because looping leaves `isLive` false. A version bump also needs
+     `migrate` (`migrateTimeline`), or zustand discards the whole blob and
+     the one preference worth keeping silently resets.
      Still open: shareable workspace URL (PLAN.md §3.12) and export/import.
    - **Help + About**: done, as a `help` dock tab (special-cased in
      `DockContent` alongside `settings`) rather than a modal — help beside

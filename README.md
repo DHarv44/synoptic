@@ -191,12 +191,15 @@ probes that point. Works on desktop and mobile, in dark or light.
      (specified in PLAN.md §3.13a, never built) and **settings search**;
      both matter much more once the knob count grows.
    - **Session persistence** ✅ — a reload now comes back where you were: map
-     camera (centre, zoom, bearing, pitch), probe point, timeline position,
-     dock tab and section expansion, tool panel and width, and the radar
-     selection. Only choices are stored, never downloaded volumes: the radar
-     site is kept only while locked, since unlocked the map reassigns it on
-     the first move. A scrub position outside the −48 h/+16 d window comes
-     back live rather than off-screen, and playback never resumes by itself.
+     camera (centre, zoom, bearing, pitch), probe point, dock tab and section
+     expansion, tool panel and width, and the radar selection. Only choices
+     are stored, never downloaded volumes: the radar site is kept only while
+     locked, since unlocked the map reassigns it on the first move. **The
+     clock is the deliberate exception — every load starts live.** Restoring
+     a scrub position meant reopening a tab hours later and being shown an
+     old sky with only a small timestamp to say so, and the radar loop made
+     it routine, since looping leaves the timeline detached. Loop speed
+     persists; the clock does not, and playback never resumes by itself.
      *Still open:* the shareable workspace URL from PLAN.md §3.12 and
      export/import.
    - Deliberately *not* exposing per-layer draw order — the stacking is
