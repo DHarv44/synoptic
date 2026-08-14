@@ -86,14 +86,21 @@ app.use('/proxy', (_req, res) => {
   res.status(404).type('text/plain').end('no such proxy route')
 })
 
-// Hashed filenames can be cached forever; index.html must not be, or a deploy
-// keeps serving the old asset URLs.
+/**
+ * Hashed filenames can be cached forever. Three things must not be:
+ * index.html, or a deploy keeps serving dead asset URLs; the service worker,
+ * because a cached worker can never ship its own replacement and the app
+ * would be frozen at this version indefinitely; and the manifest, which is
+ * small and changes how the installed app identifies itself.
+ */
+const NEVER_CACHE = /(?:index\.html|sw\.js|manifest\.webmanifest)$/
+
 app.use(
   express.static(DIST, {
     setHeaders: (res, path) => {
       res.setHeader(
         'Cache-Control',
-        path.endsWith('index.html') ? 'no-cache' : 'public, max-age=31536000, immutable',
+        NEVER_CACHE.test(path) ? 'no-cache' : 'public, max-age=31536000, immutable',
       )
     },
   }),

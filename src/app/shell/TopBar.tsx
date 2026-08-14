@@ -3,6 +3,7 @@ import { spotlight } from '@mantine/spotlight'
 import { IconHelp, IconMoon, IconSearch, IconSun } from '@tabler/icons-react'
 import { Clock } from '@/ui/Clock'
 import { HealthStrip } from '@/app/shell/HealthStrip'
+import { InstallButton } from '@/app/shell/InstallButton'
 import { useDock } from '@/app/shell/dockStore'
 
 export function TopBar() {
@@ -31,6 +32,7 @@ export function TopBar() {
 
       <Group gap="xs" wrap="nowrap">
         <HealthStrip />
+        <InstallButton />
         <Tooltip label="Help and about">
           <ActionIcon
             variant="subtle"
