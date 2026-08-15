@@ -18,6 +18,7 @@
 import express from 'express'
 import { fileURLToPath } from 'node:url'
 import { getWindPayload } from './gfsWind.mjs'
+import { getGridPayload } from './gfsGrid.mjs'
 
 const PORT = process.env.PORT ?? 8080
 const DIST = fileURLToPath(new URL('../dist', import.meta.url))
@@ -87,6 +88,19 @@ app.use('/proxy/gfs-wind', async (req, res) => {
   try {
     const level = new URL(req.url, 'http://x').searchParams.get('level') ?? '10m'
     const payload = await getWindPayload(level)
+    res.setHeader('Content-Type', 'application/octet-stream')
+    res.setHeader('Cache-Control', 'public, max-age=600')
+    res.end(payload)
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** Scalar GFS fields (MSLP, heights, temp, CAPE) for the contour layer. */
+app.use('/proxy/gfs-grid', async (req, res) => {
+  try {
+    const field = new URL(req.url, 'http://x').searchParams.get('field') ?? 'mslp'
+    const payload = await getGridPayload(field)
     res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Cache-Control', 'public, max-age=600')
     res.end(payload)

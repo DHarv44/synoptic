@@ -241,7 +241,13 @@ server/index.mjs, above the /proxy 404.
   aviationweather.gov/api/data/<product>, replacing the METAR-specific
   rewrite (keep /proxy/metar working or migrate its caller). Fixtures for
   each product.
-- **M3 — gridded fields service** ✦ large, the investment. Generalize
+- **M3 — gridded fields service** ✅ DONE (server/gfsGrid.mjs uint16 +
+  per-payload scale/offset; core/grid/isolines marching squares with
+  chaining; feature `fields`: MSLP/500 hgt/850 temp/CAPE at conventional
+  intervals). Deferred: forecast-hour stepping (f000 analysis only, like
+  wind), antimeridian seam (lines clip at ±180), GRIB decode fixture (the
+  pipeline was validated against live data instead; the pinned wind bug
+  lives in the u/v pair path, which scalars do not touch). Generalize
   server/gfsWind.mjs → a variable registry ({var, level, TypedArray,
   scale, offset} per plane), route /proxy/gfs-grid?var=&level=, header
   {planes:[{name,scale,offset}]}; int16 for MSLP/heights/CAPE. Client:

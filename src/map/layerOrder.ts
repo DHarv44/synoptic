@@ -24,6 +24,8 @@ export const LAYER_ORDER = [
   'radar-level2',
   'wind',
   'graticule',
+  // Contoured reference fields (isobars, heights) under every hazard wash.
+  'fields',
   // Aviation hazard washes sit under the NWS warning wash: a SIGMET is
   // advisory context, a tornado warning is the thing itself.
   'aviation-fill',

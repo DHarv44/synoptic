@@ -9,11 +9,11 @@ const FILTER = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl'
 const CACHE_TTL_MS = 30 * 60_000
 
 // 0.25° grid
-const SRC_W = 1440
-const SRC_H = 721
+export const SRC_W = 1440
+export const SRC_H = 721
 // served at 0.5°
-const OUT_W = 720
-const OUT_H = 361
+export const OUT_W = 720
+export const OUT_H = 361
 const SCALE = 100 / 127 // int8 → m/s
 
 /** level key → filter CGI level parameter */
@@ -28,7 +28,7 @@ const LEVELS = {
 const cache = new Map() // level → { at, payload }
 let runCache = null // { ymd, cycle, at }
 
-function pad2(n) {
+export function pad2(n) {
   return String(n).padStart(2, '0')
 }
 
@@ -43,7 +43,7 @@ function filterUrl(ymd, cycle, levParam, varName) {
 }
 
 /** Latest cycle whose f000 exists: probe recent cycles with a tiny field. */
-async function discoverRun() {
+export async function discoverRun() {
   if (runCache && Date.now() - runCache.at < CACHE_TTL_MS) return runCache
   const now = new Date()
   for (let back = 0; back < 6; back++) {
@@ -76,7 +76,7 @@ function decodeGrib(buf) {
   return { vals, northFirst: grib.La1 > 0 }
 }
 
-async function fetchField(run, levParam, varName) {
+export async function fetchField(run, levParam, varName) {
   const res = await fetch(filterUrl(run.ymd, run.cycle, levParam, varName))
   if (!res.ok) throw new Error(`NOMADS filter ${res.status} for ${varName}`)
   const buf = Buffer.from(await res.arrayBuffer())

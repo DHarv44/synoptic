@@ -42,6 +42,11 @@ export const CREDITS: Credit[] = [
     what: 'Satellite imagery.',
   },
   {
+    label: 'NOAA NOMADS',
+    href: 'https://nomads.ncep.noaa.gov/',
+    what: 'GFS gridded fields: winds, pressure, heights, temperature, CAPE.',
+  },
+  {
     label: 'Blitzortung',
     href: 'https://www.blitzortung.org/',
     what: 'Community lightning detection network, seconds of latency.',

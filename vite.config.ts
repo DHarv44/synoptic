@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { getWindPayload } from './server/gfsWind.mjs'
+import { getGridPayload } from './server/gfsGrid.mjs'
 
 // Surfaced in the About panel, so a bug report can name a build.
 const { version } = createRequire(import.meta.url)('./package.json') as { version: string }
@@ -15,6 +16,19 @@ function windProxy(): Plugin {
       server.middlewares.use('/proxy/gfs-wind', (req, res) => {
         const level = new URL(req.url ?? '', 'http://x').searchParams.get('level') ?? '10m'
         getWindPayload(level)
+          .then((payload) => {
+            res.setHeader('Content-Type', 'application/octet-stream')
+            res.setHeader('Cache-Control', 'public, max-age=600')
+            res.end(payload)
+          })
+          .catch((e: unknown) => {
+            res.statusCode = 502
+            res.end(String(e))
+          })
+      })
+      server.middlewares.use('/proxy/gfs-grid', (req, res) => {
+        const field = new URL(req.url ?? '', 'http://x').searchParams.get('field') ?? 'mslp'
+        getGridPayload(field)
           .then((payload) => {
             res.setHeader('Content-Type', 'application/octet-stream')
             res.setHeader('Cache-Control', 'public, max-age=600')
