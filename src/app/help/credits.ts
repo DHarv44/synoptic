@@ -42,6 +42,11 @@ export const CREDITS: Credit[] = [
     what: 'Satellite imagery.',
   },
   {
+    label: 'NWS Storm Prediction Center',
+    href: 'https://www.spc.noaa.gov/',
+    what: 'Convective outlooks, watches and mesoscale discussions.',
+  },
+  {
     label: 'NWS Weather Prediction Center',
     href: 'https://www.wpc.ncep.noaa.gov/',
     what: 'Surface analysis: fronts and pressure centres (via IEM AFOS).',

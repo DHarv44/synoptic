@@ -262,9 +262,13 @@ server/index.mjs, above the /proxy 404.
   `fronts` draws chart-colour lines + H/L centres with pressures over the
   M3 isobars. Deferred: pip sprites (triangles/semicircles — dash patterns
   stand in), stationary front two-colour alternation.
-- **M5 — SPC suite** ✦ medium. Day 1–3 categorical + probabilistic
-  outlooks, watches, mesoscale discussions with full text in a panel.
-  UNKNOWN: SPC GeoJSON CORS headers — may need a thin proxy route.
+- **M5 — SPC suite** ✅ DONE. CORS open everywhere — SPC serves outlooks
+  directly (the .lyr GeoJSON carries SPC's own stroke/fill per category, so
+  no colour table to rot), IEM serves MCDs and current watches. Feature
+  `spc`: Day 1–3 categorical fills at the bottom of the data stack, watch
+  parallelograms (PDS drawn heavier) and MCD outlines up with warning
+  boundaries, panel with watch details and MCD full text on expand.
+  Deferred: probabilistic outlook layers (tornado/wind/hail %), Day 4–8.
 - **M6 — real soundings** ✦ medium. RAOB adapter in core/data returning
   the existing Sounding shape; /proxy/raob (Wyoming/IGRA text is
   CORS-blocked; proxy returns parsed JSON). Extract SoundingTrace from

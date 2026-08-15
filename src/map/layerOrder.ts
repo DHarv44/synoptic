@@ -18,6 +18,8 @@ type AddLayerObject = Parameters<MLMap['addLayer']>[0]
  */
 export const LAYER_ORDER = [
   'satellite',
+  // Outlook fills are the context everything else sits on — radar included.
+  'spc-outlook',
   // One composite occupies 'radar' — they are alternatives, never a stack.
   // Single-site super-res is the genuine detail upgrade and sits above it.
   'radar',
