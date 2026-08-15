@@ -7,6 +7,7 @@ import { useForecast } from '@/core/data/openMeteo/useForecast'
 import { wmoText } from '@/core/data/openMeteo/forecast'
 import { PanelGuard } from '@/ui/PanelGuard'
 import { dailyRows, dayLabel } from '@/features/forecast/service'
+import { ModelAgreement } from '@/features/models/ModelAgreement'
 
 const RANGES = ['3', '5', '10'] as const
 
@@ -68,6 +69,7 @@ export function DailyPanel() {
               ))}
             </Table.Tbody>
           </Table>
+          <ModelAgreement />
         </Stack>
       )}
     </PanelGuard>

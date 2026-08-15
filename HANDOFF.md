@@ -345,19 +345,18 @@ installs and update flow in a real Brave/Chrome window.
    - **Mobile/responsive pass** (drawers as bottom sheets, touch targets,
      phone timeline) — shares groundwork with the Chase HUD, do it
      before/with item 4.
-3. **"Make it personal" trio** (user-requested, see README roadmap):
-   - **My location button** on the map (browser geolocation) → center/zoom,
-     stored as a home point that panels/alerts default to. Small: reuse
-     `useCameraStore.requestFlyTo` + the probe store.
-   - **Forecast panels** — 24 h hourly strip + 3/7/10-day summaries as new
-     dock tabs beside Now/Meteogram/Skew-T/Models. Data already flows via
-     `core/data/openMeteo` (`useForecast`); mostly a presentation slice.
-     Consider annotating confidence from the Models tab's spread.
-   - **Desktop notifications** — opt-in, home-location scoped: NWS warnings,
-     radar-trend "rain in ~20 min" nowcast, severe-parameter thresholds.
-     Needs permission flow, background-safe polling (note: pollers with
-     `pauseWhenHidden` stall when hidden — use a non-paused poller or a
-     service worker), and per-alert de-duplication by NWS alert id.
+3. **"Make it personal" — DONE** (location button, forecast panels, warning
+   notifications, verdict line, model confidence). Where the last two live:
+   - `forecast/characterize.ts` — pure; returns tokens (`{timeMs}`,
+     `{gustMs}`) not text, so `ForecastVerdict` can honour the local/UTC and
+     wind-unit preferences at the display edge. Rendered by `ContextHeader`
+     for the place tab.
+   - `models/confidence.ts` — cross-model 2 m temperature spread by day;
+     `ModelAgreement` sits under the Outlook table and shares `useModels`'
+     cache (which now takes an `enabled` flag so a disabled models feature
+     fetches nothing).
+   Deferred by design, needs a radar trend signal that doesn't exist yet:
+   "rain in ~20 min" nowcast notifications and severe-parameter thresholds.
 4. **Performance pass — first round done and measured** (numbers in README
    roadmap item 5): three.js split out of the initial bundle via a lazy
    `Volume3D` (2,679 → 1,751 kB), live clock quantised to 10 s (136 → 3 idle

@@ -239,7 +239,7 @@ probes that point. Works on desktop and mobile, in dark or light.
      hand-rolled pointer handling or a small dep like `vaul`), a "Data
      sources" entry to replace the footer that mobile hides, and a touch
      pass on the radar bench. This is the groundwork the Chase HUD builds on.
-3. **Make it personal** — mostly shipped. The instrument now knows where you
+3. **Make it personal** ✅ — shipped. The instrument now knows where you
    are and what that means for you:
    - **My location** ✅ — a locate button on the map centers and zooms to you,
      probes the point so the analysis panels fill in, and remembers it as home
@@ -256,9 +256,15 @@ probes that point. Works on desktop and mobile, in dark or light.
      background. *Still to do:* "rain starting in ~20 minutes" nowcasts from
      the radar trend, and severe-parameter thresholds crossing — both need a
      trend signal the app doesn't compute yet.
-   - Still open: a **written characterization** of the forecast (the
-     plain-language line that makes the outlook scannable), and annotating
-     confidence from the Models tab's spread.
+   - **The verdict line** ✅ — one plain-language sentence under the place
+     name: what precipitation is doing (now / from when / until when), plus
+     the single most notable of storms, gusts, or a big temperature swing.
+     Times and speeds honour the local/UTC and wind-unit preferences.
+   - **Model confidence** ✅ — the Outlook carries one line read from
+     cross-model 2 m temperature spread: agree through / diverge from which
+     day. Temperature only, deliberately — point-scale precipitation spread
+     is noisier than it is informative, and "models agree" should not be
+     said off the back of it.
 4. **Radar quality and resolution** — the biggest gap between SYNOPTIC and the
    paid apps is how radar *looks*, especially as you zoom in.
 

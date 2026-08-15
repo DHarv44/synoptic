@@ -6,6 +6,7 @@ import { fmtLatLon } from '@/core/units/format'
 import { useDock, type DockTab } from '@/app/shell/dockStore'
 import { RAIL_TABS } from '@/app/shell/DockRail'
 import { DockSection } from '@/app/shell/DockSection'
+import { ForecastVerdict } from '@/features/forecast/ForecastVerdict'
 import { SettingsPanel } from '@/app/settings/SettingsPanel'
 import { HelpPanel } from '@/app/help/HelpPanel'
 import type { PanelContribution, PanelGroup } from '@/core/settings/types'
@@ -22,18 +23,22 @@ export function ContextHeader({ tab }: { tab: DockTab }) {
   const label = RAIL_TABS.find((t) => t.key === tab)?.label ?? ''
 
   return (
-    <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
-      <Text size="sm" fw={600} truncate>
-        {tab === 'place' && point
-          ? (point.name ?? fmtLatLon(point.lat, point.lon))
-          : label}
-      </Text>
-      {tab === 'place' && point?.name && (
-        <Text size="xs" c="dimmed" ff="monospace" style={{ flexShrink: 0 }}>
-          {fmtLatLon(point.lat, point.lon)}
+    <div>
+      <Group justify="space-between" wrap="nowrap" px="xs" py={6}>
+        <Text size="sm" fw={600} truncate>
+          {tab === 'place' && point
+            ? (point.name ?? fmtLatLon(point.lat, point.lon))
+            : label}
         </Text>
-      )}
-    </Group>
+        {tab === 'place' && point?.name && (
+          <Text size="xs" c="dimmed" ff="monospace" style={{ flexShrink: 0 }}>
+            {fmtLatLon(point.lat, point.lon)}
+          </Text>
+        )}
+      </Group>
+      {/* The verdict: the forecast in one line, before any section is opened. */}
+      {tab === 'place' && point && <ForecastVerdict />}
+    </div>
   )
 }
 

@@ -11,9 +11,9 @@ import {
 
 const CACHE_MAX_AGE_MS = 30 * 60_000
 
-export function useModels(): CachedFetchState<HourlyByModel> {
+export function useModels(enabled = true): CachedFetchState<HourlyByModel> {
   const point = useProbe((s) => s.point)
-  const key = point ? `models:${point.lat.toFixed(2)},${point.lon.toFixed(2)}` : null
+  const key = enabled && point ? `models:${point.lat.toFixed(2)},${point.lon.toFixed(2)}` : null
   return useCachedFetch(key, CACHE_MAX_AGE_MS, () =>
     fetchJson<HourlyByModel>(MODELS_SOURCE, modelsUrl(point?.lat ?? 0, point?.lon ?? 0), {
       fixture: 'openmeteo-models',
