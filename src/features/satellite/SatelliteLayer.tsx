@@ -1,24 +1,28 @@
+import type { RasterTileSource } from 'maplibre-gl'
 import { useFeatureOption } from '@/core/settings/store'
 import { useTimeline } from '@/core/time/timelineStore'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
-import { gibsDate, gibsTileTemplate, PRODUCTS } from '@/features/satellite/service'
+import { gibsMaxZoom, gibsTime, gibsTileTemplate } from '@/features/satellite/service'
 
 /** NASA GIBS satellite imagery under the radar layers. */
 export function SatelliteLayer() {
   const simTime = useTimeline((s) => s.simTime)
   const product = useFeatureOption<string>('satellite', 'product')
   const opacity = useFeatureOption<number>('satellite', 'opacity')
-  const date = gibsDate(simTime, Date.now())
+  const tiles = gibsTileTemplate(product, gibsTime(product, simTime, Date.now()))
 
+  // Source lives as long as the product does. The sub-daily GOES frames step
+  // every 10 minutes — with the timeline playing, rebuilding the source per
+  // frame would throw away its tile cache exactly the way the radar mosaic
+  // once did; setTiles swaps the URL and keeps it.
   useMapLayer(
     (map) => {
-      const p = PRODUCTS[product] ?? PRODUCTS.truecolor
       map.addSource('satellite', {
         type: 'raster',
-        tiles: [gibsTileTemplate(product, date)],
+        tiles: [tiles],
         tileSize: 256,
-        maxzoom: p.maxZoom,
+        maxzoom: gibsMaxZoom(product),
         attribution: 'Imagery © NASA GIBS',
       })
       addDataLayer(
@@ -36,7 +40,18 @@ export function SatelliteLayer() {
         if (map.getSource('satellite')) map.removeSource('satellite')
       }
     },
-    [product, date, opacity],
+    [product],
+  )
+
+  useMapLayer(
+    (map) => {
+      const src = map.getSource('satellite') as RasterTileSource | undefined
+      if (src) src.setTiles([tiles])
+      if (map.getLayer('satellite')) {
+        map.setPaintProperty('satellite', 'raster-opacity', opacity / 100)
+      }
+    },
+    [tiles, opacity],
   )
 
   return null
