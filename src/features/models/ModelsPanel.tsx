@@ -4,8 +4,8 @@ import { useProbe } from '@/core/probe/store'
 import { PanelGuard } from '@/ui/PanelGuard'
 import { PanelHeader } from '@/ui/PanelHeader'
 import { LegendDot } from '@/ui/LegendDot'
-import { MODELS, MODEL_VARS } from '@/features/models/service'
-import { useEnsemble, useModels } from '@/features/models/useModels'
+import { MODELS, MODEL_VARS } from '@/core/data/openMeteo/models'
+import { useEnsemble, useModels } from '@/core/data/openMeteo/useModels'
 import { ModelsChart } from '@/features/models/ModelsChart'
 
 /** Multi-model comparison: 5 global models + optional GFS ensemble. */

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { alertCategory, alertWeight, alertBbox, CATEGORY_SETTING } from '@/features/alerts/service'
-import type { AlertFeature } from '@/features/alerts/service'
+import { alertCategory, alertWeight, alertBbox, CATEGORY_SETTING } from '@/core/data/nws/alerts'
+import type { AlertFeature } from '@/core/data/nws/alerts'
 
 describe('alertCategory', () => {
   it('files the convective products that must never be hideable', () => {

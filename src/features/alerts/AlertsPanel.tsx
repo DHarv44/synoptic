@@ -3,7 +3,7 @@ import { Badge, Group, Paper, Stack, Switch, Text } from '@mantine/core'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useCameraStore } from '@/map/cameraStore'
 import type { Bbox } from '@/map/viewStore'
-import { alertColor, type AlertFeature } from '@/features/alerts/service'
+import { alertColor, type AlertFeature } from '@/core/data/nws/alerts'
 import { useVisibleAlerts } from '@/features/alerts/useVisibleAlerts'
 
 const MAX_LISTED = 40

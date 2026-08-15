@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { bboxIntersects, useMapView } from '@/map/viewStore'
 import { useFilteredAlerts } from '@/features/alerts/useFilteredAlerts'
-import { alertBbox, type AlertFeature } from '@/features/alerts/service'
+import { alertBbox, type AlertFeature } from '@/core/data/nws/alerts'
 
 export interface VisibleAlert {
   a: AlertFeature

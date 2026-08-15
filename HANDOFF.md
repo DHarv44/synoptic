@@ -392,7 +392,12 @@ installs and update flow in a real Brave/Chrome window.
    (own Level 2 volumes / GRIB / CSV — needs format + validation decisions
    and a hard boundary so imported data never mixes with live feeds), and
    replay-specific playback controls (loop, step-by-volume, export).
-8. **Everything hurricane** (README roadmap item 8) — a tropical mode in the
+8. **Meteorological views** (README roadmap item 9, slices in SLICES.md
+   Phase 8, M0–M7) — satellite bands, aviation hazards, gridded fields
+   (isobars/heights/CAPE — generalizes the wind GRIB pipeline, which is
+   where the pinned wind bug lives), surface chart, SPC, real soundings,
+   buoys/gauges/air-quality. ACTIVE as of 2026-08-15; start at M0.
+9. **Everything hurricane** (README roadmap item 8) — a tropical mode in the
    same sense as the Chase HUD. Nearly all of it is free and keyless from
    NHC. Core: active storms as selectable objects, track + cone, 34/50/64 kt
    wind radii (which is what gives arrival time at the home location),
@@ -404,7 +409,7 @@ installs and update flow in a real Brave/Chrome window.
    to get right rather than fast: the cone shows where the *centre* may go,
    not where the effects reach, and surge is the layer most likely to be read
    as a promise.
-9. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
+10. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
 
 ## Traps that cost hours (all reproducible, all documented)

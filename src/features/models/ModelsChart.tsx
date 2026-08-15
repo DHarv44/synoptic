@@ -8,7 +8,7 @@ import {
   ensembleMembers,
   modelSeries,
   type HourlyByModel,
-} from '@/features/models/service'
+} from '@/core/data/openMeteo/models'
 
 const W = 320
 const H = 200

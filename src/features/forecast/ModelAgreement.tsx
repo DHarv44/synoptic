@@ -1,8 +1,8 @@
 import { Text } from '@mantine/core'
 import { useFeatureEnabled } from '@/core/settings/store'
 import { dayLabel } from '@/features/forecast/service'
-import { temperatureAgreement } from '@/features/models/confidence'
-import { useModels } from '@/features/models/useModels'
+import { temperatureAgreement } from '@/core/data/openMeteo/confidence'
+import { useModels } from '@/core/data/openMeteo/useModels'
 
 /**
  * One line of confidence under the outlook, read from cross-model temperature

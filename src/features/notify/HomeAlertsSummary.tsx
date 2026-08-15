@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { SectionHint } from '@/ui/SectionHint'
 import { useHome } from '@/core/home/store'
-import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
+import { acquireAlertsFeed, useAlertsData } from '@/core/data/nws/alertsFeed'
 import { alertsAtPoint } from '@/features/notify/service'
 
 /** Whether anything is in force where the user actually is. */

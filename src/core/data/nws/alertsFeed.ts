@@ -6,7 +6,7 @@ import {
   sortBySeverity,
   type AlertFeature,
   type AlertsResponse,
-} from '@/features/alerts/service'
+} from '@/core/data/nws/alerts'
 
 const feed = createSharedFeed<AlertFeature[]>({
   source: NWS,

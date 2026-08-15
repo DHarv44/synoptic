@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { alertsAtPoint, meetsSeverity, pointInPolygon } from '@/features/notify/service'
-import type { AlertFeature } from '@/features/alerts/service'
+import type { AlertFeature } from '@/core/data/nws/alerts'
 
 /** Unit square with an optional square hole in the middle. */
 const square = [

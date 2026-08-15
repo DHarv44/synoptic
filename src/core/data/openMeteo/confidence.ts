@@ -1,4 +1,4 @@
-import { MODELS, modelSeries, type HourlyByModel } from '@/features/models/service'
+import { MODELS, modelSeries, type HourlyByModel } from '@/core/data/openMeteo/models'
 
 /**
  * Where the multi-model set stops agreeing, read from 2 m temperature.

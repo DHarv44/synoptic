@@ -202,3 +202,64 @@ dependency order. Check boxes as slices land.
 ## Phase 7 (coarse; slice when reached)
 
 Chase HUD: PWA → GPS → warnings → intercept/escape → placefiles → trainer.
+
+## Phase 8 — Meteorological Views (README roadmap item 9)
+
+Every slice follows the registration checklist (service.ts SourceRef →
+fetchJson with a fixture → poller/cached-fetch per the decision rule →
+registerFeature with sourceIds → features/index.ts import → credits.ts →
+demo fixture JSON). Features never import features; shared data goes to
+core/data. New proxy routes land in BOTH vite.config.ts and
+server/index.mjs, above the /proxy 404.
+
+- **M0 — layering repair** ✦ small. acbffc8 violated the import boundary:
+  forecast/DailyPanel imports models/ModelAgreement, which imports
+  forecast/dayLabel back. Move the models data access (MODELS keys/labels,
+  HourlyByModel, urls, modelSeries, useModels/useEnsemble) into
+  core/data/openMeteo/models.ts beside useForecast; move
+  temperatureAgreement + test to core/data/openMeteo; ModelAgreement
+  component moves into features/forecast (it renders in forecast's panel);
+  features/models keeps colors + chart + panel. No behavior change.
+- **M1 — satellite bands** ✦ small/medium. Add GOES ABI via GIBS: GeoColor,
+  Band 13 clean IR, Band 8/9/10 water vapor, each with a one-line "what
+  this band shows". Wire the dead `daily` flag: sub-daily products need an
+  ISO timestamp snapped to the product's cadence (10 min) and clamped back
+  far enough for GIBS latency; verify actual availability/latency per layer
+  id at build time, not from memory. Switch SatelliteLayer to the
+  setTiles-not-rebuild pattern (copy GlobalLayer, not the current rebuild
+  on every opacity tick). Timeline scrubbing animates sub-daily bands.
+- **M2 — aviation hazards** ✦ medium. New `aviation` feature: SIGMET/AIRMET
+  polygons (below labels, alerts-fill styling discipline), PIREP points
+  (above labels, METAR's four decisions: persistent source + setData,
+  quantized viewport key, thinning, sprite pruning), TAF text beside METAR
+  in the panel. Generalize the proxy: /proxy/awc/<product> → 
+  aviationweather.gov/api/data/<product>, replacing the METAR-specific
+  rewrite (keep /proxy/metar working or migrate its caller). Fixtures for
+  each product.
+- **M3 — gridded fields service** ✦ large, the investment. Generalize
+  server/gfsWind.mjs → a variable registry ({var, level, TypedArray,
+  scale, offset} per plane), route /proxy/gfs-grid?var=&level=, header
+  {planes:[{name,scale,offset}]}; int16 for MSLP/heights/CAPE. Client:
+  core/data/grid/ fetch+decode mirroring wind/service.ts, d3-contour →
+  GeoJSON → line layer + labels. First field shipped: MSLP isobars.
+  Decode tests against a recorded GRIB fixture — this code hosts the
+  pinned wind bug (Phase 3), so tests here either find it or fence it.
+- **M4 — surface chart** ✦ medium, after M3. Isobars + WPC fronts +
+  existing METAR = a surface analysis. UNKNOWN to resolve first: fronts
+  source format (WPC coded surface bulletin vs IEM re-serve); verify
+  CORS/format before committing the slice.
+- **M5 — SPC suite** ✦ medium. Day 1–3 categorical + probabilistic
+  outlooks, watches, mesoscale discussions with full text in a panel.
+  UNKNOWN: SPC GeoJSON CORS headers — may need a thin proxy route.
+- **M6 — real soundings** ✦ medium. RAOB adapter in core/data returning
+  the existing Sounding shape; /proxy/raob (Wyoming/IGRA text is
+  CORS-blocked; proxy returns parsed JSON). Extract SoundingTrace from
+  SkewT.tsx (already at 125 lines), render obs vs model as paired traces.
+  Nearest-station picker, 00Z/12Z cadence, long cache TTL.
+- **M7 — more observations** ✦ three small independent slices: NDBC buoys
+  (fixed-width text → proxy parses to JSON; METAR-shaped layer), USGS
+  river gauges (JSON, CORS-open, keyless), Open-Meteo air quality (panel
+  line in Now + optional layer later).
+
+Order: M0 → M1 → M2 → M3 → M4 → M5 → M6 → M7. M4 depends on M3; the rest
+are independent and can reorder if a data-format unknown blocks one.

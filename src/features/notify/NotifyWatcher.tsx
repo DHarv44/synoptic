@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useHome } from '@/core/home/store'
 import { useFeatureOption } from '@/core/settings/store'
-import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
+import { acquireAlertsFeed, useAlertsData } from '@/core/data/nws/alertsFeed'
 import { alertMessage, alertsAtPoint, meetsSeverity, type SeverityLevel } from '@/features/notify/service'
 import { alreadyNotified, markNotified } from '@/features/notify/seen'
 

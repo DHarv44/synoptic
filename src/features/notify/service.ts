@@ -1,15 +1,9 @@
-import type { AlertFeature } from '@/features/alerts/service'
+import type { AlertFeature } from '@/core/data/nws/alerts'
 import type { HomePoint } from '@/core/home/store'
 
-/** Minimum severity a user is willing to be interrupted for. */
-export const SEVERITY_LEVELS = ['Extreme', 'Severe', 'Moderate', 'Minor'] as const
-export type SeverityLevel = (typeof SEVERITY_LEVELS)[number]
-
-const RANK: Record<string, number> = { Extreme: 0, Severe: 1, Moderate: 2, Minor: 3, Unknown: 4 }
-
-export function meetsSeverity(severity: string, minimum: SeverityLevel): boolean {
-  return (RANK[severity] ?? 4) <= RANK[minimum]
-}
+// Severity ranking moved to core/data/nws/severity — both this feature and
+// alerts filter on it, and features must not import each other.
+export { SEVERITY_LEVELS, meetsSeverity, type SeverityLevel } from '@/core/data/nws/severity'
 
 /**
  * Ray casting against one ring. Counts crossings of a ray heading east from

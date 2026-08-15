@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Badge, Button, Group, Stack, Text } from '@mantine/core'
 import { useHome } from '@/core/home/store'
-import { alertColor } from '@/features/alerts/service'
-import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
+import { alertColor } from '@/core/data/nws/alerts'
+import { acquireAlertsFeed, useAlertsData } from '@/core/data/nws/alertsFeed'
 import { alertsAtPoint } from '@/features/notify/service'
 import { useEffect } from 'react'
 

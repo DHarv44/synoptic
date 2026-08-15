@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { temperatureAgreement } from '@/features/models/confidence'
-import type { HourlyByModel } from '@/features/models/service'
+import { temperatureAgreement } from '@/core/data/openMeteo/confidence'
+import type { HourlyByModel } from '@/core/data/openMeteo/models'
 
 const NOW = Date.parse('2026-08-11T06:00:00Z')
 

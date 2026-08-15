@@ -7,7 +7,7 @@ import {
   ensembleUrl,
   modelsUrl,
   type HourlyByModel,
-} from '@/features/models/service'
+} from '@/core/data/openMeteo/models'
 
 const CACHE_MAX_AGE_MS = 30 * 60_000
 

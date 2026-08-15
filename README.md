@@ -449,6 +449,38 @@ probes that point. Works on desktop and mobile, in dark or light.
    6-hourly advisory cadence against continuous radar; and how to present
    forecast uncertainty without either burying it or overstating it.
 
+9. **Meteorological views — the synoptic gap** *(planned; slices in
+   SLICES.md Phase 8)*. The app is deep at storm scale and thin at synoptic
+   scale — the scale the name promises. Ranked by value against cost, using
+   pipelines that already exist wherever possible:
+   - **Satellite bands** — IR, water vapor and GeoColor via GOES ABI on the
+     existing GIBS layer. The current products are daily-only; sub-daily
+     bands need the (declared, never wired) `daily` flag and a timestamp
+     snapped to the product cadence, plus the setTiles-not-rebuild pattern
+     the radar composite already uses.
+   - **Aviation hazards** — SIGMETs, AIRMETs, PIREPs, TAFs from
+     aviationweather.gov, which we already proxy for METAR. PIREPs are real
+     aircraft reporting real turbulence and icing: ground truth aloft.
+   - **Gridded model fields** — the one investment that unlocks a class:
+     generalize the GFS wind pipeline (`server/gfsWind.mjs`) to serve any
+     scalar field with per-plane scale/offset (int16 where int8 can't span
+     the range), then contour client-side. First customers: MSLP isobars,
+     500 mb heights, 850 temp, CAPE. Note: the pinned wind decode bug lives
+     in exactly this code, so this slice confronts roadmap item 1.
+   - **The surface chart** — MSLP isobars + WPC fronts + the METAR layer:
+     an actual surface analysis. Fronts data format needs verification
+     before the slice is committed.
+   - **SPC suite** — Day 1–3 categorical/probabilistic outlooks, watch
+     boxes, mesoscale discussions with full text. Free GeoJSON.
+   - **Real soundings** — observed 00Z/12Z RAOBs overlaid on the model
+     Skew-T (PLAN §3.8 always promised this). Adapter returns the existing
+     `Sounding` shape so every renderer works unchanged.
+   - **More observations** — NDBC buoys (the marine picture), USGS river
+     gauges (the flood picture), Open-Meteo air quality (free, keyless,
+     same provider). Each a METAR-shaped point layer or panel line.
+   - Later in this cluster: gridded severe/winter fields, ob-vs-model
+     delta mode (PLAN §3.6), MRMS accumulations.
+
 **Later** — run-to-run
 forecast trends (dProg/dt), forecast verification, shareable workspace URLs,
 virtual-temperature CAPE correction, aurora/space weather.

@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from 'react'
 import { useFeatureOptions } from '@/core/settings/store'
-import { acquireAlertsFeed, useAlertsData } from '@/features/alerts/store'
-import { alertCategory, CATEGORY_SETTING, type AlertFeature } from '@/features/alerts/service'
-import { meetsSeverity, type SeverityLevel } from '@/features/notify/service'
+import { acquireAlertsFeed, useAlertsData } from '@/core/data/nws/alertsFeed'
+import { alertCategory, CATEGORY_SETTING, type AlertFeature } from '@/core/data/nws/alerts'
+import { meetsSeverity, type SeverityLevel } from '@/core/data/nws/severity'
 
 /**
  * Active alerts the user has asked to see. Applied once, here, so the map

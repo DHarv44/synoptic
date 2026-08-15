@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { ExpressionSpecification, GeoJSONSource } from 'maplibre-gl'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
-import { alertColor, alertWeight, withGeometry } from '@/features/alerts/service'
+import { alertColor, alertWeight, withGeometry } from '@/core/data/nws/alerts'
 import { useFilteredAlerts } from '@/features/alerts/useFilteredAlerts'
 
 /**
