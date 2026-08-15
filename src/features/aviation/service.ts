@@ -66,20 +66,22 @@ export function activeSigmets(items: AirSigmet[], nowMs: number): AirSigmet[] {
   )
 }
 
+/** Callers pass `activeSigmets` output, whose filter guarantees ≥3 coords. */
 export function sigmetGeoJSON(items: AirSigmet[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
-    features: items.map((s) => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        // AWC polygons are not explicitly closed; MapLibre wants a ring.
-        coordinates: [
-          [...s.coords!, s.coords![0]].map((c) => [c.lon, c.lat]),
-        ],
-      },
-      properties: { color: sigmetColor(s.hazard), hazard: s.hazard },
-    })),
+    features: items.map((s) => {
+      const coords = s.coords ?? []
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          // AWC polygons are not explicitly closed; MapLibre wants a ring.
+          coordinates: [[...coords, coords[0]].map((c) => [c.lon, c.lat])],
+        },
+        properties: { color: sigmetColor(s.hazard), hazard: s.hazard },
+      }
+    }),
   }
 }
 

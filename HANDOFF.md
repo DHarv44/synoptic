@@ -43,7 +43,47 @@ map layers with `addDataLayer(map, spec, slot)`, never `map.addLayer` — the
 order otherwise depends on which feature mounted last, and toggling a layer
 off and on moves it to the top (this is how radar came to cover warnings).
 
-## Where things stand (2026-08-11)
+## Where things stand (2026-08-15)
+
+**Current work is on branch `met-views` (pushed to origin), NOT merged to
+main.** Railway deploys main, so production predates Phase 8. The branch
+holds M0–M5 of SLICES Phase 8 (meteorological views): the layering repair,
+GOES satellite bands, aviation hazards, gridded GFS fields with client-side
+contouring, the WPC surface chart, and the SPC suite. Six commits,
+`13c2080..aa2c041`. Remaining: M6 (real RAOB soundings on the Skew-T) and
+M7 (NDBC buoys, USGS river gauges, Open-Meteo air quality).
+
+**Awaiting the user**: a visual review. Every Phase 8 layer was verified
+through data (sources populated, health green, panels rendering real rows)
+but the Browser pane refused screenshots all session, so NO human eye has
+seen the new layers drawn — SIGMET washes, PIREP dots, isobars, front
+colours, outlook fills, H/L markers are all running on conventions chosen
+blind. All five new features ship `defaultEnabled: false`; flip them on in
+the layer rail (Satellite, Aviation hazards, Model fields, Surface fronts,
+SPC outlooks). After review: merge to main, or amend aesthetics first.
+
+Phase-8 facts the next session should not re-derive (details in each
+commit message and SLICES Phase 8):
+- GIBS carries **no GOES water-vapor band**; Air Mass is the WV-derived
+  substitute. GOES layers are PT10M with ~35–55 min lag; `gibsTime()`
+  snaps to cadence and clamps behind the lag. GIBS paths are z/y/x.
+- AWC: `airsigmet` needs `type=sigmet`; `pirep` requires a bbox; intensity
+  ranges like "LGT-MOD" grade by their upper bound. `/proxy/awc/<product>`
+  exists in both dev and prod servers.
+- The isolines module had two real degeneracies: threshold==grid-value
+  must be fixed by nudging the DATA (clamping interpolation fractions
+  creates false degree-4 vertices), and endpoint keys must be near-bitwise.
+- CODSUS (WPC fronts) comes from IEM's AFOS `retrieve.py` with open CORS;
+  it is a token stream that wraps mid-list, never parse line-by-line.
+- SPC `.lyr` outlook GeoJSON carries SPC's own stroke/fill hex — never
+  build a colour table. IEM `spcwatch.py` serves only active watches and
+  has no expiry field.
+- For M6: the RAOB adapter must return the existing `Sounding` shape from
+  `core/data/openMeteo/sounding.ts` so every renderer works unchanged;
+  Wyoming/IGRA text is CORS-blocked → needs `/proxy/raob`; extract a
+  `SoundingTrace` from SkewT.tsx (~125 lines) before adding the overlay.
+
+## Where things stood (2026-08-11)
 
 - **Done & verified live**: Phases 1, 2, 2.5, 4, 5 (tags) and the whole radar
   suite R1–R8 (tag `phase-6`): streaming Level 2 decode → polar WebGL render →
