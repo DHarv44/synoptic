@@ -24,9 +24,13 @@ export const LAYER_ORDER = [
   'radar-level2',
   'wind',
   'graticule',
+  // Aviation hazard washes sit under the NWS warning wash: a SIGMET is
+  // advisory context, a tornado warning is the thing itself.
+  'aviation-fill',
   'alerts-fill',
   // — the basemap's own labels draw here —
   'cells',
+  'pirep',
   'metar',
   'lightning',
   'alerts-outline',
@@ -42,6 +46,7 @@ export type LayerSlot = (typeof LAYER_ORDER)[number]
  */
 const ABOVE_LABELS = new Set<LayerSlot>([
   'cells',
+  'pirep',
   'metar',
   'lightning',
   'alerts-outline',

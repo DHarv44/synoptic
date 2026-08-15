@@ -1,0 +1,224 @@
+[
+ {
+  "icaoId": "KKCI",
+  "alphaChar": "W",
+  "seriesId": "05W",
+  "receiptTime": "2026-08-15T21:53:45.370Z",
+  "creationTime": "2026-08-15T21:55:00.000Z",
+  "validTimeFrom": 1786830900,
+  "validTimeTo": 1786838100,
+  "airSigmetType": "SIGMET",
+  "hazard": "CONVECTIVE",
+  "altitudeHi1": 44000,
+  "altitudeHi2": 44000,
+  "altitudeLow1": null,
+  "altitudeLow2": null,
+  "movementDir": 210,
+  "movementSpd": 20,
+  "rawAirSigmet": "WSUS33 KKCI 152155\nSIGW \nCONVECTIVE SIGMET 05W\nVALID UNTIL 2355Z\nMT WY UT ID OR WA\nFROM 40S YXC-20WSW LWT-30ESE SHR-50E SLC-20SW PDT-40S YXC\nAREA TS MOV FROM 21020KT. TOPS TO FL440.\n\nOUTLOOK VALID 152355-160355\nTS ARE NOT EXPD TO REQUIRE WST ISSUANCES.",
+  "postProcessFlag": 0,
+  "severity": 5,
+  "coords": [
+   {
+    "lat": 48.935,
+    "lon": -115.78
+   },
+   {
+    "lat": 46.922,
+    "lon": -110.06
+   },
+   {
+    "lat": 44.646,
+    "lon": -106.407
+   },
+   {
+    "lat": 40.845,
+    "lon": -110.876
+   },
+   {
+    "lat": 45.464,
+    "lon": -119.275
+   },
+   {
+    "lat": 48.935,
+    "lon": -115.78
+   }
+  ]
+ },
+ {
+  "icaoId": "KKCI",
+  "alphaChar": "C",
+  "seriesId": "22C",
+  "receiptTime": "2026-08-15T21:53:45.380Z",
+  "creationTime": "2026-08-15T21:55:00.000Z",
+  "validTimeFrom": 1786830900,
+  "validTimeTo": 1786838100,
+  "airSigmetType": "SIGMET",
+  "hazard": "CONVECTIVE",
+  "altitudeHi1": 39000,
+  "altitudeHi2": 39000,
+  "altitudeLow1": null,
+  "altitudeLow2": null,
+  "movementDir": 250,
+  "movementSpd": 20,
+  "rawAirSigmet": "WSUS32 KKCI 152155\nSIGC \nCONVECTIVE SIGMET 22C\nVALID UNTIL 2355Z\nMN IA\nFROM 40ESE RWF-10NNE MCW-40N OVR-60SSE FSD-40ESE RWF\nAREA TS MOV FROM 25020KT. TOPS TO FL390.\n\nOUTLOOK VALID 152355-160355\nTS ARE NOT EXPD TO REQUIRE WST ISSUANCES.",
+  "postProcessFlag": 0,
+  "severity": 5,
+  "coords": [
+   {
+    "lat": 44.212,
+    "lon": -94.273
+   },
+   {
+    "lat": 43.248,
+    "lon": -93.24
+   },
+   {
+    "lat": 41.835,
+    "lon": -95.74
+   },
+   {
+    "lat": 42.728,
+    "lon": -96.261
+   },
+   {
+    "lat": 44.212,
+    "lon": -94.273
+   }
+  ]
+ },
+ {
+  "icaoId": "KKCI",
+  "alphaChar": "C",
+  "seriesId": "23C",
+  "receiptTime": "2026-08-15T21:53:45.415Z",
+  "creationTime": "2026-08-15T21:55:00.000Z",
+  "validTimeFrom": 1786830900,
+  "validTimeTo": 1786838100,
+  "airSigmetType": "SIGMET",
+  "hazard": "CONVECTIVE",
+  "altitudeHi1": 37000,
+  "altitudeHi2": 37000,
+  "altitudeLow1": null,
+  "altitudeLow2": null,
+  "movementDir": 260,
+  "movementSpd": 20,
+  "rawAirSigmet": "WSUS32 KKCI 152155\nSIGC \nCONVECTIVE SIGMET 23C\nVALID UNTIL 2355Z\nNE SD MT WY\nFROM 80E SHR-10SSE DPR-70W ANW-60NW BFF-30N CZI-80E SHR\nAREA TS MOV FROM 26020KT. TOPS TO FL370.\n\nOUTLOOK VALID 152355-160355\nTS ARE NOT EXPD TO REQUIRE WST ISSUANCES.",
+  "postProcessFlag": 0,
+  "severity": 5,
+  "coords": [
+   {
+    "lat": 44.825,
+    "lon": -105.185
+   },
+   {
+    "lat": 44.922,
+    "lon": -101.628
+   },
+   {
+    "lat": 42.559,
+    "lon": -101.576
+   },
+   {
+    "lat": 42.591,
+    "lon": -104.438
+   },
+   {
+    "lat": 44.503,
+    "lon": -106.44
+   },
+   {
+    "lat": 44.825,
+    "lon": -105.185
+   }
+  ]
+ },
+ {
+  "icaoId": "KKCI",
+  "alphaChar": "C",
+  "seriesId": "24C",
+  "receiptTime": "2026-08-15T21:53:45.452Z",
+  "creationTime": "2026-08-15T21:55:00.000Z",
+  "validTimeFrom": 1786830900,
+  "validTimeTo": 1786838100,
+  "airSigmetType": "SIGMET",
+  "hazard": "CONVECTIVE",
+  "altitudeHi1": 45000,
+  "altitudeHi2": 60000,
+  "altitudeLow1": null,
+  "altitudeLow2": null,
+  "movementDir": 160,
+  "movementSpd": 15,
+  "rawAirSigmet": "WSUS32 KKCI 152155\nSIGC \nCONVECTIVE SIGMET 24C\nVALID UNTIL 2355Z\nTX OK KS CO\nFROM 20WSW SLN-30SE ICT-30NNW AMA-60SSE LAA-20WSW SLN\nAREA TS MOV FROM 16015KT. TOPS ABV FL450.\n\nOUTLOOK VALID 152355-160355\nTS ARE NOT EXPD TO REQUIRE WST ISSUANCES.",
+  "postProcessFlag": 0,
+  "severity": 5,
+  "coords": [
+   {
+    "lat": 38.802,
+    "lon": -98.014
+   },
+   {
+    "lat": 37.393,
+    "lon": -97.132
+   },
+   {
+    "lat": 35.755,
+    "lon": -101.877
+   },
+   {
+    "lat": 37.278,
+    "lon": -102.21
+   },
+   {
+    "lat": 38.802,
+    "lon": -98.014
+   }
+  ]
+ },
+ {
+  "icaoId": "KKCI",
+  "alphaChar": "C",
+  "seriesId": "25C",
+  "receiptTime": "2026-08-15T21:53:45.492Z",
+  "creationTime": "2026-08-15T21:55:00.000Z",
+  "validTimeFrom": 1786830900,
+  "validTimeTo": 1786838100,
+  "airSigmetType": "SIGMET",
+  "hazard": "CONVECTIVE",
+  "altitudeHi1": 45000,
+  "altitudeHi2": 60000,
+  "altitudeLow1": null,
+  "altitudeLow2": null,
+  "movementDir": 290,
+  "movementSpd": 30,
+  "rawAirSigmet": "WSUS32 KKCI 152155\nSIGC \nCONVECTIVE SIGMET 25C\nVALID UNTIL 2355Z\nWI MN LS\nFROM 60WNW INL-60ESE INL-10ENE DLH-40NNW MSP-50SSE FAR-60WNW INL\nAREA TS MOV FROM 29030KT. TOPS ABV FL450.\n\nOUTLOOK VALID 152355-160355\nTS ARE NOT EXPD TO REQUIRE WST ISSUANCES.",
+  "postProcessFlag": 0,
+  "severity": 5,
+  "coords": [
+   {
+    "lat": 48.943,
+    "lon": -94.803
+   },
+   {
+    "lat": 48.18,
+    "lon": -92.018
+   },
+   {
+    "lat": 46.865,
+    "lon": -91.969
+   },
+   {
+    "lat": 45.494,
+    "lon": -93.593
+   },
+   {
+    "lat": 45.977,
+    "lon": -96.39
+   },
+   {
+    "lat": 48.943,
+    "lon": -94.803
+   }
+  ]
+ }
+]

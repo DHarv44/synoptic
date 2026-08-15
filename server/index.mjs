@@ -23,6 +23,7 @@ const PORT = process.env.PORT ?? 8080
 const DIST = fileURLToPath(new URL('../dist', import.meta.url))
 
 const METAR = 'https://aviationweather.gov/api/data/metar'
+const AWC = 'https://aviationweather.gov/api/data'
 const NEXRAD = 'https://unidata-nexrad-level2-chunks.s3.amazonaws.com'
 
 const app = express()
@@ -48,6 +49,19 @@ function fail(res, error) {
 app.use('/proxy/metar', async (req, res) => {
   try {
     await pipeUpstream(res, METAR + req.url, { cacheSeconds: 120 })
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/**
+ * The rest of aviationweather.gov's data API (SIGMETs, PIREPs, TAFs…),
+ * same origin problem as METAR. The product name rides in the path:
+ * /proxy/awc/airsigmet?… → /api/data/airsigmet?…
+ */
+app.use('/proxy/awc', async (req, res) => {
+  try {
+    await pipeUpstream(res, AWC + req.url, { cacheSeconds: 120 })
   } catch (e) {
     fail(res, e)
   }

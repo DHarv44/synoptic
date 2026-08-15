@@ -49,7 +49,7 @@ export const CREDITS: Credit[] = [
   {
     label: 'Aviation Weather Center',
     href: 'https://aviationweather.gov/',
-    what: 'METAR surface observations.',
+    what: 'METAR surface observations, SIGMETs and pilot reports.',
   },
   {
     label: 'OpenFreeMap · OpenMapTiles · OpenStreetMap',

@@ -53,6 +53,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace('/proxy/metar', '/api/data/metar'),
       },
+      // The rest of the AWC data API (SIGMETs, PIREPs, TAFs…).
+      '/proxy/awc': {
+        target: 'https://aviationweather.gov',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/proxy/awc', '/api/data'),
+      },
       // NEXRAD Level 2 real-time chunks (S3 bucket blocks browser CORS).
       '/proxy/nexrad': {
         target: 'https://unidata-nexrad-level2-chunks.s3.amazonaws.com',

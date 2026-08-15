@@ -212,7 +212,7 @@ demo fixture JSON). Features never import features; shared data goes to
 core/data. New proxy routes land in BOTH vite.config.ts and
 server/index.mjs, above the /proxy 404.
 
-- **M0 — layering repair** ✦ small. acbffc8 violated the import boundary:
+- **M0 — layering repair** ✅ DONE. acbffc8 violated the import boundary:
   forecast/DailyPanel imports models/ModelAgreement, which imports
   forecast/dayLabel back. Move the models data access (MODELS keys/labels,
   HourlyByModel, urls, modelSeries, useModels/useEnsemble) into
@@ -220,7 +220,9 @@ server/index.mjs, above the /proxy 404.
   temperatureAgreement + test to core/data/openMeteo; ModelAgreement
   component moves into features/forecast (it renders in forecast's panel);
   features/models keeps colors + chart + panel. No behavior change.
-- **M1 — satellite bands** ✦ small/medium. Add GOES ABI via GIBS: GeoColor,
+- **M1 — satellite bands** ✅ DONE (GeoColor, Clean IR, Air Mass, Red
+  Visible; GIBS carries no GOES water vapor — Air Mass is the WV-derived
+  substitute). Add GOES ABI via GIBS: GeoColor,
   Band 13 clean IR, Band 8/9/10 water vapor, each with a one-line "what
   this band shows". Wire the dead `daily` flag: sub-daily products need an
   ISO timestamp snapped to the product's cadence (10 min) and clamped back
@@ -228,7 +230,10 @@ server/index.mjs, above the /proxy 404.
   id at build time, not from memory. Switch SatelliteLayer to the
   setTiles-not-rebuild pattern (copy GlobalLayer, not the current rebuild
   on every opacity tick). Timeline scrubbing animates sub-daily bands.
-- **M2 — aviation hazards** ✦ medium. New `aviation` feature: SIGMET/AIRMET
+- **M2 — aviation hazards** ✅ DONE for SIGMETs + PIREPs (feature
+  `aviation`, /proxy/awc route, slots aviation-fill + pirep). Deferred to a
+  later pass: TAFs in the panel, G-AIRMETs (LINE geometries, different
+  rendering problem). New `aviation` feature: SIGMET/AIRMET
   polygons (below labels, alerts-fill styling discipline), PIREP points
   (above labels, METAR's four decisions: persistent source + setData,
   quantized viewport key, thinning, sprite pruning), TAF text beside METAR
