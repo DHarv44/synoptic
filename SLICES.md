@@ -255,10 +255,13 @@ server/index.mjs, above the /proxy 404.
   GeoJSON → line layer + labels. First field shipped: MSLP isobars.
   Decode tests against a recorded GRIB fixture — this code hosts the
   pinned wind bug (Phase 3), so tests here either find it or fence it.
-- **M4 — surface chart** ✦ medium, after M3. Isobars + WPC fronts +
-  existing METAR = a surface analysis. UNKNOWN to resolve first: fronts
-  source format (WPC coded surface bulletin vs IEM re-serve); verify
-  CORS/format before committing the slice.
+- **M4 — surface chart** ✅ DONE. The unknown resolved cleanly: IEM's AFOS
+  archive re-serves the CODSUS coded bulletin with open CORS (WPC itself
+  does not), so no proxy. core/data/wpc/codsus.ts parses the token stream
+  (7-digit lat×10/lon×10 points, sections wrap across lines); feature
+  `fronts` draws chart-colour lines + H/L centres with pressures over the
+  M3 isobars. Deferred: pip sprites (triangles/semicircles — dash patterns
+  stand in), stationary front two-colour alternation.
 - **M5 — SPC suite** ✦ medium. Day 1–3 categorical + probabilistic
   outlooks, watches, mesoscale discussions with full text in a panel.
   UNKNOWN: SPC GeoJSON CORS headers — may need a thin proxy route.

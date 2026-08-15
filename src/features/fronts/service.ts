@@ -1,0 +1,86 @@
+import { reportError, reportOk } from '@/core/data/healthStore'
+import { fixtureActive, loadFixture } from '@/core/data/fixtures'
+import type { SourceRef } from '@/core/data/types'
+import { parseCodsus, type Front, type SurfaceAnalysis } from '@/core/data/wpc/codsus'
+
+export const WPC: SourceRef = { id: 'wpc-fronts', label: 'WPC surface fronts' }
+
+/** IEM's AFOS archive re-serves the bulletin with open CORS; WPC itself doesn't. */
+const CODSUS_URL = 'https://mesonet.agron.iastate.edu/cgi-bin/afos/retrieve.py?pil=CODSUS&fmt=text'
+
+/**
+ * Text product, so this bypasses fetchJson (which is JSON-only) and carries
+ * its own health + fixture wiring, the way the wind and lightning services do.
+ */
+export async function fetchSurfaceAnalysis(): Promise<SurfaceAnalysis> {
+  try {
+    let text: string
+    if (fixtureActive()) {
+      text = (await loadFixture<{ text: string }>('wpc-codsus')).text
+    } else {
+      const res = await fetch(CODSUS_URL)
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      text = await res.text()
+    }
+    const parsed = parseCodsus(text)
+    if (parsed.fronts.length === 0 && parsed.centers.length === 0) {
+      throw new Error('bulletin parsed to nothing')
+    }
+    reportOk(WPC)
+    return parsed
+  } catch (e) {
+    reportError(WPC, e instanceof Error ? e.message : String(e))
+    throw e
+  }
+}
+
+/** Front kind → colour and dash, the conventions every surface chart uses. */
+export const FRONT_STYLE: Record<
+  Front['kind'],
+  { color: string; dash: number[] | null; width: number }
+> = {
+  cold: { color: 'var(--mantine-color-blue-5)', dash: null, width: 2.4 },
+  warm: { color: 'var(--mantine-color-red-6)', dash: null, width: 2.4 },
+  // One line can't alternate two colours; a dashed violet is the honest
+  // stand-in for both stationary and occluded until pip sprites exist.
+  stationary: { color: 'var(--mantine-color-grape-5)', dash: [4, 3], width: 2.4 },
+  occluded: { color: 'var(--mantine-color-violet-5)', dash: null, width: 2.4 },
+  trough: { color: 'var(--mantine-color-gray-5)', dash: [2, 3], width: 1.8 },
+}
+
+export function frontsGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: a.fronts.map((f) => {
+      const style = FRONT_STYLE[f.kind]
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'LineString',
+          coordinates: f.points.map((p) => [p.lon, p.lat]),
+        },
+        properties: {
+          kind: f.kind,
+          color: style.color,
+          width: style.width,
+          dashed: style.dash !== null,
+        },
+      }
+    }),
+  }
+}
+
+export function centersGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: a.centers.map((c) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [c.lon, c.lat] },
+      properties: {
+        letter: c.kind === 'high' ? 'H' : 'L',
+        pressure: String(c.pressure),
+        color: c.kind === 'high' ? 'var(--mantine-color-blue-4)' : 'var(--mantine-color-red-5)',
+      },
+    })),
+  }
+}

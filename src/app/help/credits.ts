@@ -42,6 +42,11 @@ export const CREDITS: Credit[] = [
     what: 'Satellite imagery.',
   },
   {
+    label: 'NWS Weather Prediction Center',
+    href: 'https://www.wpc.ncep.noaa.gov/',
+    what: 'Surface analysis: fronts and pressure centres (via IEM AFOS).',
+  },
+  {
     label: 'NOAA NOMADS',
     href: 'https://nomads.ncep.noaa.gov/',
     what: 'GFS gridded fields: winds, pressure, heights, temperature, CAPE.',
