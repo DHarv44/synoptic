@@ -18,15 +18,17 @@ export function FieldsLayer() {
   const scheme = useComputedColorScheme('dark')
   const field = useFeatureOption<string>('fields', 'field')
   const opacity = useFeatureOption<number>('fields', 'opacity')
+  const mslpInterval = useFeatureOption<string>('fields', 'mslpInterval')
   const [geojson, setGeojson] = useState<GeoJSON.FeatureCollection>(EMPTY)
 
   useEffect(() => {
     let stale = false
     setGeojson(EMPTY)
     const spec = FIELD_SPECS[field] ?? FIELD_SPECS.mslp
+    const interval = field === 'mslp' ? Number(mslpInterval) || spec.interval : undefined
     fetchGridField(spec.key)
       .then((grid) => {
-        if (!stale) setGeojson(fieldGeoJSON(grid, spec))
+        if (!stale) setGeojson(fieldGeoJSON(grid, spec, interval))
       })
       .catch(() => {
         // Health strip already carries the error; the layer just stays empty.
@@ -34,7 +36,7 @@ export function FieldsLayer() {
     return () => {
       stale = true
     }
-  }, [field])
+  }, [field, mslpInterval])
 
   useMapLayer((m) => {
     const ink = scheme === 'dark' ? '#cdb38a' : '#8a6d3b'

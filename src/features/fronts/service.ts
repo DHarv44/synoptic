@@ -47,7 +47,9 @@ export const FRONT_STYLE: Record<
   // blue with red semicircles alternating on the far side, as charted.
   stationary: { color: C.blue5, dash: null, width: 2 },
   occluded: { color: C.violet5, dash: null, width: 2 },
-  trough: { color: C.gray5, dash: [2, 3], width: 1.8 },
+  // WPC prints troughs as prominent dashed orange, and there are a LOT of
+  // them on a summer chart — thirty in one bulletin is normal.
+  trough: { color: C.orange5, dash: [4, 3], width: 2 },
 }
 
 export function frontsGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {

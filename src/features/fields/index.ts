@@ -20,12 +20,22 @@ registerFeature({
       key: 'field',
       label: 'Field',
       options: [
-        { value: 'mslp', label: 'MSLP isobars (4 hPa)' },
+        { value: 'mslp', label: 'MSLP isobars' },
         { value: 'hgt500', label: '500 mb heights (6 dam)' },
         { value: 'temp850', label: '850 mb temperature (2 °C)' },
         { value: 'cape', label: 'CAPE (500 J/kg)' },
       ],
       defaultValue: 'mslp',
+    },
+    {
+      kind: 'select',
+      key: 'mslpInterval',
+      label: 'Isobar interval',
+      options: [
+        { value: '2', label: '2 hPa — rings weak summer centres' },
+        { value: '4', label: '4 hPa — classic spacing' },
+      ],
+      defaultValue: '2',
     },
     {
       kind: 'number',

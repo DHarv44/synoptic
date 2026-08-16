@@ -64,7 +64,11 @@ const STRIDE = 1
  * cross the antimeridian terminate at the seam rather than wrapping. Over
  * the mid-Pacific that clips an isobar occasionally — accepted for now.
  */
-export function fieldGeoJSON(field: GridField, spec: FieldSpec): GeoJSON.FeatureCollection {
+export function fieldGeoJSON(
+  field: GridField,
+  spec: FieldSpec,
+  intervalOverride?: number,
+): GeoJSON.FeatureCollection {
   const { width, height, step, latMin } = field.header
   const w = Math.floor(width / STRIDE)
   const h = Math.floor((height - 1) / STRIDE) + 1
@@ -85,7 +89,7 @@ export function fieldGeoJSON(field: GridField, spec: FieldSpec): GeoJSON.Feature
     if (v < min) min = v
     if (v > max) max = v
   }
-  const thresholds = thresholdsFor(min, max, spec.interval).filter(
+  const thresholds = thresholdsFor(min, max, intervalOverride ?? spec.interval).filter(
     (t) => spec.floor === undefined || t >= spec.floor,
   )
 
