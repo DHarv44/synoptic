@@ -27,5 +27,14 @@ registerFeature({
       ],
       defaultValue: 'mslp',
     },
+    {
+      kind: 'number',
+      key: 'opacity',
+      label: 'Opacity %',
+      min: 10,
+      max: 100,
+      step: 5,
+      defaultValue: 90,
+    },
   ],
 })

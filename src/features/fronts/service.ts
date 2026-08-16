@@ -1,6 +1,7 @@
 import { reportError, reportOk } from '@/core/data/healthStore'
 import { fixtureActive, loadFixture } from '@/core/data/fixtures'
 import type { SourceRef } from '@/core/data/types'
+import { catmullRom, type Pt } from '@/core/geo/smooth'
 import { MAP_COLORS as C } from '@/core/mapColors'
 import { parseCodsus, type Front, type SurfaceAnalysis } from '@/core/data/wpc/codsus'
 
@@ -58,7 +59,9 @@ export function frontsGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {
         type: 'Feature',
         geometry: {
           type: 'LineString',
-          coordinates: f.points.map((p) => [p.lon, p.lat]),
+          // Bulletin points are hundreds of km apart; spline through them
+          // so the front curves the way the analyst drew it.
+          coordinates: catmullRom(f.points.map((p): Pt => [p.lon, p.lat])),
         },
         properties: {
           kind: f.kind,

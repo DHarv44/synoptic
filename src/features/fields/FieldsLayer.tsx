@@ -17,6 +17,7 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
 export function FieldsLayer() {
   const scheme = useComputedColorScheme('dark')
   const field = useFeatureOption<string>('fields', 'field')
+  const opacity = useFeatureOption<number>('fields', 'opacity')
   const [geojson, setGeojson] = useState<GeoJSON.FeatureCollection>(EMPTY)
 
   useEffect(() => {
@@ -49,7 +50,6 @@ export function FieldsLayer() {
         paint: {
           'line-color': ink,
           'line-width': 1.1,
-          'line-opacity': 0.9,
         },
       },
       'fields',
@@ -86,9 +86,13 @@ export function FieldsLayer() {
     (m) => {
       const src = m.getSource('fields') as GeoJSONSource | undefined
       if (src) src.setData(geojson)
+      if (m.getLayer('fields')) m.setPaintProperty('fields', 'line-opacity', opacity / 100)
+      if (m.getLayer('fields-labels')) {
+        m.setPaintProperty('fields-labels', 'text-opacity', opacity / 100)
+      }
     },
     // scheme is a dep because the first effect rebuilds an empty source on toggle.
-    [geojson, scheme],
+    [geojson, scheme, opacity],
   )
 
   return null

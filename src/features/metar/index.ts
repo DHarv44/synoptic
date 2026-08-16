@@ -6,12 +6,24 @@ import { MetarLayer } from '@/features/metar/MetarLayer'
 registerFeature({
   id: 'metar',
   title: 'Surface obs',
-  description: 'METAR station plots (temp, dewpoint, wind barb) when zoomed in.',
+  description: 'METAR station plots (temp, dewpoint, wind barb), thinned to the chosen density.',
   layer: true,
   layerGroup: 'observations',
   layerIcon: IconTemperature,
   layerComponent: MetarLayer,
   sourceIds: ['metar'],
   defaultEnabled: true,
-  settings: [],
+  settings: [
+    {
+      kind: 'select',
+      key: 'density',
+      label: 'Station density',
+      options: [
+        { value: 'sparse', label: 'Sparse' },
+        { value: 'normal', label: 'Normal' },
+        { value: 'dense', label: 'Dense' },
+      ],
+      defaultValue: 'normal',
+    },
+  ],
 })

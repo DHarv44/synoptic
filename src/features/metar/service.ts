@@ -18,10 +18,8 @@ export function metarUrl(latMin: number, lonMin: number, latMax: number, lonMax:
   return `/proxy/metar?format=json&bbox=${bbox}`
 }
 
-const MAX_STATIONS = 80
-
 /** Grid-thin stations to a displayable count, preferring one per cell. */
-export function thinStations(stations: Metar[], cellDeg: number): Metar[] {
+export function thinStations(stations: Metar[], cellDeg: number, cap = 80): Metar[] {
   const seen = new Set<string>()
   const out: Metar[] = []
   for (const s of stations) {
@@ -30,7 +28,7 @@ export function thinStations(stations: Metar[], cellDeg: number): Metar[] {
     if (seen.has(cell)) continue
     seen.add(cell)
     out.push(s)
-    if (out.length >= MAX_STATIONS) break
+    if (out.length >= cap) break
   }
   return out
 }

@@ -1,4 +1,5 @@
 import type { GridField } from '@/core/data/gfsGrid'
+import { chaikin, type Pt } from '@/core/geo/smooth'
 import { isolines, thresholdsFor } from '@/core/grid/isolines'
 
 export interface FieldSpec {
@@ -94,7 +95,10 @@ export function fieldGeoJSON(field: GridField, spec: FieldSpec): GeoJSON.Feature
       type: 'Feature',
       geometry: {
         type: 'LineString',
-        coordinates: line.points.map(([x, y]) => [-180 + x * outStep, latMin + y * outStep]),
+        // Chaikin the grid-resolution polyline: analysts draw curves.
+        coordinates: chaikin(
+          line.points.map(([x, y]): Pt => [-180 + x * outStep, latMin + y * outStep]),
+        ),
       },
       properties: { label: String(Math.round(line.level)) },
     })),

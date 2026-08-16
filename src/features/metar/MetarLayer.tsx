@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useComputedColorScheme } from '@mantine/core'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { fetchJson } from '@/core/data/fetchJson'
-import { featureEnabled } from '@/core/settings/store'
+import { featureEnabled, useFeatureOption } from '@/core/settings/store'
 import { startPoller } from '@/core/data/scheduler'
 import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
@@ -16,10 +16,18 @@ const MIN_ZOOM = 5
 const WIDE_ZOOM = 3.2
 const POLL_MS = 5 * 60_000
 
+/** Thinning grid (degrees per station) and station cap for each density. */
+const THIN_DEG: Record<string, { near: number; wide: number; cap: number }> = {
+  sparse: { near: 0.7, wide: 3.6, cap: 50 },
+  normal: { near: 0.4, wide: 2.4, cap: 80 },
+  dense: { near: 0.25, wide: 1.6, cap: 140 },
+}
+
 /** Surface observation station plots (symbol layer, auto-decluttered). */
 export function MetarLayer() {
   const { map } = useMapContext()
   const scheme = useComputedColorScheme('dark')
+  const density = useFeatureOption<string>('metar', 'density')
   const [stations, setStations] = useState<Metar[]>([])
   const [bboxKey, setBboxKey] = useState<string | null>(null)
   /** Sprite ids currently registered, so stale ones can be pruned. */
@@ -52,6 +60,7 @@ export function MetarLayer() {
     if (bboxKey === null) return
     const wide = bboxKey.startsWith('wide:')
     const [latC, lonC] = bboxKey.slice(5).split(',').map(Number)
+    const thinDeg = THIN_DEG[density] ?? THIN_DEG.normal
     return startPoller({
       source: METAR_SOURCE,
       cadenceMs: POLL_MS,
@@ -64,10 +73,10 @@ export function MetarLayer() {
             : metarUrl(latC - 7, lonC - 10, latC + 7, lonC + 10),
           { fixture: 'metar-bbox' },
         )
-        setStations(thinStations(data, wide ? 2.4 : 0.4))
+        setStations(thinStations(data, wide ? thinDeg.wide : thinDeg.near, thinDeg.cap))
       },
     })
-  }, [bboxKey])
+  }, [bboxKey, density])
 
   // Source and layer exist for the life of the style. Rebuilding them per
   // fetch was tearing the layer down and back up on every pan across a
