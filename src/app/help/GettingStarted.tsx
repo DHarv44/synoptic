@@ -11,8 +11,8 @@ interface Step {
  */
 const BASICS: Step[] = [
   {
-    title: 'Click the map to interrogate a point',
-    body: 'Conditions, forecast, sounding and model comparison in the Location tab all follow that one click. Ctrl+K searches for a place instead.',
+    title: 'Click anything to ask about it',
+    body: 'Clicking a station, buoy, gauge, cell, report or warning opens its card in place. Clicking bare map shows conditions there, with Interrogate — which points every Location panel (forecast, sounding, models) at that spot. Ctrl+K searches instead.',
   },
   {
     title: 'The right rail holds readouts',

@@ -1,5 +1,7 @@
 import { IconAnchor } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { registerMapPopup } from '@/map/popups/registry'
+import { BuoyPopup } from '@/features/buoys/BuoyPopup'
 import { BuoysLayer } from '@/features/buoys/BuoysLayer'
 
 /** NDBC moored buoys and coastal stations, coloured by wave height. */
@@ -16,3 +18,5 @@ registerFeature({
   defaultEnabled: false,
   settings: [],
 })
+
+registerMapPopup({ layerIds: ['buoys', 'buoys-label'], component: BuoyPopup })

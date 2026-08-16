@@ -8,7 +8,14 @@ function gauge(lid: string, floodCategory: string, primary = 3.2): Gauge {
     latitude: 35,
     longitude: -97,
     status: {
-      observed: { primary, primaryUnit: 'ft', floodCategory, validTime: '2026-08-15T12:00:00Z' },
+      observed: {
+        primary,
+        primaryUnit: 'ft',
+        secondary: 12.3,
+        secondaryUnit: 'kcfs',
+        floodCategory,
+        validTime: '2026-08-15T12:00:00Z',
+      },
     },
   }
 }

@@ -1,6 +1,8 @@
 import { IconTemperature } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { registerMapPopup } from '@/map/popups/registry'
 import { MetarLayer } from '@/features/metar/MetarLayer'
+import { MetarPopup } from '@/features/metar/MetarPopup'
 
 /** Surface observations as WMO station-model plots (METAR). */
 registerFeature({
@@ -27,3 +29,5 @@ registerFeature({
     },
   ],
 })
+
+registerMapPopup({ layerIds: ['metar'], component: MetarPopup })

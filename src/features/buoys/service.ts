@@ -56,6 +56,16 @@ export function buoyGeoJSON(buoys: Buoy[], system: UnitSystem): GeoJSON.FeatureC
         id: b.id,
         color: buoyColor(b.wvht),
         label: b.wvht !== null ? waveLabel(b.wvht, system) : '',
+        // Click-card fields: the raw observation, units applied at render.
+        timeMs: b.timeMs,
+        wvht: b.wvht,
+        dpd: b.dpd,
+        wspd: b.wspd,
+        gst: b.gst,
+        wdir: b.wdir,
+        atmp: b.atmp,
+        wtmp: b.wtmp,
+        pres: b.pres,
       },
     })),
   }

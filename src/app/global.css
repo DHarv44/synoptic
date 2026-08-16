@@ -31,3 +31,20 @@ body,
     opacity: 0.9;
   }
 }
+
+/* Map click popovers: MapLibre's popup chrome, restyled to app chrome so
+   the cards match the panels in either scheme. */
+.synoptic-popup .maplibregl-popup-content {
+  background: var(--mantine-color-body);
+  color: var(--mantine-color-text);
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  font-family: inherit;
+}
+
+.synoptic-popup .maplibregl-popup-tip {
+  border-top-color: var(--mantine-color-body);
+  border-bottom-color: var(--mantine-color-body);
+}

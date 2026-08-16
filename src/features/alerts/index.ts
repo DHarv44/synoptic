@@ -1,5 +1,7 @@
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { registerMapPopup } from '@/map/popups/registry'
+import { AlertPopup } from '@/features/alerts/AlertPopup'
 import { AlertsLayer } from '@/features/alerts/AlertsLayer'
 import { AlertsPanel } from '@/features/alerts/AlertsPanel'
 import { AlertsSummary } from '@/features/alerts/AlertsSummary'
@@ -43,3 +45,5 @@ registerFeature({
     { kind: 'boolean', key: 'showOther', label: 'Other advisories', defaultValue: true },
   ],
 })
+
+registerMapPopup({ layerIds: ['alerts-fill'], component: AlertPopup })

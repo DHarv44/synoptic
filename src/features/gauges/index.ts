@@ -1,5 +1,7 @@
 import { IconRipple } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { registerMapPopup } from '@/map/popups/registry'
+import { GaugePopup } from '@/features/gauges/GaugePopup'
 import { GaugesLayer } from '@/features/gauges/GaugesLayer'
 
 /** River gauges from the NWS National Water Prediction Service. */
@@ -23,3 +25,5 @@ registerFeature({
     },
   ],
 })
+
+registerMapPopup({ layerIds: ['gauges'], component: GaugePopup })

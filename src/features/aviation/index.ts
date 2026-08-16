@@ -1,6 +1,8 @@
 import { IconPlaneTilt } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { registerMapPopup } from '@/map/popups/registry'
 import { AviationLayer } from '@/features/aviation/AviationLayer'
+import { PirepPopup, SigmetPopup } from '@/features/aviation/AviationPopups'
 import { AviationPanel } from '@/features/aviation/AviationPanel'
 import { AviationSummary } from '@/features/aviation/AviationSummary'
 
@@ -31,3 +33,6 @@ registerFeature({
     { kind: 'boolean', key: 'pireps', label: 'Pilot reports (PIREPs)', defaultValue: true },
   ],
 })
+
+registerMapPopup({ layerIds: ['pirep'], component: PirepPopup })
+registerMapPopup({ layerIds: ['aviation-fill'], component: SigmetPopup })

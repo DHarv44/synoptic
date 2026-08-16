@@ -1,5 +1,7 @@
 import { IconAlertHexagon } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { registerMapPopup } from '@/map/popups/registry'
+import { CellPopup } from '@/features/cells/CellPopup'
 import { CellsLayer } from '@/features/cells/CellsLayer'
 import { CellsPanel } from '@/features/cells/CellsPanel'
 import { CellsSummary } from '@/features/cells/CellsSummary'
@@ -31,3 +33,5 @@ registerFeature({
     },
   ],
 })
+
+registerMapPopup({ layerIds: ['cells', 'cells-label'], component: CellPopup })

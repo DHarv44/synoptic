@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { Map as MLMap, Marker, setWorkerUrl, type MapMouseEvent } from 'maplibre-gl'
+import { Map as MLMap, Marker, setWorkerUrl } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-csp-worker?url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -17,6 +17,7 @@ import { useHealth } from '@/core/data/healthStore'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
 import { attachDevStore } from '@/dev/wx'
+import { MapPopup } from '@/map/popups/MapPopup'
 import type { FeatureManifest } from '@/core/settings/types'
 
 interface MapCtx {
@@ -46,7 +47,6 @@ export function MapView() {
   const containerRef = useRef<HTMLDivElement>(null)
   const scheme = useComputedColorScheme('dark')
   const [ctx, setCtx] = useState<MapCtx | null>(null)
-  const setPoint = useProbe((s) => s.setPoint)
 
   // Create the map once.
   useEffect(() => {
@@ -75,9 +75,9 @@ export function MapView() {
       strengthenLabels(map, map.getStyle().name?.toLowerCase().includes('positron') ? 'light' : 'dark')
       setCtx((prev) => ({ map, styleVersion: (prev?.styleVersion ?? 0) + 1 }))
     })
-    map.on('click', (e: MapMouseEvent) => {
-      setPoint({ lat: e.lngLat.lat, lon: e.lngLat.lng })
-    })
+    // Clicks are handled by MapPopup: an orb opens its card, the bare map
+    // opens the location card. Retargeting the panels (the old blind
+    // click-sets-probe) is a deliberate action inside that card now.
     const publishBounds = (): void => {
       const b = map.getBounds()
       useMapView.getState().setBounds([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()])
@@ -150,6 +150,7 @@ export function MapView() {
             <FeatureLayer key={f.id} manifest={f} />
           ))}
           <ProbeMapMarker />
+          <MapPopup />
         </MapContext.Provider>
       )}
     </div>

@@ -18,6 +18,8 @@ export function gaugesUrl(latMin: number, lonMin: number, latMax: number, lonMax
 export interface GaugeStatus {
   primary: number // stage; -999 when missing
   primaryUnit: string
+  secondary: number // flow; -999 when missing
+  secondaryUnit: string
   floodCategory: string
   validTime: string
 }
@@ -72,6 +74,11 @@ export function gaugeGeoJSON(gauges: Gauge[]): GeoJSON.FeatureCollection {
           rank,
           color: CATEGORY_COLORS[rank],
           stage: s ? `${s.primary.toFixed(1)} ${s.primaryUnit}` : '',
+          // Click-card fields.
+          name: g.name,
+          flow: s && s.secondary !== -999 ? `${s.secondary} ${s.secondaryUnit}` : '',
+          category: s?.floodCategory ?? '',
+          validTime: s?.validTime ?? '',
         },
       }
     }),

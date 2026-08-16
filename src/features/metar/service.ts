@@ -12,6 +12,9 @@ export interface Metar {
   wspd: number | null // kt
   /** AWC-computed flight category: VFR | MVFR | IFR | LIFR. */
   fltCat: string | null
+  name: string
+  rawOb: string
+  obsTime: number // unix seconds
 }
 
 export function metarUrl(latMin: number, lonMin: number, latMax: number, lonMax: number): string {

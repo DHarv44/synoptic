@@ -42,6 +42,11 @@ export function AlertsLayer() {
           color: alertColor(a.properties.event),
           event: a.properties.event,
           weight: alertWeight(a.properties.event),
+          // Click-card fields — the popup explains the polygon in place.
+          headline: a.properties.headline ?? '',
+          areaDesc: a.properties.areaDesc,
+          expires: a.properties.expires,
+          severity: a.properties.severity,
         },
       })),
     }),

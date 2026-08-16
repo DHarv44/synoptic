@@ -120,7 +120,19 @@ export function MetarLayer() {
         features: stations.map((s) => ({
           type: 'Feature',
           geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
-          properties: { img: stationImageId(s, scheme, tempUnit) },
+          properties: {
+            img: stationImageId(s, scheme, tempUnit),
+            // Click-card fields: the plot compresses; the popup doesn't.
+            icaoId: s.icaoId,
+            name: s.name,
+            rawOb: s.rawOb,
+            obsTime: s.obsTime,
+            temp: s.temp,
+            dewp: s.dewp,
+            wdir: typeof s.wdir === 'number' ? s.wdir : null,
+            wspd: s.wspd,
+            fltCat: s.fltCat,
+          },
         })),
       })
 

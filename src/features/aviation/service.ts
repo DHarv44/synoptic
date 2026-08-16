@@ -80,7 +80,15 @@ export function sigmetGeoJSON(items: AirSigmet[]): GeoJSON.FeatureCollection {
           // AWC polygons are not explicitly closed; MapLibre wants a ring.
           coordinates: [[...coords, coords[0]].map((c) => [c.lon, c.lat])],
         },
-        properties: { color: sigmetColor(s.hazard), hazard: s.hazard },
+        properties: {
+          color: sigmetColor(s.hazard),
+          hazard: s.hazard,
+          // Click-card fields.
+          rawAirSigmet: s.rawAirSigmet,
+          validTimeTo: s.validTimeTo,
+          altitudeLow1: s.altitudeLow1,
+          altitudeHi1: s.altitudeHi1,
+        },
       }
     }),
   }
@@ -115,7 +123,16 @@ export function pirepGeoJSON(items: Pirep[]): GeoJSON.FeatureCollection {
         return {
           type: 'Feature',
           geometry: { type: 'Point', coordinates: [p.lon, p.lat] },
-          properties: { sev, color: PIREP_COLORS[sev] },
+          properties: {
+            sev,
+            color: PIREP_COLORS[sev],
+            // Click-card fields: the pilot's own words, mostly.
+            rawOb: p.rawOb,
+            acType: p.acType,
+            fltLvl: String(p.fltLvl),
+            obsTime: p.obsTime,
+            pirepType: p.pirepType,
+          },
         }
       }),
   }
