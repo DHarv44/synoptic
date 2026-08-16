@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useComputedColorScheme } from '@mantine/core'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { useFeatureOption } from '@/core/settings/store'
 import { fetchGridField } from '@/core/data/gfsGrid'
@@ -9,11 +10,12 @@ import { FIELD_SPECS, fieldGeoJSON } from '@/features/fields/service'
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
 
 /**
- * Contoured GFS analysis fields — isobars and friends. Monochrome by
- * convention: these are reference lines the coloured data layers sit over,
- * the way they do on every synoptic chart since the telegraph.
+ * Contoured GFS analysis fields — isobars and friends. Chart brown, the
+ * way reference isolines have been inked since the telegraph: present
+ * enough to be the skeleton of the scene, never competing with data hues.
  */
 export function FieldsLayer() {
+  const scheme = useComputedColorScheme('dark')
   const field = useFeatureOption<string>('fields', 'field')
   const [geojson, setGeojson] = useState<GeoJSON.FeatureCollection>(EMPTY)
 
@@ -34,6 +36,8 @@ export function FieldsLayer() {
   }, [field])
 
   useMapLayer((m) => {
+    const ink = scheme === 'dark' ? '#cdb38a' : '#8a6d3b'
+    const halo = scheme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)'
     m.addSource('fields', { type: 'geojson', data: EMPTY })
     addDataLayer(
       m,
@@ -43,9 +47,9 @@ export function FieldsLayer() {
         source: 'fields',
         layout: { 'line-join': 'round' },
         paint: {
-          'line-color': '#9aa4ad',
-          'line-width': 1,
-          'line-opacity': 0.75,
+          'line-color': ink,
+          'line-width': 1.1,
+          'line-opacity': 0.9,
         },
       },
       'fields',
@@ -58,15 +62,16 @@ export function FieldsLayer() {
         source: 'fields',
         layout: {
           'symbol-placement': 'line',
+          'symbol-spacing': 320,
           'text-field': ['get', 'label'],
-          'text-size': 10,
-          'text-font': ['Noto Sans Regular'],
-          'text-padding': 8,
+          'text-size': 10.5,
+          'text-font': ['Noto Sans Bold'],
+          'text-padding': 4,
         },
         paint: {
-          'text-color': '#c3ccd4',
-          'text-halo-color': 'rgba(0,0,0,0.75)',
-          'text-halo-width': 1.2,
+          'text-color': ink,
+          'text-halo-color': halo,
+          'text-halo-width': 1.4,
         },
       },
       'fields',
@@ -75,14 +80,15 @@ export function FieldsLayer() {
       for (const id of ['fields', 'fields-labels']) if (m.getLayer(id)) m.removeLayer(id)
       if (m.getSource('fields')) m.removeSource('fields')
     }
-  }, [])
+  }, [scheme])
 
   useMapLayer(
     (m) => {
       const src = m.getSource('fields') as GeoJSONSource | undefined
       if (src) src.setData(geojson)
     },
-    [geojson],
+    // scheme is a dep because the first effect rebuilds an empty source on toggle.
+    [geojson, scheme],
   )
 
   return null

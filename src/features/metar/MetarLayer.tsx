@@ -11,6 +11,9 @@ import { METAR_SOURCE, metarUrl, thinStations, type Metar } from '@/features/met
 import { ensureStationImages, stationImageId } from '@/features/metar/stationImages'
 
 const MIN_ZOOM = 5
+/** Chart scale: a thinned national carpet of stations, the way the WPC
+ * surface analysis is carpeted. Below this there is no station layer. */
+const WIDE_ZOOM = 3.2
 const POLL_MS = 5 * 60_000
 
 /** Surface observation station plots (symbol layer, auto-decluttered). */
@@ -22,15 +25,21 @@ export function MetarLayer() {
   /** Sprite ids currently registered, so stale ones can be pruned. */
   const addedRef = useRef<string[]>([])
 
-  // Track the viewport → quantized fetch key (only when zoomed in enough).
+  // Track the viewport → quantized fetch key. Two regimes: a close bbox at
+  // street-weather zooms, a wide heavily-thinned one at chart zooms.
   useEffect(() => {
     const update = (): void => {
-      if (map.getZoom() < MIN_ZOOM - 0.5) {
+      const z = map.getZoom()
+      if (z < WIDE_ZOOM) {
         setBboxKey(null)
         return
       }
       const c = map.getCenter()
-      setBboxKey(`${Math.round(c.lat / 4) * 4},${Math.round(c.lng / 4) * 4}`)
+      if (z < MIN_ZOOM - 0.5) {
+        setBboxKey(`wide:${Math.round(c.lat / 8) * 8},${Math.round(c.lng / 8) * 8}`)
+      } else {
+        setBboxKey(`near:${Math.round(c.lat / 4) * 4},${Math.round(c.lng / 4) * 4}`)
+      }
     }
     update()
     map.on('moveend', update)
@@ -41,7 +50,8 @@ export function MetarLayer() {
 
   useEffect(() => {
     if (bboxKey === null) return
-    const [latC, lonC] = bboxKey.split(',').map(Number)
+    const wide = bboxKey.startsWith('wide:')
+    const [latC, lonC] = bboxKey.slice(5).split(',').map(Number)
     return startPoller({
       source: METAR_SOURCE,
       cadenceMs: POLL_MS,
@@ -49,10 +59,12 @@ export function MetarLayer() {
       run: async () => {
         const data = await fetchJson<Metar[]>(
           METAR_SOURCE,
-          metarUrl(latC - 7, lonC - 10, latC + 7, lonC + 10),
+          wide
+            ? metarUrl(latC - 16, lonC - 27, latC + 16, lonC + 27)
+            : metarUrl(latC - 7, lonC - 10, latC + 7, lonC + 10),
           { fixture: 'metar-bbox' },
         )
-        setStations(thinStations(data, 0.4))
+        setStations(thinStations(data, wide ? 2.4 : 0.4))
       },
     })
   }, [bboxKey])
@@ -71,7 +83,7 @@ export function MetarLayer() {
         id: 'metar',
         type: 'symbol',
         source: 'metar',
-        minzoom: MIN_ZOOM,
+        minzoom: WIDE_ZOOM,
         layout: {
           'icon-image': ['get', 'img'],
           'icon-allow-overlap': false, // built-in decluttering

@@ -50,9 +50,10 @@ export const FIELD_SPECS: Record<string, FieldSpec> = {
   },
 }
 
-/** Contouring resolution: every 2nd point, 0.5° → 1°. Synoptic fields have
- * no real structure below that, and it quarters the marching-squares work. */
-const STRIDE = 2
+/** Contouring resolution: full 0.5° grid. The 1° stride we started with
+ * over-smoothed — isobars lost the kinks at fronts that make a chart read
+ * as analysis, and the compute (one pass per fetch, ~30 min apart) is fine. */
+const STRIDE = 1
 
 /**
  * Contours of a global grid as GeoJSON lines, one feature per chained line,

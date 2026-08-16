@@ -40,12 +40,12 @@ export const FRONT_STYLE: Record<
   Front['kind'],
   { color: string; dash: number[] | null; width: number }
 > = {
-  cold: { color: C.blue5, dash: null, width: 2.4 },
-  warm: { color: C.red6, dash: null, width: 2.4 },
-  // One line can't alternate two colours; a dashed violet is the honest
-  // stand-in for both stationary and occluded until pip sprites exist.
-  stationary: { color: C.grape5, dash: [4, 3], width: 2.4 },
-  occluded: { color: C.violet5, dash: null, width: 2.4 },
+  cold: { color: C.blue5, dash: null, width: 2 },
+  warm: { color: C.red6, dash: null, width: 2 },
+  // The pip sprites carry the identification; the stationary line reads
+  // blue with red semicircles alternating on the far side, as charted.
+  stationary: { color: C.blue5, dash: null, width: 2 },
+  occluded: { color: C.violet5, dash: null, width: 2 },
   trough: { color: C.gray5, dash: [2, 3], width: 1.8 },
 }
 

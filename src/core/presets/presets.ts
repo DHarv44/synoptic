@@ -73,6 +73,17 @@ export const BUILT_IN_PRESETS: Preset[] = [
     },
   },
   {
+    id: 'chart',
+    label: 'Surface chart',
+    description: 'WPC-style: isobars, fronts with pips, pressure centres, station plots.',
+    scene: {
+      fields: { field: 'mslp' },
+      fronts: true,
+      metar: true,
+      graticule: true,
+    },
+  },
+  {
     id: 'aviation',
     label: 'Aviation',
     description: 'METARs, SIGMETs, PIREPs over satellite and radar.',
