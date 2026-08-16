@@ -51,7 +51,7 @@ export const DATA_CATALOG: Dataset[] = [
     settings: ['Radar source', 'loop speed', 'opacity'],
     unused: ['N0R 4-bit product', 'single-site RIDGE tiles', 'precip type mosaics (ptype)'],
     assessment: 'upgrade candidate',
-    note: 'The canonical free mosaic, but MRMS (2-min, quality-controlled, multi-sensor) exists on the same IEM WMS infrastructure and is the modern standard composite.',
+    note: 'The best keyless reflectivity mosaic. Verified 2026-08-15: IEM serves MRMS precipitation tiles (2-min rate, 1–72 h accumulations) but no MRMS reflectivity mosaic — that upgrade would mean decoding NCEP MRMS GRIB server-side. MRMS precip-rate is the nearer win: a true rainfall-rate layer beside reflectivity.',
   },
   {
     id: 'iem-archive',
@@ -169,11 +169,11 @@ export const DATA_CATALOG: Dataset[] = [
     unused: [
       '15-minutely variables',
       'solar/radiation fields',
-      'ECMWF AIFS (the ML model) as a comparison member',
+      'ECMWF AIFS (the ML model) as a comparison member — verified live 2026-08-15',
       'historical reanalysis API',
     ],
     assessment: 'best available',
-    note: 'The best keyless multi-model aggregator there is. AIFS would be a free upgrade to the model-agreement panel.',
+    note: 'The best keyless multi-model aggregator there is. AIFS (ecmwf_aifs025) verified serving data — a free additional member for the model-agreement panel.',
   },
   {
     id: 'open-meteo-ensemble',
@@ -230,7 +230,7 @@ export const DATA_CATALOG: Dataset[] = [
     settings: ['probe point'],
     unused: ['pollen (Europe)', 'per-pollutant AQI breakdown', 'a map layer'],
     assessment: 'adequate',
-    note: 'Model AQ, not station obs. AirNow has US station truth but requires a key.',
+    note: 'Model AQ, not station obs. EPA AirNow (free key, verified fair-use terms fit our probe-point pattern) is the station-truth upgrade when a key is provisioned.',
   },
   {
     id: 'open-meteo-geocoding',
@@ -269,7 +269,7 @@ export const DATA_CATALOG: Dataset[] = [
     settings: ['product', 'opacity'],
     unused: ['GOES-West layers', 'hundreds of science layers', 'no GOES water-vapour band exists here — Air Mass is the WV-derived substitute'],
     assessment: 'upgrade candidate',
-    note: 'Rock-solid and keyless, but the ~45-min lag is why clouds freeze in the live radar loop. SSEC RealEarth serves GOES tiles minutes-fresh (key-gated but free) — the candidate fix.',
+    note: 'Rock-solid and keyless, but the ~45-min lag is why clouds freeze in the live radar loop. RealEarth was evaluated as the fresh-GOES fix and rejected: unpublished quotas and an explicit no-availability-guarantee disclaimer. The lag stands until a better door appears.',
   },
   {
     id: 'blitzortung',
