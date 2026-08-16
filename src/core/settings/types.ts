@@ -89,6 +89,13 @@ export interface FeatureManifest {
   settings: SettingField[]
   /** Health-strip source ids this feature consumes (drives rail badges). */
   sourceIds?: string[]
+  /**
+   * Publication lag of this layer's animating imagery under its CURRENT
+   * settings, or null when they make it non-animating (daily products).
+   * Drives SYNC loop mode: the loop window is held back by the slowest
+   * enabled layer so every participant has real frames across it.
+   */
+  timeMeta?: () => { lagMs: number } | null
   defaultEnabled?: boolean
   /** Core capabilities (e.g. units) that expose settings but can't be disabled. */
   alwaysOn?: boolean

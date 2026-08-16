@@ -31,11 +31,33 @@ export const FRAME_SPEEDS = [1000, 600, 350, 175] as const
 export const DEFAULT_FRAME_MS = 350
 
 /**
+ * SYNC mode trades freshness for coherence: the loop window is held back
+ * far enough that EVERY enabled animating layer has real frames across it,
+ * so satellite marches with the radar instead of freezing at its newest
+ * image. LIVE mode anchors at the wall clock and lets laggy layers freeze.
+ */
+export type LoopMode = 'live' | 'sync'
+
+/** A layer lagging beyond this is broken or daily, not a coherence trade. */
+export const SYNC_LAG_CAP_MS = 2 * 3600_000
+
+/**
  * Frames the newest one is held for before wrapping. A loop that snaps
  * straight back to the oldest frame is hard to read — the pause is what
  * tells you where the cycle ends and lets you see the latest scan.
  */
 export const LOOP_END_HOLD = 4
+
+/**
+ * Where the loop's "now" sits: the wall clock in LIVE, held back by the
+ * slowest enabled layer's publication lag in SYNC. Every loop-window
+ * function routes through here, so the store's mode shifts the whole
+ * machine — playback, wrapping, prefetch — in one place.
+ */
+export function loopAnchor(nowMs: number): number {
+  const s = useTimeline.getState()
+  return s.mode === 'sync' ? nowMs - s.syncLagMs : nowMs
+}
 
 /** Oldest frame in the loop, aligned to generation boundaries. */
 export function loopStart(nowMs: number): number {
@@ -44,7 +66,13 @@ export function loopStart(nowMs: number): number {
 
 /** Newest frame the loop will reach. */
 export function newestFrame(nowMs: number): number {
-  return Math.floor(nowMs / LOOP_FRAME_MS) * LOOP_FRAME_MS
+  return Math.floor(loopAnchor(nowMs) / LOOP_FRAME_MS) * LOOP_FRAME_MS
+}
+
+/** loopStart for a mode the store hasn't switched to yet (setMode mid-set). */
+function loopStartFor(mode: LoopMode, syncLagMs: number): number {
+  const anchor = mode === 'sync' ? Date.now() - syncLagMs : Date.now()
+  return Math.floor(anchor / LOOP_FRAME_MS) * LOOP_FRAME_MS - LOOP_WINDOW_MS
 }
 
 /** Every frame in the loop, oldest first. */
@@ -62,6 +90,10 @@ interface TimelineState {
   simTime: number
   isLive: boolean
   playing: boolean
+  /** LIVE anchors the loop at the wall clock; SYNC holds it back syncLagMs. */
+  mode: LoopMode
+  /** Max publication lag across enabled animating layers (computed outside). */
+  syncLagMs: number
   /** Real ms each loop frame is held. */
   frameMs: number
   /**
@@ -74,6 +106,8 @@ interface TimelineState {
   setSimTime: (ms: number) => void
   goLive: () => void
   setPlaying: (playing: boolean) => void
+  setMode: (mode: LoopMode) => void
+  setSyncLag: (ms: number) => void
   setFrameMs: (ms: number) => void
   setWarmFrames: (count: number | null) => void
   /** Step one frame, wrapping at the newest or at the warm edge. */
@@ -133,6 +167,8 @@ export const useTimeline = create<TimelineState>()(
       simTime: Date.now(),
       isLive: true,
       playing: false,
+      mode: 'live',
+      syncLagMs: 0,
       frameMs: DEFAULT_FRAME_MS,
       warmFrames: null,
       setSimTime: (ms) =>
@@ -154,6 +190,21 @@ export const useTimeline = create<TimelineState>()(
           // than sitting on "now" waiting to wrap.
           const resumable = !s.isLive && s.simTime >= start && s.simTime < newestFrame(now)
           return { playing: true, isLive: false, simTime: resumable ? s.simTime : start }
+        }),
+      setMode: (mode) =>
+        set((s) => {
+          if (mode === s.mode) return s
+          // Mid-loop the window jumps; restart at the new oldest frame so
+          // the badge change and the picture change land together.
+          if (s.playing) {
+            return { mode, simTime: loopStartFor(mode, s.syncLagMs), warmFrames: null }
+          }
+          return { mode }
+        }),
+      setSyncLag: (ms) =>
+        set((s) => {
+          const clamped = Math.max(0, Math.min(ms, SYNC_LAG_CAP_MS))
+          return s.syncLagMs === clamped ? s : { syncLagMs: clamped }
         }),
       setFrameMs: (ms) => set({ frameMs: ms }),
       setWarmFrames: (count) =>

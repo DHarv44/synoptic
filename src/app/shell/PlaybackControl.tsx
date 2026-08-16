@@ -11,6 +11,8 @@ import {
   stepSimTime,
   useTimeline,
 } from '@/core/time/timelineStore'
+import { computeSyncLag } from '@/core/time/syncLag'
+import { useSettings } from '@/core/settings/store'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useAvailableTools } from '@/app/shell/toolRegistry'
 import { RAIL_WIDTH } from '@/app/shell/ToolRail'
@@ -92,6 +94,18 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
   const setFrameMs = useTimeline((s) => s.setFrameMs)
   const goLive = useTimeline((s) => s.goLive)
   const warmFrames = useTimeline((s) => s.warmFrames)
+  const mode = useTimeline((s) => s.mode)
+  const setMode = useTimeline((s) => s.setMode)
+  const syncLagMs = useTimeline((s) => s.syncLagMs)
+  const setSyncLag = useTimeline((s) => s.setSyncLag)
+
+  // The sync hold-back follows whatever layers are enabled right now:
+  // toggling satellite on pulls the loop back, toggling it off releases it.
+  const featuresState = useSettings((s) => s.features)
+  useEffect(() => {
+    setSyncLag(computeSyncLag())
+  }, [featuresState, setSyncLag])
+  const syncMin = Math.max(1, Math.round(syncLagMs / 60_000))
   // The left tool rail only exists once a tool does — the radar workbench
   // appears with Level 2 — and it draws above this bar, so it landed on top
   // of the transport controls the moment you zoomed in far enough.
@@ -181,15 +195,23 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
             aria-label="Timeline scrubber"
           />
         </div>
-        <Badge
-          variant={isLive ? 'filled' : 'outline'}
-          color={isLive ? 'red' : 'gray'}
-          size="sm"
-          style={{ cursor: 'pointer', flexShrink: 0 }}
-          onClick={goLive}
+        <Tooltip
+          label={
+            mode === 'sync'
+              ? `Synced loop: every animating layer has real frames, ${syncMin} min behind live. Click to jump to now.`
+              : 'Click to jump to now.'
+          }
         >
-          LIVE
-        </Badge>
+          <Badge
+            variant={isLive || (mode === 'sync' && playing) ? 'filled' : 'outline'}
+            color={mode === 'sync' && playing ? 'yellow' : isLive ? 'red' : 'gray'}
+            size="sm"
+            style={{ cursor: 'pointer', flexShrink: 0 }}
+            onClick={goLive}
+          >
+            {mode === 'sync' && playing ? `SYNC −${syncMin}M` : 'LIVE'}
+          </Badge>
+        </Tooltip>
         {/*
           Speed lives at the far end, not beside play. Sitting next to it —
           same size, same colour — it turned the left edge of the bar into two
@@ -215,6 +237,13 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
                 {SPEED_LABELS[i]}
               </Menu.Item>
             ))}
+            <Menu.Label>Loop timing</Menu.Label>
+            <Menu.Item onClick={() => setMode('live')} fw={mode === 'live' ? 600 : undefined}>
+              Live — freshest radar, laggy layers freeze
+            </Menu.Item>
+            <Menu.Item onClick={() => setMode('sync')} fw={mode === 'sync' ? 600 : undefined}>
+              {`Synced — all layers move together, −${syncMin} min`}
+            </Menu.Item>
           </Menu.Dropdown>
         </Menu>
       </Group>

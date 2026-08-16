@@ -114,3 +114,9 @@ export function gibsTileTemplate(productKey: string, time: string): string {
 export function gibsMaxZoom(productKey: string): number {
   return (PRODUCTS[productKey] ?? PRODUCTS.truecolor).maxZoom
 }
+
+/** Sync-mode timing: sub-daily products animate at their lag; daily don't. */
+export function satelliteTimeMeta(productKey: string): { lagMs: number } | null {
+  const p = PRODUCTS[productKey] ?? PRODUCTS.truecolor
+  return p.stepMs >= DAY_MS ? null : { lagMs: p.lagMs }
+}

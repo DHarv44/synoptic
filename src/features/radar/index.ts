@@ -1,5 +1,6 @@
 import { IconRadar2 } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { featureOption } from '@/core/settings/store'
 import { RadarLayer } from '@/features/radar/RadarLayer'
 
 /** Composite reflectivity: US NEXRAD mosaic, or a worldwide fallback. */
@@ -12,6 +13,11 @@ registerFeature({
   layerIcon: IconRadar2,
   layerComponent: RadarLayer,
   sourceIds: ['rainviewer', 'iem-nexrad'],
+  // Mosaic scans publish ~5 min behind; RainViewer's composite ~10.
+  timeMeta: () =>
+    featureOption<string>('radar', 'source') === 'global'
+      ? { lagMs: 10 * 60_000 }
+      : { lagMs: 5 * 60_000 },
   defaultEnabled: true,
   settings: [
     {

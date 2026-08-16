@@ -16,7 +16,7 @@ const NOW = Date.parse('2026-08-11T23:18:40Z')
 beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(NOW)
-  useTimeline.setState({ simTime: NOW, isLive: true, playing: false })
+  useTimeline.setState({ simTime: NOW, isLive: true, playing: false, mode: 'live', syncLagMs: 0 })
 })
 
 afterEach(() => {
@@ -29,6 +29,27 @@ describe('loop window', () => {
   it('aligns frames to generation boundaries', () => {
     expect(newestFrame(NOW)).toBe(Date.parse('2026-08-11T23:15:00Z'))
     expect(loopStart(NOW)).toBe(newestFrame(NOW) - LOOP_WINDOW_MS)
+  })
+
+  it('sync mode holds the whole window back by the layer lag', () => {
+    useTimeline.setState({ mode: 'sync', syncLagMs: 75 * 60_000 })
+    // 23:18:40 − 75 min = 22:03:40 → newest frame 22:00.
+    expect(newestFrame(NOW)).toBe(Date.parse('2026-08-11T22:00:00Z'))
+    expect(loopStart(NOW)).toBe(newestFrame(NOW) - LOOP_WINDOW_MS)
+  })
+
+  it('switching modes mid-loop restarts at the new oldest frame', () => {
+    state().setPlaying(true)
+    useTimeline.setState({ syncLagMs: 75 * 60_000 })
+    state().setMode('sync')
+    expect(state().playing).toBe(true)
+    expect(state().simTime).toBe(loopStart(NOW))
+    expect(state().warmFrames).toBeNull()
+  })
+
+  it('sync with zero lag degrades to live', () => {
+    useTimeline.setState({ mode: 'sync', syncLagMs: 0 })
+    expect(newestFrame(NOW)).toBe(Date.parse('2026-08-11T23:15:00Z'))
   })
 })
 

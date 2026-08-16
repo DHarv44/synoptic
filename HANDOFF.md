@@ -52,9 +52,11 @@ RAOB overlay, buoys, gauges, air quality), scene presets with derived
 active-matching, the surface-chart war (MSLET + selectable PRMSL, spline
 smoothing, pips, ring-defined H/L centres), the /data documentation page,
 AIFS in the model panel, the MRMS precip-totals layer, hover opacity
-sliders on the layer rail, and the flight-category METAR plots. Next big
-agreed build: LIVE/SYNC loop mode (designed in-session; layers already
-carry cadence+lag metadata).
+sliders on the layer rail, and the flight-category METAR plots. LIVE/SYNC
+loop mode shipped 2026-08-16: features declare `timeMeta` lag, the loop
+anchor shifts by the slowest enabled layer (capped 2 h), the badge reads
+SYNC −Xm during synced playback, and satellite steps its 10-min frames
+through the loop instead of freezing. Loads always start LIVE.
 
 **Awaiting the user**: a visual review. Every Phase 8 layer was verified
 through data (sources populated, health green, panels rendering real rows)

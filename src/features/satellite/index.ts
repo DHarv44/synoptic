@@ -1,6 +1,8 @@
 import { IconSatellite } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
+import { featureOption } from '@/core/settings/store'
 import { SatelliteLayer } from '@/features/satellite/SatelliteLayer'
+import { satelliteTimeMeta } from '@/features/satellite/service'
 
 /** NASA GIBS satellite imagery: daily VIIRS global, 10-min GOES-East. */
 registerFeature({
@@ -13,6 +15,7 @@ registerFeature({
   layerIcon: IconSatellite,
   layerComponent: SatelliteLayer,
   sourceIds: ['gibs'],
+  timeMeta: () => satelliteTimeMeta(featureOption<string>('satellite', 'product')),
   defaultEnabled: false,
   settings: [
     {
