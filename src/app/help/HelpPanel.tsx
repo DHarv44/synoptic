@@ -3,6 +3,7 @@ import { DockSection } from '@/app/shell/DockSection'
 import { GettingStarted } from '@/app/help/GettingStarted'
 import { Shortcuts } from '@/app/help/Shortcuts'
 import { Glossary } from '@/app/help/Glossary'
+import { DataPage } from '@/app/help/DataPage'
 import { About } from '@/app/help/About'
 
 /**
@@ -24,6 +25,9 @@ export function HelpPanel() {
       </DockSection>
       <DockSection id="help-terms" title="Reading the instruments">
         <Glossary />
+      </DockSection>
+      <DockSection id="help-data" title="Data catalog">
+        <DataPage />
       </DockSection>
       <DockSection id="help-about" title="About">
         <About />
