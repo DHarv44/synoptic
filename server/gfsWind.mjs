@@ -65,6 +65,26 @@ export async function discoverRun() {
   throw new Error('no GFS cycle reachable on NOMADS filter')
 }
 
+/**
+ * The IEEE-754 reference value from GRIB2 Section 5 (octets 12–15),
+ * read straight from the message bytes. grib2class misparses NEGATIVE
+ * reference values (UGRD's came back 5.6e-74 instead of about -4000),
+ * which shifted every wind by +30-plus m/s while leaving all-positive
+ * fields like pressure untouched — the wind layer's original sin.
+ */
+export function grib2RefValue(buf) {
+  let off = 16 // past Section 0 (GRIB, reserved, discipline, edition, length)
+  while (off + 5 <= buf.length) {
+    if (buf.slice(off, off + 4).toString() === '7777') break
+    const len = buf.readUInt32BE(off)
+    const num = buf.readUInt8(off + 4)
+    if (num === 5) return buf.readFloatBE(off + 11)
+    if (len === 0) break
+    off += len
+  }
+  throw new Error('no Section 5 in GRIB message')
+}
+
 /** Decode one single-message GRIB2 subset. Returns row-major floats (north first). */
 function decodeGrib(buf) {
   const grib = new GRIB2CLASS({ numMembers: 1, log: false })
@@ -72,6 +92,13 @@ function decodeGrib(buf) {
   const vals = grib.DataValues?.[0]
   if (!vals || vals.length < SRC_W * SRC_H) {
     throw new Error(`grib decode failed (${vals?.length ?? 0} values)`)
+  }
+  // Correct the library's reference-value parse: values are
+  // (R + X·2^E)/10^D, so a mis-read R shifts every value by ΔR/10^D.
+  const trueRef = grib2RefValue(buf)
+  const delta = (trueRef - grib.ReferenceValue) / Math.pow(10, grib.DecimalScaleFactor)
+  if (Math.abs(delta) > 1e-9) {
+    for (let i = 0; i < vals.length; i++) vals[i] += delta
   }
   return { vals, northFirst: grib.La1 > 0 }
 }

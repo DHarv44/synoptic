@@ -42,6 +42,13 @@ export class ParticleSystem {
     this.state = [this.makeStateTexture(), this.makeStateTexture()]
     this.fbo = gl.createFramebuffer() as WebGLFramebuffer
     this.windTex = gl.createTexture() as WebGLTexture
+    // Calm until real data arrives: an uninitialized texture samples (0,0),
+    // which decodes to −100 m/s in BOTH components — every particle red and
+    // screaming southwest, at any level, forever.
+    gl.bindTexture(gl.TEXTURE_2D, this.windTex)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG8, 1, 1, 0, gl.RG, gl.UNSIGNED_BYTE, new Uint8Array([128, 128]))
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
   }
 
   private makeStateTexture(): WebGLTexture {
@@ -82,6 +89,12 @@ export class ParticleSystem {
   /** One sim substep into the back state texture. */
   step(dtSimSeconds: number): void {
     const { gl } = this
+    // We share MapLibre's GL context mid-frame: whatever framebuffer and
+    // viewport the map was using must come back EXACTLY, or the draw pass
+    // (and every layer after us) renders into a state-texture-sized box in
+    // the corner — which is precisely how this layer was broken for weeks.
+    const prevFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
+    const prevViewport = gl.getParameter(gl.VIEWPORT) as Int32Array
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo)
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.state[1], 0)
     gl.viewport(0, 0, this.res, this.res)
@@ -93,7 +106,8 @@ export class ParticleSystem {
     gl.bindVertexArray(this.quadVao)
     gl.drawArrays(gl.TRIANGLES, 0, 3)
     gl.bindVertexArray(null)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, prevFbo)
+    gl.viewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3])
     this.state = [this.state[1], this.state[0]]
   }
 

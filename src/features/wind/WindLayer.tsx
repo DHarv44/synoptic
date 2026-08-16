@@ -5,7 +5,7 @@ import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { useFeatureOption } from '@/core/settings/store'
 import { ParticleSystem } from '@/features/wind/ParticleSystem'
-import { fetchWindField } from '@/features/wind/service'
+import { fetchWindField, type WindField } from '@/features/wind/service'
 
 const SIM_MINUTES_PER_SECOND = 8 // sim time compression: readable motion
 
@@ -13,6 +13,10 @@ interface WindCustomLayer extends CustomLayerInterface {
   system: ParticleSystem | null
   opacity: number
   pointSize: number
+  /** Latest fetched field; applied on setWind AND on (re)creation in onAdd —
+   * the fetch usually resolves before MapLibre calls onAdd, and a field
+   * delivered to a not-yet-created system used to vanish silently. */
+  pendingField: WindField | null
 }
 
 function makeLayer(particleCount: number): WindCustomLayer {
@@ -24,9 +28,11 @@ function makeLayer(particleCount: number): WindCustomLayer {
     system: null,
     opacity: 0.8,
     pointSize: 1.6,
+    pendingField: null,
     onAdd(_map: MLMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
       if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL2 required')
       this.system = new ParticleSystem(gl, particleCount)
+      if (this.pendingField) this.system.setWind(this.pendingField)
     },
     onRemove() {
       this.system?.dispose()
@@ -79,7 +85,10 @@ export function WindLayer() {
   useEffect(() => {
     let cancelled = false
     void fetchWindField(level).then((field) => {
-      if (!cancelled && layerRef.current?.system) layerRef.current.system.setWind(field)
+      const layer = layerRef.current
+      if (cancelled || !layer) return
+      layer.pendingField = field
+      layer.system?.setWind(field)
     }).catch(() => undefined)
     return () => {
       cancelled = true
