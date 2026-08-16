@@ -19,7 +19,7 @@ export const CREDITS: Credit[] = [
   {
     label: 'NEXRAD · Iowa Environmental Mesonet',
     href: 'https://mesonet.agron.iastate.edu/',
-    what: 'CONUS radar mosaic and NEXRAD storm attributes (TVS, meso, hail).',
+    what: 'CONUS radar mosaic, MRMS precipitation accumulations, and NEXRAD storm attributes.',
   },
   {
     label: 'NOAA NEXRAD Level 2',

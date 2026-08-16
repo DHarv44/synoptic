@@ -38,6 +38,16 @@ registerFeature({
       defaultValue: '2',
     },
     {
+      kind: 'select',
+      key: 'reduction',
+      label: 'Sea-level reduction',
+      options: [
+        { value: 'mslet', label: 'MSLET — membrane, sane over terrain' },
+        { value: 'prmsl', label: 'PRMSL — classic Shuell, noisy over the Rockies' },
+      ],
+      defaultValue: 'mslet',
+    },
+    {
       kind: 'number',
       key: 'opacity',
       label: 'Opacity %',

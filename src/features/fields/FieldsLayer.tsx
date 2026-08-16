@@ -20,6 +20,7 @@ export function FieldsLayer() {
   const field = useFeatureOption<string>('fields', 'field')
   const opacity = useFeatureOption<number>('fields', 'opacity')
   const mslpInterval = useFeatureOption<string>('fields', 'mslpInterval')
+  const reduction = useFeatureOption<string>('fields', 'reduction')
   const [chart, setChart] = useState<FieldChart>(EMPTY_CHART)
 
   useEffect(() => {
@@ -27,7 +28,10 @@ export function FieldsLayer() {
     setChart(EMPTY_CHART)
     const spec = FIELD_SPECS[field] ?? FIELD_SPECS.mslp
     const interval = field === 'mslp' ? Number(mslpInterval) || spec.interval : undefined
-    fetchGridField(spec.key)
+    // Both sea-level reductions stay available; the server serves each as
+    // its own grid key.
+    const gridKey = field === 'mslp' && reduction === 'prmsl' ? 'mslp_prmsl' : spec.key
+    fetchGridField(gridKey)
       .then((grid) => {
         if (!stale) setChart(fieldChart(grid, spec, interval))
       })
@@ -37,7 +41,7 @@ export function FieldsLayer() {
     return () => {
       stale = true
     }
-  }, [field, mslpInterval])
+  }, [field, mslpInterval, reduction])
 
   useMapLayer((m) => {
     const ink = scheme === 'dark' ? '#cdb38a' : '#8a6d3b'

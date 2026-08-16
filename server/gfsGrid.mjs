@@ -14,10 +14,12 @@ const CACHE_TTL_MS = 30 * 60_000
 
 /** field key → GRIB filter parameters. Analysis (f000) only, like wind. */
 const FIELDS = {
-  // MSLET (Eta membrane reduction), not PRMSL (Shuell): PRMSL carries 1-2 hPa
-  // of reduction noise over high terrain that wallpapers the Rockies with
-  // false closed contours and distorts ridge maxima by several hPa.
+  // Two sea-level reductions, user-selectable: MSLET (Eta membrane) is the
+  // terrain-sane default; PRMSL (Shuell) is the classic reduction, noisy
+  // over the Rockies but kept as an option — datasets get added here, not
+  // replaced.
   mslp: { lev: 'lev_mean_sea_level', var: 'MSLET', unit: 'Pa' },
+  mslp_prmsl: { lev: 'lev_mean_sea_level', var: 'PRMSL', unit: 'Pa' },
   hgt500: { lev: 'lev_500_mb', var: 'HGT', unit: 'gpm' },
   temp850: { lev: 'lev_850_mb', var: 'TMP', unit: 'K' },
   cape: { lev: 'lev_surface', var: 'CAPE', unit: 'J/kg' },

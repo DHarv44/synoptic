@@ -15,6 +15,9 @@ export const MODELS: ModelDef[] = [
   { key: 'icon_seamless', label: 'ICON', color: 'var(--mantine-color-green-6)' },
   { key: 'gem_seamless', label: 'GEM', color: 'var(--mantine-color-violet-5)' },
   { key: 'ukmo_seamless', label: 'UKMO', color: 'var(--mantine-color-orange-5)' },
+  // ECMWF's ML model — a genuinely different forecasting philosophy in the
+  // agreement panel. Verified live on Open-Meteo 2026-08-15.
+  { key: 'ecmwf_aifs025', label: 'AIFS', color: 'var(--mantine-color-cyan-5)' },
 ]
 
 export const MODEL_VARS = [

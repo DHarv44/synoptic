@@ -20,6 +20,8 @@ export const LAYER_ORDER = [
   'satellite',
   // Outlook fills are the context everything else sits on — radar included.
   'spc-outlook',
+  // Accumulated precip: a wash of what already fell, under what's falling.
+  'precip',
   // One composite occupies 'radar' — they are alternatives, never a stack.
   // Single-site super-res is the genuine detail upgrade and sits above it.
   'radar',

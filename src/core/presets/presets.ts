@@ -11,6 +11,7 @@ import type { SettingValue } from '@/core/settings/types'
 export const SCENE_FEATURES = [
   'radar',
   'level2',
+  'precip',
   'satellite',
   'wind',
   'fields',
@@ -110,10 +111,11 @@ export const BUILT_IN_PRESETS: Preset[] = [
   {
     id: 'hydro',
     label: 'Hydro',
-    description: 'River gauges and rainfall radar.',
+    description: 'River gauges, rainfall radar, 24-hour precip totals.',
     scene: {
       radar: { source: 'mosaic' },
       gauges: true,
+      precip: { product: 'p24h' },
     },
   },
 ]
