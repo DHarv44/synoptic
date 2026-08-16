@@ -1,4 +1,5 @@
-import { useSettings } from '@/core/settings/store'
+import { featureEnabled, featureOption, useSettings } from '@/core/settings/store'
+import { getFeature } from '@/core/settings/registry'
 import type { SettingValue } from '@/core/settings/types'
 
 /**
@@ -137,4 +138,25 @@ export function applyPreset(preset: Preset): void {
       for (const [key, value] of Object.entries(spec)) s.setOption(id, key, value)
     }
   }
+}
+
+/**
+ * Does the CURRENT settings state land exactly where applying this preset
+ * would? Compared against effective values (manifest defaults filled in),
+ * so the answer survives reloads and doesn't care how the state got there.
+ */
+export function sceneMatches(preset: Preset): boolean {
+  for (const id of SCENE_FEATURES) {
+    const spec = preset.scene === null ? undefined : preset.scene[id]
+    const manifest = getFeature(id)
+    const wantEnabled =
+      preset.scene === null ? (manifest?.defaultEnabled ?? true) : spec !== undefined
+    if (featureEnabled(id) !== wantEnabled) return false
+    for (const field of manifest?.settings ?? []) {
+      const override =
+        spec !== undefined && spec !== true ? spec[field.key] : undefined
+      if (featureOption(id, field.key) !== (override ?? field.defaultValue)) return false
+    }
+  }
+  return true
 }

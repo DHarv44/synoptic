@@ -1,12 +1,11 @@
 import { Button, Menu, Stack, Text } from '@mantine/core'
 import { IconCheck, IconStackFront } from '@tabler/icons-react'
 import { BUILT_IN_PRESETS, getPreset } from '@/core/presets/presets'
-import { usePresets } from '@/core/presets/store'
+import { applyPresetById, useActivePresetId } from '@/core/presets/store'
 
 /** Scene preset switcher: one tap swaps the whole layer stack for a task. */
 export function PresetMenu() {
-  const activeId = usePresets((s) => s.activeId)
-  const apply = usePresets((s) => s.apply)
+  const activeId = useActivePresetId()
   const active = activeId !== null ? getPreset(activeId) : undefined
 
   return (
@@ -27,7 +26,7 @@ export function PresetMenu() {
         {BUILT_IN_PRESETS.map((p) => (
           <Menu.Item
             key={p.id}
-            onClick={() => apply(p.id)}
+            onClick={() => applyPresetById(p.id)}
             rightSection={p.id === activeId ? <IconCheck size={14} stroke={2} /> : undefined}
           >
             <Stack gap={0}>

@@ -1,34 +1,22 @@
-import { create } from 'zustand'
+import { useMemo } from 'react'
 import { useSettings } from '@/core/settings/store'
-import { applyPreset, getPreset } from '@/core/presets/presets'
+import { BUILT_IN_PRESETS, applyPreset, getPreset, sceneMatches } from '@/core/presets/presets'
 
-interface PresetState {
-  /** The preset whose scene is currently on screen, until the user departs it. */
-  activeId: string | null
-  apply: (id: string) => void
+/**
+ * The active preset is DERIVED, never stored: whichever preset the current
+ * scene exactly matches, recomputed from settings truth. Applying one makes
+ * it match; any hand-toggle makes it not; reloads need no bookkeeping. A
+ * stored "last clicked" id was tried first and lied after either.
+ */
+export function useActivePresetId(): string | null {
+  const features = useSettings((s) => s.features)
+  return useMemo(() => {
+    void features // recompute when any setting changes
+    return BUILT_IN_PRESETS.find(sceneMatches)?.id ?? null
+  }, [features])
 }
 
-let applying = false
-
-export const usePresets = create<PresetState>((set) => ({
-  activeId: null,
-  apply: (id) => {
-    const preset = getPreset(id)
-    if (!preset) return
-    applying = true
-    try {
-      applyPreset(preset)
-    } finally {
-      applying = false
-    }
-    set({ activeId: id })
-  },
-}))
-
-// Hand-toggling any layer or option means the scene is no longer the preset's;
-// drop the highlight rather than pretend. Preset application itself is exempt.
-useSettings.subscribe((s, prev) => {
-  if (!applying && s.features !== prev.features && usePresets.getState().activeId !== null) {
-    usePresets.setState({ activeId: null })
-  }
-})
+export function applyPresetById(id: string): void {
+  const preset = getPreset(id)
+  if (preset) applyPreset(preset)
+}

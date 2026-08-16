@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { BUILT_IN_PRESETS, SCENE_FEATURES, applyPreset, getPreset } from '@/core/presets/presets'
+import {
+  BUILT_IN_PRESETS,
+  SCENE_FEATURES,
+  applyPreset,
+  getPreset,
+  sceneMatches,
+} from '@/core/presets/presets'
 import { useSettings } from '@/core/settings/store'
 
 describe('built-in presets', () => {
@@ -27,6 +33,17 @@ describe('applyPreset', () => {
     expect(f['radar']?.enabled).toBe(true)
     expect(f['buoys']?.enabled).toBe(false)
     expect(f['radar']?.options['source']).toBe('mosaic')
+  })
+
+  it('sceneMatches identifies the applied preset and only it, until a hand-toggle', () => {
+    const severe = getPreset('severe')
+    const marine = getPreset('marine')
+    if (!severe || !marine) throw new Error('presets missing')
+    applyPreset(severe)
+    expect(sceneMatches(severe)).toBe(true)
+    expect(sceneMatches(marine)).toBe(false)
+    useSettings.getState().setEnabled('buoys', true)
+    expect(sceneMatches(severe)).toBe(false)
   })
 
   it('lands identically regardless of prior tweaks', () => {
