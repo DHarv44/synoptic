@@ -5,6 +5,12 @@ interface SettingFieldInputProps {
   field: SettingField
   value: SettingValue
   onChange: (value: SettingValue) => void
+  /**
+   * Render select dropdowns inline rather than portaled. Inside a
+   * hover-opened popover a portaled dropdown lands outside the hover
+   * area, and pointing at it closes the popover under your cursor.
+   */
+  selectWithinPortal?: boolean
 }
 
 /** Wide numeric ranges read better as sliders than as spinners. */
@@ -13,7 +19,12 @@ function isContinuous(field: Extract<SettingField, { kind: 'number' }>): boolean
 }
 
 /** Renders one manifest-declared setting as the right Mantine control. */
-export function SettingFieldInput({ field, value, onChange }: SettingFieldInputProps) {
+export function SettingFieldInput({
+  field,
+  value,
+  onChange,
+  selectWithinPortal = true,
+}: SettingFieldInputProps) {
   switch (field.kind) {
     case 'boolean':
       return (
@@ -69,7 +80,7 @@ export function SettingFieldInput({ field, value, onChange }: SettingFieldInputP
           onChange={(v) => onChange(v ?? field.defaultValue)}
           allowDeselect={false}
           aria-label={field.label}
-          comboboxProps={{ withinPortal: true }}
+          comboboxProps={{ withinPortal: selectWithinPortal }}
         />
       )
   }

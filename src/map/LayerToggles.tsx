@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react'
-import { ActionIcon, Popover, Slider, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Popover, Stack, Text, Tooltip } from '@mantine/core'
 import { listFeatures } from '@/core/settings/registry'
-import { useFeatureEnabled, useFeatureOption, useSettings } from '@/core/settings/store'
+import { useFeatureEnabled, useSettings } from '@/core/settings/store'
 import { useHealth } from '@/core/data/healthStore'
 import { fmtUtcTime } from '@/core/time/format'
+import { SettingFieldInput } from '@/ui/settings/SettingFieldInput'
+import { SettingRow } from '@/ui/settings/SettingRow'
 import type { FeatureManifest, LayerGroup } from '@/core/settings/types'
 import type { SourceHealth } from '@/core/data/types'
 
@@ -29,7 +31,7 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
   const enabled = useFeatureEnabled(manifest.id)
   const setEnabled = useSettings((s) => s.setEnabled)
   const setOption = useSettings((s) => s.setOption)
-  const opacity = useFeatureOption<number>(manifest.id, 'opacity')
+  const options = useSettings((s) => s.features[manifest.id]?.options)
   const health = useWorstHealth(manifest.sourceIds)
   const Icon = manifest.layerIcon
 
@@ -44,10 +46,6 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
     window.clearTimeout(closeTimer.current)
     closeTimer.current = window.setTimeout(() => setHovered(false), 150)
   }
-
-  const opacityField = manifest.settings?.find(
-    (s) => s.kind === 'number' && s.key === 'opacity',
-  )
 
   const age = health?.lastSuccess !== undefined ? ` · ${fmtUtcTime(health.lastSuccess)}` : ''
   const label = enabled
@@ -87,8 +85,8 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
     </ActionIcon>
   )
 
-  // No opacity to offer (or layer off): the plain tooltip carries the label.
-  if (opacityField === undefined || opacityField.kind !== 'number' || !enabled) {
+  // No settings to offer (or layer off): the plain tooltip carries the label.
+  if (manifest.settings.length === 0 || !enabled) {
     return (
       <Tooltip label={label} position="left" openDelay={200}>
         {button}
@@ -96,8 +94,9 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
     )
   }
 
-  // One hover surface for label AND slider — a Tooltip and a flyout would
-  // fight for the same spot to the left of the rail.
+  // One hover surface for label AND the layer's settings — the same shared
+  // controls the Settings panel renders, writing to the same store. A
+  // Tooltip and a flyout would fight for the same spot left of the rail.
   return (
     <Popover opened={hovered} position="left" offset={6} shadow="md" withinPortal>
       <Popover.Target>
@@ -105,21 +104,26 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
           {button}
         </div>
       </Popover.Target>
-      <Popover.Dropdown p="xs" onMouseEnter={openNow} onMouseLeave={closeSoon}>
-        <Text size="xs" c="dimmed" mb={6}>
+      <Popover.Dropdown p="sm" w={300} onMouseEnter={openNow} onMouseLeave={closeSoon}>
+        <Text size="xs" c="dimmed">
           {label}
         </Text>
-        <Slider
-          w={130}
-          size="xs"
-          min={opacityField.min}
-          max={opacityField.max}
-          step={opacityField.step}
-          value={opacity}
-          onChange={(v) => setOption(manifest.id, 'opacity', v)}
-          label={(v) => `${v}%`}
-          aria-label={`${manifest.title} opacity`}
-        />
+        <Stack gap={0} mt={2}>
+          {manifest.settings.map((field) => (
+            <SettingRow
+              key={field.key}
+              label={field.label}
+              control={
+                <SettingFieldInput
+                  field={field}
+                  value={options?.[field.key] ?? field.defaultValue}
+                  onChange={(v) => setOption(manifest.id, field.key, v)}
+                  selectWithinPortal={false}
+                />
+              }
+            />
+          ))}
+        </Stack>
       </Popover.Dropdown>
     </Popover>
   )

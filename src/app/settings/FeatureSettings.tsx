@@ -1,8 +1,8 @@
 import { Anchor, Collapse, Group, Stack, Switch, Text } from '@mantine/core'
 import { useSettings, useFeatureEnabled } from '@/core/settings/store'
 import type { FeatureManifest } from '@/core/settings/types'
-import { SettingRow } from '@/app/settings/SettingRow'
-import { SettingFieldInput } from '@/app/settings/SettingFieldInput'
+import { SettingRow } from '@/ui/settings/SettingRow'
+import { SettingFieldInput } from '@/ui/settings/SettingFieldInput'
 
 /**
  * One feature's block: a title row carrying the enable switch, its options
