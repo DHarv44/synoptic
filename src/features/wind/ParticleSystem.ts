@@ -28,7 +28,7 @@ export class ParticleSystem {
   private frame = 0
 
   /** Trail length: fraction of each frame kept. 0 disables persistence. */
-  fade = 0.955
+  fade = 0.965
 
   constructor(gl: WebGL2RenderingContext, particleCount: number) {
     this.gl = gl

@@ -9,11 +9,19 @@ import { ParticleSystem } from '@/features/wind/ParticleSystem'
 import { SpeedField } from '@/features/wind/SpeedField'
 import { fetchWindField, type WindField } from '@/features/wind/service'
 
-const SIM_MINUTES_PER_SECOND = 8 // sim time compression: readable motion
+/**
+ * Sim seconds per real second at zoom 6. Screen speed is what makes flow
+ * readable, and pixels-per-meter doubles every zoom level — so the factor
+ * halves per zoom-in, keeping a 10 m/s wind at roughly 25 px/s at every
+ * zoom. The old fixed 8 min/s moved that wind ~1 px/s at CONUS zoom: a
+ * static scatter of atoms, not a flow.
+ */
+const SIM_RATE_Z6 = 3000
 
 interface WindCustomLayer extends CustomLayerInterface {
   system: ParticleSystem | null
   field: SpeedField | null
+  map: MLMap | null
   opacity: number
   pointSize: number
   showField: boolean
@@ -32,13 +40,15 @@ function makeLayer(particleCount: number): WindCustomLayer {
     renderingMode: '2d',
     system: null,
     field: null,
+    map: null,
     opacity: 0.8,
     pointSize: 1.6,
     showField: true,
     fieldOpacity: 0.5,
     pendingField: null,
-    onAdd(_map: MLMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
+    onAdd(map: MLMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
       if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL2 required')
+      this.map = map
       this.system = new ParticleSystem(gl, particleCount)
       this.field = new SpeedField(gl)
       if (this.pendingField) this.system.setWind(this.pendingField)
@@ -54,7 +64,8 @@ function makeLayer(particleCount: number): WindCustomLayer {
       const now = performance.now()
       const dtReal = lastT === 0 ? 1 / 60 : Math.min((now - lastT) / 1000, 0.1)
       lastT = now
-      this.system.step(dtReal * SIM_MINUTES_PER_SECOND * 60)
+      const zoom = this.map?.getZoom() ?? 6
+      this.system.step(dtReal * SIM_RATE_Z6 * Math.pow(2, 6 - Math.min(zoom, 10)))
       const matrix = (args as unknown as { defaultProjectionData?: { mainMatrix?: number[] } })
         ?.defaultProjectionData?.mainMatrix ?? (args as unknown as number[])
       if (this.showField && this.field) {

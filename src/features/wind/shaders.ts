@@ -37,9 +37,11 @@ void main() {
   pos += vec2(dLon / 360.0, dLat / 180.0);
   pos.x = fract(pos.x);
 
-  // respawn: rate scaled by speed so fast streams stay fed, plus polar clamp
+  // respawn: rate scaled by speed so fast streams stay fed, plus polar clamp.
+  // Low base rate: particles must live long enough to trace filaments, or
+  // the layer reads as a static scatter.
   float speed = length(wind);
-  float drop = 0.003 + speed * 0.0002;
+  float drop = 0.001 + speed * 0.00008;
   float rnd = hash(v_uv * 1000.0 + u_seed);
   if (rnd < drop || pos.y < 0.03 || pos.y > 0.97) {
     pos = vec2(hash(v_uv * 371.3 + u_seed), 0.05 + 0.9 * hash(v_uv * 913.7 + u_seed * 1.7));
