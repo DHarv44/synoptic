@@ -13,8 +13,9 @@ export interface ChartCenter {
 export interface CenterOptions {
   /**
    * How far past its innermost ring's level the extremum must reach.
-   * Half a contour interval kills the tropical wiggle that scrapes a ring
-   * by 0.2 hPa while keeping every centre with real depth.
+   * WARNING, learned the hard way: filtering letters after rings are drawn
+   * orphans circles on the chart. Leave unset unless the rings themselves
+   * are filtered by the same rule.
    */
   minDepth?: number
   /** Smallest ring bbox dimension (degrees) worth a letter — noise-scale

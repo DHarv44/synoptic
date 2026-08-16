@@ -98,10 +98,10 @@ export function fieldChart(
   if (!spec.markExtrema) return { contours, centers: null }
   const centers: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
-    features: pickCenters(findExtrema(smoothed), lines, {
-      minDepth: interval / 2,
-      minRingDeg: 1.5,
-    }).map((c) => ({
+    // No depth filter: it deleted letters out of rings that plainly exist,
+    // orphaning circles on the chart — the exact defect this design exists
+    // to prevent. A synoptic-scale closed ring earns its letter, full stop.
+    features: pickCenters(findExtrema(smoothed), lines, { minRingDeg: 1.5 }).map((c) => ({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [c.lon, c.lat] },
       properties: {
