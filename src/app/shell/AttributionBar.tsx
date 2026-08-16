@@ -9,7 +9,7 @@ export function AttributionBar() {
         Data:
       </Text>
       {CREDITS.map((c, i) => (
-        <Group key={c.href} gap={6} wrap="nowrap">
+        <Group key={c.label} gap={6} wrap="nowrap">
           {i > 0 && (
             <Text size="xs" c="dimmed" opacity={0.4}>
               ·

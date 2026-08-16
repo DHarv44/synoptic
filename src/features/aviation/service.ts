@@ -1,4 +1,5 @@
 import type { SourceRef } from '@/core/data/types'
+import { MAP_COLORS as C } from '@/core/mapColors'
 
 export const AWC: SourceRef = { id: 'awc-hazards', label: 'Aviation hazards (AWC)' }
 
@@ -39,19 +40,19 @@ export interface Pirep {
 export function sigmetColor(hazard: string): string {
   switch (hazard) {
     case 'CONVECTIVE':
-      return 'var(--mantine-color-red-6)'
+      return C.red6
     case 'TURB':
-      return 'var(--mantine-color-orange-5)'
+      return C.orange5
     case 'ICE':
     case 'ICING':
-      return 'var(--mantine-color-cyan-5)'
+      return C.cyan5
     case 'IFR':
-      return 'var(--mantine-color-indigo-4)'
+      return C.indigo4
     case 'MTW':
     case 'MTN OBSCN':
-      return 'var(--mantine-color-violet-5)'
+      return C.violet5
     default:
-      return 'var(--mantine-color-gray-5)'
+      return C.gray5
   }
 }
 
@@ -102,12 +103,7 @@ export function pirepSeverity(p: Pirep): number {
   return p.pirepType === 'Urgent PIREP' ? Math.max(reported, 3) : reported
 }
 
-const PIREP_COLORS = [
-  'var(--mantine-color-gray-5)',
-  'var(--mantine-color-yellow-5)',
-  'var(--mantine-color-orange-5)',
-  'var(--mantine-color-red-6)',
-]
+const PIREP_COLORS = [C.gray5, C.yellow5, C.orange5, C.red6]
 
 export function pirepGeoJSON(items: Pirep[]): GeoJSON.FeatureCollection {
   return {

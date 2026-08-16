@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { fetchJson } from '@/core/data/fetchJson'
 import { featureEnabled, useFeatureOption } from '@/core/settings/store'
+import { MAP_COLORS } from '@/core/mapColors'
 import { startPoller } from '@/core/data/scheduler'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
@@ -120,7 +121,7 @@ export function SpcLayer() {
         type: 'line',
         source: 'spc-mcds',
         paint: {
-          'line-color': 'var(--mantine-color-orange-7)',
+          'line-color': MAP_COLORS.orange7,
           'line-width': 1.6,
           'line-dasharray': [2, 2],
         },

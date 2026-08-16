@@ -1,4 +1,5 @@
 import type { SourceRef } from '@/core/data/types'
+import { MAP_COLORS as C } from '@/core/mapColors'
 import type { UnitSystem } from '@/core/units/useUnitSystem'
 
 export const NDBC_SOURCE: SourceRef = { id: 'ndbc', label: 'Buoys (NDBC)' }
@@ -34,11 +35,11 @@ export function marineBuoys(buoys: Buoy[], nowMs: number): Buoy[] {
 /** Wave-height bins, calm to phenomenal; wave-less stations read as calm. */
 export function buoyColor(wvhtM: number | null): string {
   const m = wvhtM ?? 0
-  if (m < 0.5) return 'var(--mantine-color-blue-4)'
-  if (m < 1.5) return 'var(--mantine-color-cyan-4)'
-  if (m < 2.5) return 'var(--mantine-color-yellow-5)'
-  if (m < 4) return 'var(--mantine-color-orange-5)'
-  return 'var(--mantine-color-red-6)'
+  if (m < 0.5) return C.blue4
+  if (m < 1.5) return C.cyan4
+  if (m < 2.5) return C.yellow5
+  if (m < 4) return C.orange5
+  return C.red6
 }
 
 export function waveLabel(wvhtM: number, system: UnitSystem): string {

@@ -1,4 +1,5 @@
 import type { SourceRef } from '@/core/data/types'
+import { MAP_COLORS as C } from '@/core/mapColors'
 
 export const NWPS: SourceRef = { id: 'nwps', label: 'River gauges (NWPS)' }
 
@@ -43,13 +44,7 @@ const CATEGORY_RANK: Record<string, number> = {
 }
 
 /** AHPS map colours: green through action/minor/moderate/major. */
-const CATEGORY_COLORS = [
-  'var(--mantine-color-green-7)',
-  'var(--mantine-color-yellow-5)',
-  'var(--mantine-color-orange-5)',
-  'var(--mantine-color-red-6)',
-  'var(--mantine-color-grape-6)',
-]
+const CATEGORY_COLORS = [C.green7, C.yellow5, C.orange5, C.red6, C.grape6]
 
 /** Gauges with a current observation, optionally only those at/above action. */
 export function reportingGauges(gauges: Gauge[], floodingOnly: boolean): Gauge[] {

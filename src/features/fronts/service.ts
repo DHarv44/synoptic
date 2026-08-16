@@ -1,6 +1,7 @@
 import { reportError, reportOk } from '@/core/data/healthStore'
 import { fixtureActive, loadFixture } from '@/core/data/fixtures'
 import type { SourceRef } from '@/core/data/types'
+import { MAP_COLORS as C } from '@/core/mapColors'
 import { parseCodsus, type Front, type SurfaceAnalysis } from '@/core/data/wpc/codsus'
 
 export const WPC: SourceRef = { id: 'wpc-fronts', label: 'WPC surface fronts' }
@@ -39,13 +40,13 @@ export const FRONT_STYLE: Record<
   Front['kind'],
   { color: string; dash: number[] | null; width: number }
 > = {
-  cold: { color: 'var(--mantine-color-blue-5)', dash: null, width: 2.4 },
-  warm: { color: 'var(--mantine-color-red-6)', dash: null, width: 2.4 },
+  cold: { color: C.blue5, dash: null, width: 2.4 },
+  warm: { color: C.red6, dash: null, width: 2.4 },
   // One line can't alternate two colours; a dashed violet is the honest
   // stand-in for both stationary and occluded until pip sprites exist.
-  stationary: { color: 'var(--mantine-color-grape-5)', dash: [4, 3], width: 2.4 },
-  occluded: { color: 'var(--mantine-color-violet-5)', dash: null, width: 2.4 },
-  trough: { color: 'var(--mantine-color-gray-5)', dash: [2, 3], width: 1.8 },
+  stationary: { color: C.grape5, dash: [4, 3], width: 2.4 },
+  occluded: { color: C.violet5, dash: null, width: 2.4 },
+  trough: { color: C.gray5, dash: [2, 3], width: 1.8 },
 }
 
 export function frontsGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {
@@ -79,7 +80,7 @@ export function centersGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {
       properties: {
         letter: c.kind === 'high' ? 'H' : 'L',
         pressure: String(c.pressure),
-        color: c.kind === 'high' ? 'var(--mantine-color-blue-4)' : 'var(--mantine-color-red-5)',
+        color: c.kind === 'high' ? C.blue4 : C.red5,
       },
     })),
   }

@@ -60,7 +60,7 @@ export function About() {
           Data sources
         </Text>
         {CREDITS.map((c) => (
-          <div key={c.href}>
+          <div key={c.label}>
             <Anchor href={c.href} target="_blank" rel="noopener noreferrer" size="sm">
               {c.label}
             </Anchor>

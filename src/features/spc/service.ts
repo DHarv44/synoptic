@@ -1,5 +1,6 @@
 import { fixtureActive } from '@/core/data/fixtures'
 import type { SourceRef } from '@/core/data/types'
+import { MAP_COLORS as C } from '@/core/mapColors'
 
 export const SPC: SourceRef = { id: 'spc', label: 'Storm Prediction Center' }
 
@@ -47,7 +48,7 @@ export type SpcCollection<P> = GeoJSON.FeatureCollection<GeoJSON.Geometry, P>
 
 /** Tornado watches red, severe-thunderstorm yellow — the SPC convention. */
 export function watchColor(type: WatchProps['type']): string {
-  return type === 'TOR' ? 'var(--mantine-color-red-6)' : 'var(--mantine-color-yellow-5)'
+  return type === 'TOR' ? C.red6 : C.yellow5
 }
 
 /** Features whose expiry is still ahead of now. */
