@@ -24,6 +24,9 @@ float hash(vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
 
+uniform vec2 u_spawnMin;  // equirect [0,1]²: view box origin (lon may wrap)
+uniform vec2 u_spawnSpan; // view box size
+
 void main() {
   vec4 st = texture(u_state, v_uv);
   vec2 pos = st.rg;
@@ -40,50 +43,72 @@ void main() {
   pos.x = fract(pos.x);
 
   // Lifecycle instead of random death: age runs 0→1, faster for fast
-  // particles so streams stay fed, and rebirth lands elsewhere. The draw
-  // pass fades by age, so no particle ever pops in or vanishes mid-streak.
+  // particles so streams stay fed. The draw pass fades by age, so no
+  // particle ever pops in or vanishes mid-streak.
   float speed = length(wind);
   age += 0.0018 + speed * 0.00008;
-  if (age >= 1.0 || pos.y < 0.03 || pos.y > 0.97) {
-    pos = vec2(hash(v_uv * 371.3 + u_seed), 0.05 + 0.9 * hash(v_uv * 913.7 + u_seed * 1.7));
+
+  // The whole budget lives in the current view: spawn inside it, retire
+  // whatever drifts well past its edge. Density on screen, not on Earth.
+  float dx = fract(pos.x - u_spawnMin.x + 1.0);
+  float dy = pos.y - u_spawnMin.y;
+  bool outside = dx > u_spawnSpan.x * 1.25 || dy < -0.12 * u_spawnSpan.y || dy > u_spawnSpan.y * 1.12;
+
+  if (age >= 1.0 || outside || pos.y < 0.03 || pos.y > 0.97) {
+    pos = vec2(
+      fract(u_spawnMin.x + u_spawnSpan.x * hash(v_uv * 371.3 + u_seed)),
+      clamp(u_spawnMin.y + u_spawnSpan.y * hash(v_uv * 913.7 + u_seed * 1.7), 0.03, 0.97)
+    );
     age = fract(age) * 0.05; // reborn young, slightly staggered
   }
   o_state = vec4(pos, age, 1.0);
 }
 `
 
-/** Draws particles as points through the map's mercator matrix. */
+/**
+ * Draws each particle as a LINE SEGMENT from last frame's position to this
+ * frame's — stamped dots turn into continuous strokes. Even vertices take
+ * the previous state, odd the current; a segment that respawned this frame
+ * (jumped) collapses to a point rather than slashing across the view.
+ */
 export const DRAW_VERT = /* glsl */ `#version 300 es
 precision highp float;
 uniform sampler2D u_state;
+uniform sampler2D u_statePrev;
 uniform sampler2D u_wind;
 uniform float u_windScale;
 uniform mat4 u_matrix;
 uniform float u_stateRes;
-uniform float u_pointSize;
 out float v_speed;
 out float v_age;
 
 const float PI = 3.14159265358979;
 
-void main() {
-  float idx = float(gl_VertexID);
-  vec2 uv = (vec2(mod(idx, u_stateRes), floor(idx / u_stateRes)) + 0.5) / u_stateRes;
-  vec4 st = texture(u_state, uv);
-  vec2 pos = st.rg;
-  v_age = st.b;
-
-  vec2 windRaw = texture(u_wind, pos).rg;
-  v_speed = length((windRaw * 2.0 - 1.0) * 127.0 * u_windScale);
-
+vec2 project(vec2 pos) {
   float lon = pos.x * 360.0;               // 0..360
   float lat = pos.y * 180.0 - 90.0;
   float mercX = fract((lon + 180.0) / 360.0); // wrap to mercator [0,1]
   float latR = radians(clamp(lat, -85.05, 85.05));
   float mercY = 0.5 - log(tan(PI * 0.25 + latR * 0.5)) / (2.0 * PI);
+  return vec2(mercX, mercY);
+}
 
-  gl_Position = u_matrix * vec4(mercX, mercY, 0.0, 1.0);
-  gl_PointSize = u_pointSize;
+void main() {
+  float idx = floor(float(gl_VertexID) * 0.5);
+  bool head = mod(float(gl_VertexID), 2.0) > 0.5;
+  vec2 uv = (vec2(mod(idx, u_stateRes), floor(idx / u_stateRes)) + 0.5) / u_stateRes;
+  vec4 cur = texture(u_state, uv);
+  vec4 prev = texture(u_statePrev, uv);
+  // A jump (respawn or antimeridian wrap) must not draw as a streak.
+  bool jumped = distance(cur.rg, prev.rg) > 0.02;
+  vec4 st = head || jumped ? cur : prev;
+  v_age = cur.b;
+
+  vec2 windRaw = texture(u_wind, cur.rg).rg;
+  v_speed = length((windRaw * 2.0 - 1.0) * 127.0 * u_windScale);
+
+  vec2 merc = project(st.rg);
+  gl_Position = u_matrix * vec4(merc, 0.0, 1.0);
 }
 `
 
@@ -96,8 +121,6 @@ in float v_age;
 out vec4 o_color;
 
 void main() {
-  vec2 c = gl_PointCoord - 0.5;
-  if (dot(c, c) > 0.25) discard;
   // Ease in at birth, ease out toward death — respawns never pop.
   float life = smoothstep(0.0, 0.1, v_age) * (1.0 - smoothstep(0.75, 1.0, v_age));
   // speed ramp: slate → cyan → yellow → red (0..40+ m/s)

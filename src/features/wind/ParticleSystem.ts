@@ -102,7 +102,7 @@ export class ParticleSystem {
   }
 
   /** One sim substep into the back state texture. */
-  step(dtSimSeconds: number): void {
+  step(dtSimSeconds: number, spawn: { x: number; y: number; w: number; h: number }): void {
     const { gl } = this
     // We share MapLibre's GL context mid-frame: whatever framebuffer and
     // viewport the map was using must come back EXACTLY, or the draw pass
@@ -118,6 +118,8 @@ export class ParticleSystem {
     this.bindCommon(this.simProgram)
     gl.uniform1f(gl.getUniformLocation(this.simProgram, 'u_dt'), dtSimSeconds)
     gl.uniform1f(gl.getUniformLocation(this.simProgram, 'u_seed'), (this.frame++ % 1000) + 1)
+    gl.uniform2f(gl.getUniformLocation(this.simProgram, 'u_spawnMin'), spawn.x, spawn.y)
+    gl.uniform2f(gl.getUniformLocation(this.simProgram, 'u_spawnSpan'), spawn.w, spawn.h)
     gl.bindVertexArray(this.quadVao)
     gl.drawArrays(gl.TRIANGLES, 0, 3)
     gl.bindVertexArray(null)
@@ -177,23 +179,25 @@ export class ParticleSystem {
   private drawParticles(
     matrix: number[] | Float32Array,
     opacity: number,
-    pointSize: number,
     plain: boolean,
   ): void {
     const { gl } = this
     gl.useProgram(this.drawProgram)
     this.bindCommon(this.drawProgram)
+    // Previous positions turn stamped dots into continuous stroke segments.
+    gl.activeTexture(gl.TEXTURE3)
+    gl.bindTexture(gl.TEXTURE_2D, this.state[1])
+    gl.uniform1i(gl.getUniformLocation(this.drawProgram, 'u_statePrev'), 3)
     gl.uniformMatrix4fv(gl.getUniformLocation(this.drawProgram, 'u_matrix'), false, matrix)
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_stateRes'), this.res)
-    gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_pointSize'), pointSize)
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_opacity'), opacity)
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_plain'), plain ? 1 : 0)
     gl.bindVertexArray(this.emptyVao)
-    gl.drawArrays(gl.POINTS, 0, this.res * this.res)
+    gl.drawArrays(gl.LINES, 0, this.res * this.res * 2)
     gl.bindVertexArray(null)
   }
 
-  draw(matrix: number[] | Float32Array, opacity: number, pointSize: number, plain: boolean): void {
+  draw(matrix: number[] | Float32Array, opacity: number, plain: boolean): void {
     const { gl } = this
     const prevFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
     const prevViewport = gl.getParameter(gl.VIEWPORT) as Int32Array
@@ -214,7 +218,7 @@ export class ParticleSystem {
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.disable(gl.BLEND)
     this.drawTexture(prev, this.fade)
-    this.drawParticles(matrix, opacity, pointSize, plain)
+    this.drawParticles(matrix, opacity, plain)
 
     // Composite the accumulated trails onto the map.
     gl.bindFramebuffer(gl.FRAMEBUFFER, prevFbo)

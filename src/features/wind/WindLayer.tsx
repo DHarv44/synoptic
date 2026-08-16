@@ -65,7 +65,23 @@ function makeLayer(particleCount: number): WindCustomLayer {
       const dtReal = lastT === 0 ? 1 / 60 : Math.min((now - lastT) / 1000, 0.1)
       lastT = now
       const zoom = this.map?.getZoom() ?? 6
-      this.system.step(dtReal * SIM_RATE_Z6 * Math.pow(2, 6 - Math.min(zoom, 10)))
+      // The particle budget lives in the viewport: spawn box = view bounds
+      // in equirect [0,1]² (x in grid-lon 0..360 space, wrap-safe).
+      const b = this.map?.getBounds()
+      const west = b?.getWest() ?? -180
+      const east = b?.getEast() ?? 180
+      const south = b?.getSouth() ?? -85
+      const north = b?.getNorth() ?? 85
+      const spawn = {
+        x: (((west % 360) + 360) % 360) / 360,
+        y: Math.max((south + 90) / 180, 0.03),
+        w: Math.min((east - west) / 360, 1),
+        h: Math.max(
+          Math.min((north + 90) / 180, 0.97) - Math.max((south + 90) / 180, 0.03),
+          0.01,
+        ),
+      }
+      this.system.step(dtReal * SIM_RATE_Z6 * Math.pow(2, 6 - Math.min(zoom, 10)), spawn)
       const matrix = (args as unknown as { defaultProjectionData?: { mainMatrix?: number[] } })
         ?.defaultProjectionData?.mainMatrix ?? (args as unknown as number[])
       if (this.showField && this.field) {
@@ -75,12 +91,7 @@ function makeLayer(particleCount: number): WindCustomLayer {
         }
       }
       // With the field carrying colour, particles go pale so motion reads.
-      this.system.draw(
-        matrix as number[],
-        this.opacity,
-        this.pointSize * devicePixelRatio,
-        this.showField,
-      )
+      this.system.draw(matrix as number[], this.opacity, this.showField)
     },
   }
   return layer
