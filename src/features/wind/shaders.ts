@@ -34,19 +34,26 @@ void main() {
   vec2 windRaw = texture(u_wind, pos).rg;           // 0..1
   vec2 wind = (windRaw * 2.0 - 1.0) * 127.0 * u_windScale; // m/s
 
+  // Motion uses a compressed speed: direction and ordering are true, but a
+  // 3 m/s breeze gets a visual floor so low levels draw streaks instead of
+  // dots, while the jet stays the jet. True magnitude still lives in the
+  // colours and the field — particles are the motion texture.
+  float s = length(wind);
+  vec2 dir = s > 0.01 ? wind / s : vec2(0.0);
+  vec2 move = dir * (6.0 + 0.85 * s);
+
   float lat = pos.y * 180.0 - 90.0;
   float coslat = max(cos(radians(lat)), 0.05);
   // degrees moved this step
-  float dLon = wind.x * u_dt / (111320.0 * coslat);
-  float dLat = wind.y * u_dt / 110540.0;
+  float dLon = move.x * u_dt / (111320.0 * coslat);
+  float dLat = move.y * u_dt / 110540.0;
   pos += vec2(dLon / 360.0, dLat / 180.0);
   pos.x = fract(pos.x);
 
   // Lifecycle instead of random death: age runs 0→1, faster for fast
   // particles so streams stay fed. The draw pass fades by age, so no
   // particle ever pops in or vanishes mid-streak.
-  float speed = length(wind);
-  age += 0.0018 + speed * 0.00008;
+  age += 0.0018 + s * 0.00008;
 
   // The whole budget lives in the current view: spawn inside it, retire
   // whatever drifts well past its edge. Density on screen, not on Earth.
