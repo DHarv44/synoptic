@@ -8,6 +8,7 @@ registerFeature({
   title: 'Conditions',
   description: 'Current conditions at the probed location (Open-Meteo).',
   panels: [{ id: 'conditions', title: 'Now', component: ConditionsPanel, group: 'place', order: 0, summary: ConditionsSummary }],
+  sourceIds: ['openmeteo-aq'],
   defaultEnabled: true,
   settings: [],
 })

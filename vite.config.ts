@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { getWindPayload } from './server/gfsWind.mjs'
 import { getGridPayload } from './server/gfsGrid.mjs'
+import { getBuoysJson } from './server/ndbc.mjs'
 
 // Surfaced in the About panel, so a bug report can name a build.
 const { version } = createRequire(import.meta.url)('./package.json') as { version: string }
@@ -20,6 +21,18 @@ function windProxy(): Plugin {
             res.setHeader('Content-Type', 'application/octet-stream')
             res.setHeader('Cache-Control', 'public, max-age=600')
             res.end(payload)
+          })
+          .catch((e: unknown) => {
+            res.statusCode = 502
+            res.end(String(e))
+          })
+      })
+      server.middlewares.use('/proxy/ndbc', (_req, res) => {
+        getBuoysJson()
+          .then((body) => {
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Cache-Control', 'public, max-age=300')
+            res.end(body)
           })
           .catch((e: unknown) => {
             res.statusCode = 502

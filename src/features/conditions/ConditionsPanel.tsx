@@ -12,6 +12,8 @@ import {
 } from '@/core/units/format'
 import { useForecast } from '@/core/data/openMeteo/useForecast'
 import { wmoText } from '@/core/data/openMeteo/forecast'
+import { aqiCategory } from '@/core/data/openMeteo/airQuality'
+import { useAirQuality } from '@/features/conditions/useAirQuality'
 import { PanelGuard } from '@/ui/PanelGuard'
 
 /** Current conditions readout for the probed point. */
@@ -19,6 +21,7 @@ export function ConditionsPanel() {
   const point = useProbe((s) => s.point)
   const u = useUnits()
   const { data, loading, error } = useForecast()
+  const aq = useAirQuality()
 
   return (
     <PanelGuard error={error} loading={loading || !data}>
@@ -44,6 +47,9 @@ export function ConditionsPanel() {
                 ['Pressure', fmtPressure(data.current.pressure_msl, u.pressure)],
                 ['Cloud cover', fmtPercent(data.current.cloud_cover)],
                 ['Precip (1h)', fmtPrecip(data.current.precipitation, u.precip)],
+                ...(aq !== null
+                  ? [['Air quality', `${Math.round(aq.usAqi)} US AQI · ${aqiCategory(aq.usAqi)}`]]
+                  : []),
               ],
             }}
           />

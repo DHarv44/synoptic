@@ -1,0 +1,2884 @@
+{
+  "gauges": [
+    {
+      "lid": "ACDO2",
+      "name": "Deep Fork River at Arcadia Lake",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.64839,
+      "longitude": -97.36337,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": "HPIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 1005.49,
+          "primaryUnit": "ft",
+          "secondary": 26.6,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "ADDO2",
+      "name": "Cow Creek (OK) near Addington",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.245,
+      "longitude": -97.974167,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "ALXO2",
+      "name": "Washita River at Alex",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.925903,
+      "longitude": -97.773927,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -0.5,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "ARBO2",
+      "name": "Rock Creek (OK) at Lake of the Arbuckles",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.430645,
+      "longitude": -97.03085,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 872.15,
+          "primaryUnit": "ft",
+          "secondary": 72.7,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "ATKO2",
+      "name": "North Boggy Creek at Atoka Lake",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.445371,
+      "longitude": -96.083603,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 587.2,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "ATMO2",
+      "name": "Muddy Boggy Creek at Atoka",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.394167,
+      "longitude": -96.125,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 13.41,
+          "primaryUnit": "ft",
+          "secondary": 0.0603,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "BDCO2",
+      "name": "Delaware Creek near Bromide",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.407017,
+      "longitude": -96.539931,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 2.31,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "BGSO2",
+      "name": "Deep Fork River near Beggs",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "TSA",
+        "name": "Tulsa"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.673888888889,
+      "longitude": -96.068333333333,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -0.86,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:15:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CANO2",
+      "name": "Clear Boggy Creek above Caney Creek near Caney",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.25509,
+      "longitude": -96.212768,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 9.12,
+          "primaryUnit": "ft",
+          "secondary": 0.0083,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CCKO2",
+      "name": "Washita River near Chickasha",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.0856,
+      "longitude": -97.9597,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CLVO2",
+      "name": "Canadian River near Calvin",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.977867,
+      "longitude": -96.243617,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 4.55,
+          "primaryUnit": "ft",
+          "secondary": 0.0627,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CNVO2",
+      "name": "Blue River (OK) near Connerville",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.383426,
+      "longitude": -96.600558,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 5.66,
+          "primaryUnit": "ft",
+          "secondary": 0.0506,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CORO2",
+      "name": "Mud Creek (OK) near Courtney",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.004265,
+      "longitude": -97.566968,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 7.23,
+          "primaryUnit": "ft",
+          "secondary": 0,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CRNO2",
+      "name": "North Criner Creek near Criner",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.971459,
+      "longitude": -97.584756,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 2.51,
+          "primaryUnit": "ft",
+          "secondary": 0,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:15:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CWBO2",
+      "name": "Little West Blue Creek near Connerville",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.475753,
+      "longitude": -96.681544,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 5.06,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "CWRO2",
+      "name": "Washita River at Cumberland Cut near Cumberland",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.096914,
+      "longitude": -96.553269,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 617.1,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "DOVO2",
+      "name": "Cimarron River near Dover",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.951708,
+      "longitude": -97.914499,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 8.84,
+          "primaryUnit": "ft",
+          "secondary": 0.018,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "DURO2",
+      "name": "Washita River near Dickson",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.233427,
+      "longitude": -96.975845,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 6.17,
+          "primaryUnit": "ft",
+          "secondary": 0.0962,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:30:00Z"
+        },
+        "forecast": {
+          "primary": 6.2,
+          "primaryUnit": "ft",
+          "secondary": 0.1,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T06:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "DVSO2",
+      "name": "Honey Creek (OK) below Turner Falls near Davis",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.431755,
+      "longitude": -97.147241,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1.28,
+          "primaryUnit": "ft",
+          "secondary": 0.004,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "ELNO2",
+      "name": "North Canadian River near El Reno",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.563107,
+      "longitude": -97.95755,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 2.17,
+          "primaryUnit": "ft",
+          "secondary": 0,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": 2.3,
+          "primaryUnit": "ft",
+          "secondary": 0.0017,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T06:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "FKBO2",
+      "name": "Blue River (OK) near Franks",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.578146,
+      "longitude": -96.698897,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 3.71,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "FUQO2",
+      "name": "Black Bear Creek (SC OK) at Lake Fuqua",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.59975,
+      "longitude": -97.671028,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1076.15,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "GTRO2",
+      "name": "Cimarron River near Guthrie",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.920602,
+      "longitude": -97.425875,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 5.12,
+          "primaryUnit": "ft",
+          "secondary": 0.0577,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "GUCO2",
+      "name": "Cottonwood Creek (OK) at Guthrie",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.879972,
+      "longitude": -97.429302,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "HEFO2",
+      "name": "Bluff Creek (Central OK) at Lake Hefner",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.582833,
+      "longitude": -97.595597,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": "HPIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 1193.34,
+          "primaryUnit": "ft",
+          "secondary": 61.5,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "HEYO2",
+      "name": "Eastern Oklahoma Lakes at Heyburn Lake",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "TSA",
+        "name": "Tulsa"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.947777777778,
+      "longitude": -96.298611111111,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": "HPIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 761.2,
+          "primaryUnit": "ft",
+          "secondary": 6.63,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "HRHO2",
+      "name": "North Canadian River near Harrah",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.500341,
+      "longitude": -97.193919,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 2.96,
+          "primaryUnit": "ft",
+          "secondary": 0.0671,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:15:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "HVRO2",
+      "name": "Wildhorse Creek near Hoover",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.541474,
+      "longitude": -97.247244,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 0.82,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "KCRO2",
+      "name": "Canadian River near Konawa",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.933416,
+      "longitude": -96.683349,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 6.7,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "KNGO2",
+      "name": "Kingfisher Creek at Kingfisher",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.8706,
+      "longitude": -97.9325,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "KNRO2",
+      "name": "Uncle John Creek at Kingfisher",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.86103,
+      "longitude": -97.92418,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "LHUO2",
+      "name": "Wildhorse Creek at Lake Humphreys",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.584444,
+      "longitude": -97.885556,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1174.58,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "LNDO2",
+      "name": "Washita River at Lindsay",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.8181,
+      "longitude": -97.5983,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "LSDO2",
+      "name": "East Elm Creek at Lake Stanley Draper",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.328399,
+      "longitude": -97.356699,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1186.42,
+          "primaryUnit": "ft",
+          "secondary": 86.3,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "MCKO2",
+      "name": "Mill Creek (OK) near Mill Creek",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.405092,
+      "longitude": -96.863344,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 6.57,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "MCPO2",
+      "name": "Pennington Creek near Mill Creek",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.42037,
+      "longitude": -96.758896,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 2.54,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "MICO2",
+      "name": "Mill Creek (OK) at Mouth of 3Mile Creek near Mill Creek",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.388836,
+      "longitude": -96.845761,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 5.36,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "MPCO2",
+      "name": "Pennington Creek 5 miles NNE of Mill Creek",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.477453,
+      "longitude": -96.811317,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 2.99,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "MSCO2",
+      "name": "Soldier Creek (OK) near SE 15th Street at Midwest City",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.446894,
+      "longitude": -97.373267,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 9.03,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:15:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "MWCO2",
+      "name": "Crutcho Creek at SE 29th Street at Midwest City",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.435025,
+      "longitude": -97.417222,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 5.65,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "NKHO2",
+      "name": "Little Washita River near Ninnekah",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.963401,
+      "longitude": -97.899486,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 5.9,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "NLRO2",
+      "name": "Little River (OK) near Norman",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.221736,
+      "longitude": -97.213916,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 3.08,
+          "primaryUnit": "ft",
+          "secondary": 0.001,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "NRCO2",
+      "name": "Canadian River at Norman",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.194511,
+      "longitude": -97.485034,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 85.24,
+          "primaryUnit": "ft",
+          "secondary": 0.0068,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "NRMO2",
+      "name": "Little River (OK) at Lake Thunderbird",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.223403,
+      "longitude": -97.217528,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1037.39,
+          "primaryUnit": "ft",
+          "secondary": 109,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "OCCO2",
+      "name": "Crutcho Creek at SE 50th Street at Oklahoma City",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.415017,
+      "longitude": -97.418475,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1.33,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:15:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "OKBO2",
+      "name": "North Canadian River at Britton Road at Oklahoma City",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.565615,
+      "longitude": -97.367258,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 4.3,
+          "primaryUnit": "ft",
+          "secondary": 0.0005,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": 4.4,
+          "primaryUnit": "ft",
+          "secondary": 0.0093,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T06:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "OLBO2",
+      "name": "North Canadian River at NW10th Street at Oklahoma City",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.478668,
+      "longitude": -97.663375,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 3.86,
+          "primaryUnit": "ft",
+          "secondary": 0.0105,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "OVRO2",
+      "name": "North Canadian River at Lake Overholser",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.486446,
+      "longitude": -97.666431,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1238.37,
+          "primaryUnit": "ft",
+          "secondary": 11,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "PLVO2",
+      "name": "Washita River near Pauls Valley",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.754802,
+      "longitude": -97.251412,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 2.72,
+          "primaryUnit": "ft",
+          "secondary": 0.0754,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": 2.7,
+          "primaryUnit": "ft",
+          "secondary": 0.0721,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T06:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "PRCO2",
+      "name": "Canadian River at Purcell",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.013961,
+      "longitude": -97.347528,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 2.83,
+          "primaryUnit": "ft",
+          "secondary": 0.006,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "PRKO2",
+      "name": "Cimarron River near Perkins",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.959167,
+      "longitude": -97.0325,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "PRLO2",
+      "name": "Walnut Creek (OK) at Purcell",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.998961,
+      "longitude": -97.366973,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 2.56,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "RIPO2",
+      "name": "Cimarron River near Ripley",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.985893,
+      "longitude": -96.91225,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 6.44,
+          "primaryUnit": "ft",
+          "secondary": 0.103,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "RPCO2",
+      "name": "Pennington Creek near Reagan",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.351333,
+      "longitude": -96.710389,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 10.83,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SASO2",
+      "name": "Little River (OK) near Sasakwa",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.965362,
+      "longitude": -96.512511,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 2.37,
+          "primaryUnit": "ft",
+          "secondary": 0,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SDFO2",
+      "name": "Deep Fork River near Stroud",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.686111,
+      "longitude": -96.6625,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 12.02,
+          "primaryUnit": "ft",
+          "secondary": 0.372,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SHLO2",
+      "name": "South Deer Creek Tributary at Shawnee Rerservoir near Shawnee",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.347291,
+      "longitude": -97.062803,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1070.34,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SMCO2",
+      "name": "Mill Creek (OK) near Sulphur",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.477336,
+      "longitude": -96.905781,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 3.38,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SNCO2",
+      "name": "North Canadian River at Shawnee",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.333127,
+      "longitude": -96.869466,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 8.88,
+          "primaryUnit": "ft",
+          "secondary": 0.0933,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SPCO2",
+      "name": "Polecat Creek near Sapulpa",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "TSA",
+        "name": "Tulsa"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.988333333333,
+      "longitude": -96.081944444444,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SRCO2",
+      "name": "Rock Creek (OK) at Sulphur",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.495367,
+      "longitude": -96.988628,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 5.34,
+          "primaryUnit": "ft",
+          "secondary": 0.0154,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SSQO2",
+      "name": "Squirrel Creek near Shawnee",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.304167,
+      "longitude": -96.912222,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 0.74,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SWDO2",
+      "name": "Cottonwood Creek (OK) near Seward",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.81366,
+      "longitude": -97.478097,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 2.38,
+          "primaryUnit": "ft",
+          "secondary": 0.0336,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "SWNO2",
+      "name": "North Canadian River near Shawnee",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.332848,
+      "longitude": -96.960023,
+      "pedts": {
+        "observed": "HGIRZ",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "obs_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "TCMO2",
+      "name": "Little River (OK) near Tecumseh",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.172574,
+      "longitude": -96.931966,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 3.34,
+          "primaryUnit": "ft",
+          "secondary": 0.0001,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "TUCO2",
+      "name": "Canadian River near Mustang",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.324167,
+      "longitude": -97.723611,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 10.07,
+          "primaryUnit": "ft",
+          "secondary": 0.0827,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "TWRO2",
+      "name": "Washita River near Tishomingo",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 34.219261,
+      "longitude": -96.701669,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 618.96,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "WETO2",
+      "name": "North Canadian River near Wetumka",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.265645,
+      "longitude": -96.206117,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 5.63,
+          "primaryUnit": "ft",
+          "secondary": 0.0928,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "WRWO2",
+      "name": "Deep Fork River near Warwick",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.680896,
+      "longitude": -97.008361,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 4.1,
+          "primaryUnit": "ft",
+          "secondary": 0.007,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "WWCO2",
+      "name": "Wewoka Creek near Wetumka",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.195,
+      "longitude": -96.2481,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 3.89,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-15T23:45:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "WWLO2",
+      "name": "North Deer Creek at Wes Watkins Reservoir",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.401944,
+      "longitude": -97.098889,
+      "pedts": {
+        "observed": "HPIRG",
+        "forecast": ""
+      },
+      "status": {
+        "observed": {
+          "primary": 1070.9,
+          "primaryUnit": "ft",
+          "secondary": -999,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "not_defined",
+          "validTime": "2026-08-16T00:00:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "lid": "YUKO2",
+      "name": "North Canadian River near Yukon",
+      "rfc": {
+        "abbreviation": "ABRFC",
+        "name": "Arkansas-Red Basin RFC"
+      },
+      "wfo": {
+        "abbreviation": "OUN",
+        "name": "Norman"
+      },
+      "state": {
+        "abbreviation": "OK",
+        "name": "Oklahoma"
+      },
+      "latitude": 35.539498,
+      "longitude": -97.742544,
+      "pedts": {
+        "observed": "HGIRG",
+        "forecast": "HGIFF"
+      },
+      "status": {
+        "observed": {
+          "primary": 0.4,
+          "primaryUnit": "ft",
+          "secondary": 0.0062,
+          "secondaryUnit": "kcfs",
+          "floodCategory": "no_flooding",
+          "validTime": "2026-08-15T23:30:00Z"
+        },
+        "forecast": {
+          "primary": -999,
+          "primaryUnit": "",
+          "secondary": -999,
+          "secondaryUnit": "",
+          "floodCategory": "fcst_not_current",
+          "validTime": "0001-01-01T00:00:00Z"
+        }
+      }
+    }
+  ]
+}

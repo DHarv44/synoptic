@@ -280,10 +280,19 @@ server/index.mjs, above the /proxy 404.
   settings. Found and fixed in passing: yOfP was vertically mirrored —
   the whole skew-T had been rendering upside down (regression test now
   pins orientation). Deferred: observed-parcel indices, hodograph overlay.
-- **M7 — more observations** ✦ three small independent slices: NDBC buoys
-  (fixed-width text → proxy parses to JSON; METAR-shaped layer), USGS
-  river gauges (JSON, CORS-open, keyless), Open-Meteo air quality (panel
-  line in Now + optional layer later).
+- **M7 — more observations** ✅ three slices, all landed:
+  `buoys`: NDBC latest_obs.txt has no CORS → `/proxy/ndbc` (server/ndbc.mjs)
+  parses the whitespace text to JSON, 10 min cache; one global file, so the
+  layer polls once — no bbox chasing. Circles coloured by wave height with
+  unit-aware labels; stations >3 h stale or with no marine data hidden.
+  `gauges`: NWPS replaced the planned USGS iv — same keyless/CORS-open, but
+  carries flood categories, which is the value a workstation wants. The
+  `srid=EPSG_4326` param is mandatory or the API silently returns zero
+  gauges. METAR-style viewport poller (MIN_ZOOM 6); AHPS colours, flooding
+  gauges drawn larger; "flooding only" setting.
+  Air quality: Open-Meteo AQ subdomain, `Air quality` row in the Now panel
+  (US AQI + EPA category), nearest-hour pick that skips null readings.
+  Deferred: buoy/gauge click-through details, AQ map layer.
 
 Order: M0 → M1 → M2 → M3 → M4 → M5 → M6 → M7. M4 depends on M3; the rest
 are independent and can reorder if a data-format unknown blocks one.

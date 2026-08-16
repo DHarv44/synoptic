@@ -36,6 +36,8 @@ export const LAYER_ORDER = [
   'alerts-fill',
   // — the basemap's own labels draw here —
   'cells',
+  'gauges',
+  'buoys',
   'pirep',
   'metar',
   'lightning',
@@ -52,6 +54,8 @@ export type LayerSlot = (typeof LAYER_ORDER)[number]
  */
 const ABOVE_LABELS = new Set<LayerSlot>([
   'cells',
+  'gauges',
+  'buoys',
   'pirep',
   'metar',
   'lightning',

@@ -19,6 +19,7 @@ import express from 'express'
 import { fileURLToPath } from 'node:url'
 import { getWindPayload } from './gfsWind.mjs'
 import { getGridPayload } from './gfsGrid.mjs'
+import { getBuoysJson } from './ndbc.mjs'
 
 const PORT = process.env.PORT ?? 8080
 const DIST = fileURLToPath(new URL('../dist', import.meta.url))
@@ -104,6 +105,18 @@ app.use('/proxy/gfs-grid', async (req, res) => {
     res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Cache-Control', 'public, max-age=600')
     res.end(payload)
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** NDBC latest buoy obs, parsed from fixed-width text (upstream has no CORS). */
+app.use('/proxy/ndbc', async (_req, res) => {
+  try {
+    const body = await getBuoysJson()
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Cache-Control', 'public, max-age=300')
+    res.end(body)
   } catch (e) {
     fail(res, e)
   }

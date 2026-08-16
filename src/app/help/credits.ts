@@ -34,7 +34,7 @@ export const CREDITS: Credit[] = [
   {
     label: 'Open-Meteo',
     href: 'https://open-meteo.com/',
-    what: 'Forecasts, model soundings, ensembles and location search.',
+    what: 'Forecasts, model soundings, ensembles, air quality and location search.',
   },
   {
     label: 'NASA GIBS',
@@ -60,6 +60,16 @@ export const CREDITS: Credit[] = [
     label: 'RAOB archive · Iowa Environmental Mesonet',
     href: 'https://mesonet.agron.iastate.edu/',
     what: 'Observed 00Z/12Z balloon soundings, overlaid on the model skew-T.',
+  },
+  {
+    label: 'NWS National Water Prediction Service',
+    href: 'https://water.noaa.gov/',
+    what: 'River gauge observations and flood categories.',
+  },
+  {
+    label: 'NDBC',
+    href: 'https://www.ndbc.noaa.gov/',
+    what: 'Moored buoy and coastal station observations: waves, water temperature, marine wind.',
   },
   {
     label: 'Blitzortung',

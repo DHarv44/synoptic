@@ -47,11 +47,15 @@ off and on moves it to the top (this is how radar came to cover warnings).
 
 **Current work is on branch `met-views` (pushed to origin), NOT merged to
 main.** Railway deploys main, so production predates Phase 8. The branch
-holds M0–M5 of SLICES Phase 8 (meteorological views): the layering repair,
-GOES satellite bands, aviation hazards, gridded GFS fields with client-side
-contouring, the WPC surface chart, and the SPC suite. Six commits,
-`13c2080..aa2c041`. Remaining: M6 (real RAOB soundings on the Skew-T) and
-M7 (NDBC buoys, USGS river gauges, Open-Meteo air quality).
+holds ALL of SLICES Phase 8 (meteorological views), M0–M7: the layering
+repair, GOES satellite bands, aviation hazards, gridded GFS fields with
+client-side contouring, the WPC surface chart, the SPC suite, observed
+RAOB soundings dashed on the Skew-T (IEM raob.py, open CORS, no proxy),
+NDBC buoys via a parsing `/proxy/ndbc`, NWPS river gauges with flood
+categories, and a US AQI row in the Now panel. Also fixed in passing: the
+Skew-T had been rendering vertically mirrored (yOfP put the surface at the
+top) since it shipped — orientation now pinned by a regression test.
+Phase 8 is feature-complete; what remains is review and merge.
 
 **Awaiting the user**: a visual review. Every Phase 8 layer was verified
 through data (sources populated, health green, panels rendering real rows)
