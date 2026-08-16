@@ -16,7 +16,7 @@ import { fetchWindField, type WindField } from '@/features/wind/service'
  * zoom. The old fixed 8 min/s moved that wind ~1 px/s at CONUS zoom: a
  * static scatter of atoms, not a flow.
  */
-const SIM_RATE_Z6 = 3000
+const SIM_RATE_Z6 = 1800
 
 interface WindCustomLayer extends CustomLayerInterface {
   system: ParticleSystem | null

@@ -9,10 +9,10 @@ void main() {
 }
 `
 
-/** Advects particle positions stored in an RG32F texture (equirect [0,1]²). */
+/** Advects particle state in an RGBA32F texture: xy position, z age. */
 export const SIM_FRAG = /* glsl */ `#version 300 es
 precision highp float;
-uniform sampler2D u_state;   // RG32F: x = lon [0,1], y = lat [0,1]
+uniform sampler2D u_state;   // RGBA32F: x = lon [0,1], y = lat [0,1], z = age
 uniform sampler2D u_wind;    // RG8: u,v quantized
 uniform float u_windScale;   // int8 → m/s
 uniform float u_dt;          // sim seconds per frame
@@ -25,7 +25,9 @@ float hash(vec2 p) {
 }
 
 void main() {
-  vec2 pos = texture(u_state, v_uv).rg;
+  vec4 st = texture(u_state, v_uv);
+  vec2 pos = st.rg;
+  float age = st.b;
   vec2 windRaw = texture(u_wind, pos).rg;           // 0..1
   vec2 wind = (windRaw * 2.0 - 1.0) * 127.0 * u_windScale; // m/s
 
@@ -37,16 +39,16 @@ void main() {
   pos += vec2(dLon / 360.0, dLat / 180.0);
   pos.x = fract(pos.x);
 
-  // respawn: rate scaled by speed so fast streams stay fed, plus polar clamp.
-  // Low base rate: particles must live long enough to trace filaments, or
-  // the layer reads as a static scatter.
+  // Lifecycle instead of random death: age runs 0→1, faster for fast
+  // particles so streams stay fed, and rebirth lands elsewhere. The draw
+  // pass fades by age, so no particle ever pops in or vanishes mid-streak.
   float speed = length(wind);
-  float drop = 0.001 + speed * 0.00008;
-  float rnd = hash(v_uv * 1000.0 + u_seed);
-  if (rnd < drop || pos.y < 0.03 || pos.y > 0.97) {
+  age += 0.0018 + speed * 0.00008;
+  if (age >= 1.0 || pos.y < 0.03 || pos.y > 0.97) {
     pos = vec2(hash(v_uv * 371.3 + u_seed), 0.05 + 0.9 * hash(v_uv * 913.7 + u_seed * 1.7));
+    age = fract(age) * 0.05; // reborn young, slightly staggered
   }
-  o_state = vec4(pos, 0.0, 1.0);
+  o_state = vec4(pos, age, 1.0);
 }
 `
 
@@ -60,13 +62,16 @@ uniform mat4 u_matrix;
 uniform float u_stateRes;
 uniform float u_pointSize;
 out float v_speed;
+out float v_age;
 
 const float PI = 3.14159265358979;
 
 void main() {
   float idx = float(gl_VertexID);
   vec2 uv = (vec2(mod(idx, u_stateRes), floor(idx / u_stateRes)) + 0.5) / u_stateRes;
-  vec2 pos = texture(u_state, uv).rg;
+  vec4 st = texture(u_state, uv);
+  vec2 pos = st.rg;
+  v_age = st.b;
 
   vec2 windRaw = texture(u_wind, pos).rg;
   v_speed = length((windRaw * 2.0 - 1.0) * 127.0 * u_windScale);
@@ -87,11 +92,14 @@ precision mediump float;
 uniform float u_opacity;
 uniform float u_plain; // 1 = pale monochrome (field carries the colour)
 in float v_speed;
+in float v_age;
 out vec4 o_color;
 
 void main() {
   vec2 c = gl_PointCoord - 0.5;
   if (dot(c, c) > 0.25) discard;
+  // Ease in at birth, ease out toward death — respawns never pop.
+  float life = smoothstep(0.0, 0.1, v_age) * (1.0 - smoothstep(0.75, 1.0, v_age));
   // speed ramp: slate → cyan → yellow → red (0..40+ m/s)
   vec3 slow = vec3(0.45, 0.55, 0.65);
   vec3 mid = vec3(0.30, 0.85, 0.90);
@@ -101,7 +109,7 @@ void main() {
   col = mix(col, fast, smoothstep(10.0, 25.0, v_speed));
   col = mix(col, max_, smoothstep(25.0, 45.0, v_speed));
   col = mix(col, vec3(0.92, 0.94, 0.97), u_plain);
-  o_color = vec4(col, u_opacity);
+  o_color = vec4(col, u_opacity * life);
 }
 `
 

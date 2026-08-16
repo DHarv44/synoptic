@@ -65,13 +65,17 @@ export class ParticleSystem {
   private makeStateTexture(): WebGLTexture {
     const { gl, res } = this
     const tex = gl.createTexture() as WebGLTexture
-    const init = new Float32Array(res * res * 2)
+    // RGBA: x, y, age (0..1 of a lifetime), spare. Ages start random so
+    // deaths are uncorrelated — a whole generation dying together is what
+    // makes a particle layer visibly "start over".
+    const init = new Float32Array(res * res * 4)
     for (let i = 0; i < res * res; i++) {
-      init[i * 2] = Math.random()
-      init[i * 2 + 1] = 0.08 + 0.84 * Math.random()
+      init[i * 4] = Math.random()
+      init[i * 4 + 1] = 0.08 + 0.84 * Math.random()
+      init[i * 4 + 2] = Math.random()
     }
     gl.bindTexture(gl.TEXTURE_2D, tex)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG32F, res, res, 0, gl.RG, gl.FLOAT, init)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, res, res, 0, gl.RGBA, gl.FLOAT, init)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
