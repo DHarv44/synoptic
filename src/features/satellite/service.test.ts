@@ -9,8 +9,8 @@ describe('gibsTime', () => {
   })
 
   it('snaps sub-daily products to their 10-minute cadence', () => {
-    // now − 1 h lag = 19:57:23 → snapped down to 19:50.
-    expect(gibsTime('geocolor', NOW, NOW)).toBe('2026-08-15T19:50:00Z')
+    // now − 75 min lag = 19:42:23 → snapped down to 19:40.
+    expect(gibsTime('geocolor', NOW, NOW)).toBe('2026-08-15T19:40:00Z')
   })
 
   it('follows the timeline into the past without the lag clamp', () => {

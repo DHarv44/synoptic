@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useComputedColorScheme } from '@mantine/core'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { fetchJson } from '@/core/data/fetchJson'
 import { featureEnabled, useFeatureOption } from '@/core/settings/store'
@@ -21,6 +22,7 @@ const POLL_MS = 15 * 60_000
 /** River gauges coloured by flood category, viewport-following like METARs. */
 export function GaugesLayer() {
   const { map } = useMapContext()
+  const scheme = useComputedColorScheme('dark')
   const floodingOnly = useFeatureOption<boolean>('gauges', 'floodingOnly')
   const [gauges, setGauges] = useState<Gauge[]>([])
   const [bboxKey, setBboxKey] = useState<string | null>(null)
@@ -76,8 +78,8 @@ export function GaugesLayer() {
           'circle-radius': ['+', 3, ['*', 1.2, ['get', 'rank']]],
           'circle-color': ['get', 'color'],
           'circle-opacity': 0.9,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': 'rgba(0,0,0,0.5)',
+          'circle-stroke-width': 1.2,
+          'circle-stroke-color': scheme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)',
         },
       },
       'gauges',
@@ -86,14 +88,15 @@ export function GaugesLayer() {
       if (m.getLayer('gauges')) m.removeLayer('gauges')
       if (m.getSource('gauges')) m.removeSource('gauges')
     }
-  }, [])
+  }, [scheme])
 
   useMapLayer(
     (m) => {
       const src = m.getSource('gauges') as GeoJSONSource | undefined
       src?.setData(gaugeGeoJSON(reportingGauges(gauges, floodingOnly)))
     },
-    [gauges, floodingOnly],
+    // scheme is a dep because the first effect rebuilds an empty source on toggle.
+    [gauges, floodingOnly, scheme],
   )
 
   return null

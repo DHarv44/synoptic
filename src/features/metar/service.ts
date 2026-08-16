@@ -10,6 +10,8 @@ export interface Metar {
   dewp: number | null // °C
   wdir: number | string | null // deg or 'VRB'
   wspd: number | null // kt
+  /** AWC-computed flight category: VFR | MVFR | IFR | LIFR. */
+  fltCat: string | null
 }
 
 export function metarUrl(latMin: number, lonMin: number, latMax: number, lonMax: number): string {

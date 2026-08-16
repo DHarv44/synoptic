@@ -97,8 +97,29 @@ export function AviationLayer() {
         layout: { 'line-join': 'round' },
         paint: {
           'line-color': ['get', 'color'],
-          'line-width': 1.2,
+          'line-width': 1.6,
           'line-dasharray': [3, 2],
+        },
+      },
+      'aviation-fill',
+    )
+    // The hazard name on the polygon, the way the GFA labels its areas —
+    // an unlabeled wash makes the reader open a panel to learn "TURB".
+    addDataLayer(
+      m,
+      {
+        id: 'aviation-sigmet-labels',
+        type: 'symbol',
+        source: 'aviation-sigmets',
+        layout: {
+          'text-field': ['get', 'hazard'],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': 11,
+        },
+        paint: {
+          'text-color': ['get', 'color'],
+          'text-halo-color': 'rgba(0,0,0,0.7)',
+          'text-halo-width': 1.2,
         },
       },
       'aviation-fill',
@@ -121,7 +142,7 @@ export function AviationLayer() {
       'pirep',
     )
     return () => {
-      for (const id of ['aviation-fill', 'aviation-outline', 'pirep']) {
+      for (const id of ['aviation-fill', 'aviation-outline', 'aviation-sigmet-labels', 'pirep']) {
         if (m.getLayer(id)) m.removeLayer(id)
       }
       for (const id of ['aviation-sigmets', 'aviation-pireps']) {

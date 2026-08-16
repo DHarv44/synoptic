@@ -66,7 +66,8 @@ export const BUILT_IN_PRESETS: Preset[] = [
     label: 'Synoptic analysis',
     description: 'Air-mass satellite, isobars, fronts, steering flow.',
     scene: {
-      satellite: { product: 'airmass' },
+      // Opacity dropped so the isobars stay the skeleton over the vivid RGB.
+      satellite: { product: 'airmass', opacity: 60 },
       fields: { field: 'mslp' },
       fronts: true,
       graticule: true,

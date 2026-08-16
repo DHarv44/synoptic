@@ -45,11 +45,12 @@ export function BuoysLayer() {
         source: 'buoys',
         minzoom: MIN_ZOOM,
         paint: {
-          'circle-radius': 3.5,
+          'circle-radius': 4,
           'circle-color': ['get', 'color'],
-          'circle-opacity': 0.9,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': 'rgba(0,0,0,0.5)',
+          'circle-opacity': 0.95,
+          'circle-stroke-width': 1.2,
+          // Light stroke in dark mode: calm-blue dots were invisible on night ocean.
+          'circle-stroke-color': scheme === 'dark' ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.5)',
         },
       },
       'buoys',
@@ -87,7 +88,8 @@ export function BuoysLayer() {
       const src = m.getSource('buoys') as GeoJSONSource | undefined
       src?.setData(buoyGeoJSON(buoys, system))
     },
-    [buoys, system],
+    // scheme is a dep because the first effect rebuilds an empty source on toggle.
+    [buoys, system, scheme],
   )
 
   return null

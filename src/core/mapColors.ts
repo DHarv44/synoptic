@@ -13,6 +13,7 @@ export const MAP_COLORS = {
   orange5: '#ff922b',
   orange7: '#f76707',
   yellow5: '#fab005',
+  green5: '#51cf66',
   green7: '#37b24c',
   blue4: '#4dabf7',
   blue5: '#339af0',

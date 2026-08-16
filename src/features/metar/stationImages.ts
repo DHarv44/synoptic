@@ -20,7 +20,17 @@ const cache = new Map<string, ImageData>()
 const BATCH = 6
 
 export function stationImageId(s: Metar, scheme: 'dark' | 'light'): string {
-  return `metar-${s.icaoId}-${scheme}`
+  // The id encodes everything the sprite draws: with only station+scheme,
+  // a cached sprite kept showing its first observation all session.
+  const dir = typeof s.wdir === 'number' ? Math.round(s.wdir / 10) : 'v'
+  const bits = [
+    s.temp === null ? '' : Math.round(s.temp),
+    s.dewp === null ? '' : Math.round(s.dewp),
+    s.wspd === null ? '' : Math.round(s.wspd),
+    dir,
+    s.fltCat ?? '',
+  ].join('/')
+  return `metar-${s.icaoId}-${scheme}-${bits}`
 }
 
 function draw(s: Metar, scheme: 'dark' | 'light'): ImageData {

@@ -26,7 +26,12 @@ interface GibsProduct {
 
 const DAY_MS = 86_400_000
 const TEN_MIN_MS = 600_000
-const HOUR_MS = 3_600_000
+/**
+ * GOES lag margin. Capabilities said 35–55 min, and at a 60-min clamp the
+ * newest frame was sometimes only partially published — black tile voids
+ * across whole regions. 75 min trades a touch of freshness for whole frames.
+ */
+const GOES_LAG_MS = 75 * 60_000
 
 /**
  * Layer ids, matrix sets and cadences verified against the live WMTS
@@ -57,7 +62,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     ext: 'png',
     maxZoom: 7,
     stepMs: TEN_MIN_MS,
-    lagMs: HOUR_MS,
+    lagMs: GOES_LAG_MS,
   },
   'goes-ir': {
     id: 'GOES-East_ABI_Band13_Clean_Infrared',
@@ -65,7 +70,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     ext: 'png',
     maxZoom: 6,
     stepMs: TEN_MIN_MS,
-    lagMs: HOUR_MS,
+    lagMs: GOES_LAG_MS,
   },
   'goes-vis': {
     id: 'GOES-East_ABI_Band2_Red_Visible_1km',
@@ -73,7 +78,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     ext: 'png',
     maxZoom: 7,
     stepMs: TEN_MIN_MS,
-    lagMs: HOUR_MS,
+    lagMs: GOES_LAG_MS,
   },
   airmass: {
     id: 'GOES-East_ABI_Air_Mass',
@@ -81,7 +86,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     ext: 'png',
     maxZoom: 6,
     stepMs: TEN_MIN_MS,
-    lagMs: HOUR_MS,
+    lagMs: GOES_LAG_MS,
   },
 }
 

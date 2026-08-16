@@ -84,7 +84,13 @@ export function SpcLayer() {
         id: 'spc-outlook',
         type: 'fill',
         source: 'spc-outlook',
-        paint: { 'fill-color': ['get', 'fill'], 'fill-opacity': 0.22 },
+        paint: {
+          'fill-color': ['get', 'fill'],
+          // A categorical outlook is context at synoptic zoom and mud over
+          // radar at storm scale; the wash bows out as you close in and
+          // the outline layer carries the boundary alone.
+          'fill-opacity': ['interpolate', ['linear'], ['zoom'], 5.5, 0.22, 7, 0.06, 8, 0],
+        },
       },
       'spc-outlook',
     )
