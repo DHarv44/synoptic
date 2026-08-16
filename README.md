@@ -61,7 +61,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Surface obs | METAR station models (temp/dewpoint/barb), decluttered | ✅ |
 | Satellite | NASA GIBS imagery, timeline-dated | ✅ |
 | Basemap | OpenFreeMap vector tiles — cities, roads, labels, dark/light | ✅ |
-| Wind particles | GPU flow field, surface → jet stream | ⚠️ built, disabled (see roadmap) |
+| Wind particles | GPU flow: speed field wash + streamline trails, surface → jet | ⚠️ working, polish ongoing (see roadmap) |
 | My location | Locate button → centre/zoom, remembered as home | ✅ |
 | Notifications | Desktop alerts for warnings covering your location (rain nowcast still planned) | ✅ |
 | Alert ticker | Top-bar scrolling severe ticker | 🔭 |
@@ -93,13 +93,22 @@ probes that point. Works on desktop and mobile, in dark or light.
 
 **Next up**
 
-1. **Fix the wind particle layer** *(built, shipped disabled)* — the GPU particle
-   system, GFS proxy, and level selector all work, but the served wind field
-   contains a corrupt patch that renders as a solid block of fast particles.
-   Diagnosis so far: server-side U-component agrees between the 0.25° and 0.5°
-   GFS files, but client speeds run ~30 m/s hotter, implicating the V-component —
-   either `grib2class` mis-decoding VGRD or a u/v assembly bug. Resume steps are
-   recorded in [SLICES.md](SLICES.md) (Phase 3) and [HANDOFF.md](HANDOFF.md).
+1. **Wind still needs work** *(2026-08-16: fixed and overhauled, not finished)* —
+   the old corruption was three stacked bugs (unrestored GL viewport, a
+   fetch/onAdd race, and `grib2class` misparsing negative GRIB reference
+   values), all fixed; the layer then gained a Windy-style speed-field wash,
+   screen-persistence streamline trails, line-segment strokes, viewport-local
+   particle spawning, zoom-constant pacing, and a compressed visual speed
+   floor so low levels flow like the jet. Remaining, in rough order:
+   - **Speed legend** — the field ramp has no colourbar; magnitudes are
+     unreadable without one.
+   - **Feel tuning** — pace, trail length, density and the 6 + 0.85s visual
+     speed mapping are first-pass constants; they need eyes-on tuning per
+     level, and possibly per-level ramp ranges (jet saturates the palette).
+   - **Level2/globe interplay** — custom GL layers still pin the map to
+     mercator; globe projection waits on porting them.
+   - **Gusts/streamline variants** — Windy-style gust layer and steadier
+     streamline mode are cheap now that the field/trails machinery exists.
 2. **UI overhaul pass** — largely shipped; the remainder is listed below.
 
    **Shipped.** The structural work is done. The permanent left rail is gone
