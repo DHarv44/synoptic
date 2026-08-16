@@ -8,6 +8,14 @@ registerFeature({
   title: 'Sounding',
   description: 'Skew-T log-p, hodograph, and derived indices at the probed point.',
   panels: [{ id: 'sounding', title: 'Skew-T', component: SoundingPanel, group: 'place', order: 4, summary: SoundingSummary }],
+  sourceIds: ['iem-raob'],
   defaultEnabled: true,
-  settings: [],
+  settings: [
+    {
+      kind: 'boolean',
+      key: 'observed',
+      label: 'Observed balloon overlay',
+      defaultValue: true,
+    },
+  ],
 })

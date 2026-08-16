@@ -21,7 +21,8 @@ const plotH = SKEWT.H - SKEWT.MT - SKEWT.MB
 export function yOfP(p: number): number {
   const t =
     (Math.log(p) - Math.log(SKEWT.P_BOT)) / (Math.log(SKEWT.P_TOP) - Math.log(SKEWT.P_BOT))
-  return SKEWT.MT + t * plotH
+  // High pressure (surface) at the bottom, y growing downward in SVG.
+  return SKEWT.MT + (1 - t) * plotH
 }
 
 /** Skewed x for temperature (°C) at pressure p. */

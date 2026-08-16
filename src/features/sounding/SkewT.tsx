@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { Sounding } from '@/core/data/openMeteo/sounding'
 import { liftParcel } from '@/core/met/thermo'
+import { SoundingTrace } from '@/features/sounding/SoundingTrace'
 import {
   DRY_ADIABATS_K,
   ISOBARS,
@@ -22,15 +23,20 @@ const COL = {
   text: 'var(--mantine-color-dimmed)',
 }
 
+interface SkewTProps {
+  sounding: Sounding
+  /** Observed balloon profile drawn dashed beneath the model traces. */
+  observed?: Sounding | null
+}
+
 /** Skew-T log-p: environment traces, surface parcel path, CAPE shading. */
-export function SkewT({ sounding }: { sounding: Sounding }) {
-  const { tempPath, dewPath, parcelPath, capePolygon } = useMemo(() => {
+export function SkewT({ sounding, observed }: SkewTProps) {
+  const { parcelPath, capePolygon } = useMemo(() => {
     const lv = sounding.levels
     const ps = lv.map((l) => l.p)
     const parcel = liftParcel(lv[0].T, lv[0].Td, lv[0].p, ps)
 
     const tPts = lv.map((l) => [xOfTP(l.T, l.p), yOfP(l.p)] as [number, number])
-    const dPts = lv.map((l) => [xOfTP(l.Td, l.p), yOfP(l.p)] as [number, number])
     const pPts = lv.map(
       (l, i) => [xOfTP(parcel.temps[i], l.p), yOfP(l.p)] as [number, number],
     )
@@ -45,8 +51,6 @@ export function SkewT({ sounding }: { sounding: Sounding }) {
       }
     }
     return {
-      tempPath: pathFrom(tPts),
-      dewPath: pathFrom(dPts),
       parcelPath: pathFrom(pPts),
       capePolygon: up.length > 1 ? pathFrom([...up, ...down]) + 'Z' : null,
     }
@@ -104,8 +108,12 @@ export function SkewT({ sounding }: { sounding: Sounding }) {
         ))}
         {capePolygon && <path d={capePolygon} fill={COL.cape} opacity={0.15} />}
         <path d={parcelPath} fill="none" stroke={COL.parcel} strokeWidth={1.2} strokeDasharray="4 3" />
-        <path d={tempPath} fill="none" stroke={COL.temp} strokeWidth={1.8} />
-        <path d={dewPath} fill="none" stroke={COL.dew} strokeWidth={1.8} />
+        {observed && (
+          <g opacity={0.65}>
+            <SoundingTrace sounding={observed} tempColor={COL.temp} dewColor={COL.dew} dash="5 3" width={1.3} />
+          </g>
+        )}
+        <SoundingTrace sounding={sounding} tempColor={COL.temp} dewColor={COL.dew} />
       </g>
       {/* bottom temperature labels */}
       {ISOTHERMS.filter((t) => t >= SKEWT.T_MIN && t <= SKEWT.T_MAX).map((t) => (

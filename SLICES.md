@@ -269,11 +269,17 @@ server/index.mjs, above the /proxy 404.
   parallelograms (PDS drawn heavier) and MCD outlines up with warning
   boundaries, panel with watch details and MCD full text on expand.
   Deferred: probabilistic outlook layers (tornado/wind/hail %), Day 4–8.
-- **M6 — real soundings** ✦ medium. RAOB adapter in core/data returning
-  the existing Sounding shape; /proxy/raob (Wyoming/IGRA text is
-  CORS-blocked; proxy returns parsed JSON). Extract SoundingTrace from
-  SkewT.tsx (already at 125 lines), render obs vs model as paired traces.
-  Nearest-station picker, 00Z/12Z cadence, long cache TTL.
+- **M6 — real soundings** ✅ `core/data/iem/raob.ts`: IEM raob.py serves
+  clean JSON with open CORS — no proxy needed at all (Wyoming/IGRA never
+  used). Thermo levels form the profile; wind, reported on its own levels,
+  interpolates to them as u/v in log-p. Nearest online station within
+  400 km (`_XXX` area-alias ids return empty and are skipped), latest
+  00Z/12Z behind a 2 h archive lag, one-cycle fallback for missed
+  launches. SoundingTrace extracted; observed draws dashed under the
+  model traces with a station/distance legend line, toggleable in
+  settings. Found and fixed in passing: yOfP was vertically mirrored —
+  the whole skew-T had been rendering upside down (regression test now
+  pins orientation). Deferred: observed-parcel indices, hodograph overlay.
 - **M7 — more observations** ✦ three small independent slices: NDBC buoys
   (fixed-width text → proxy parses to JSON; METAR-shaped layer), USGS
   river gauges (JSON, CORS-open, keyless), Open-Meteo air quality (panel
