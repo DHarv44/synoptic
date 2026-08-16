@@ -4,6 +4,7 @@ import { IconHelp, IconMoon, IconSearch, IconSun } from '@tabler/icons-react'
 import { Clock } from '@/ui/Clock'
 import { HealthStrip } from '@/app/shell/HealthStrip'
 import { InstallButton } from '@/app/shell/InstallButton'
+import { PresetMenu } from '@/app/shell/PresetMenu'
 import { useDock } from '@/app/shell/dockStore'
 
 export function TopBar() {
@@ -26,6 +27,7 @@ export function TopBar() {
             <IconSearch size={17} stroke={1.6} />
           </ActionIcon>
         </Tooltip>
+        <PresetMenu />
       </Group>
 
       <Clock />
