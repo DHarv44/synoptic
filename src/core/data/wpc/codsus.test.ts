@@ -69,6 +69,24 @@ describe('parseCodsus', () => {
     expect(graded.fronts[0]).toMatchObject({ kind: 'cold', strength: 'WK' })
   })
 
+  it('decodes the overnight ASUS01 whole-degree format', () => {
+    // Real bulletin head, 2026-08-16 04:26Z: 4-5 digit points, same pil.
+    const asus01 = [
+      'HIGHS 1021 38112 1019 35105 1024 4474 1021 2988',
+      'LOWS 1013 5093 1009 34115',
+      'COLD 4693 4594 4396 4299 42101',
+      'TROF 41108 39108 38106',
+    ].join('\n')
+    const a = parseCodsus(asus01)
+    expect(a.centers).toHaveLength(6)
+    expect(a.centers[0]).toMatchObject({ kind: 'high', pressure: 1021, lat: 38, lon: -112 })
+    expect(a.centers[2]).toMatchObject({ pressure: 1024, lat: 44, lon: -74 })
+    expect(a.centers[3]).toMatchObject({ pressure: 1021, lat: 29, lon: -88 })
+    const cold = a.fronts.find((f) => f.kind === 'cold')
+    expect(cold?.points[4]).toEqual({ lat: 42, lon: -101 })
+    expect(a.fronts.find((f) => f.kind === 'trough')?.points).toHaveLength(3)
+  })
+
   it('drops one-point fronts rather than drawing dots', () => {
     expect(parseCodsus('COLD 3380670').fronts).toHaveLength(0)
   })

@@ -40,9 +40,22 @@ const FRONT_KINDS: Record<string, Front['kind']> = {
 
 const STRENGTHS = new Set(['WK', 'MDT', 'STG'])
 
+/**
+ * Two point formats share the CODSUS pil: the main-cycle ASUS02 codes
+ * tenths as 7 digits (lat×10 then zero-padded lon×10, `2870883` → 28.7N
+ * 88.3W); the interim overnight ASUS01 codes whole degrees as 4–5 digits
+ * (2-digit lat then lon, `4474` → 44N 74W, `38112` → 38N 112W). The
+ * overnight chart parsed to nothing until both were handled.
+ */
 function decodePoint(tok: string): { lat: number; lon: number } {
-  return { lat: Number(tok.slice(0, 3)) / 10, lon: -Number(tok.slice(3)) / 10 }
+  if (tok.length === 7) {
+    return { lat: Number(tok.slice(0, 3)) / 10, lon: -Number(tok.slice(3)) / 10 }
+  }
+  return { lat: Number(tok.slice(0, 2)), lon: -Number(tok.slice(2)) }
 }
+
+/** A coordinate token in either resolution. */
+const POINT_RE = /^\d{4}$|^\d{5}$|^\d{7}$/
 
 export function parseCodsus(text: string): SurfaceAnalysis {
   const out: SurfaceAnalysis = { validTime: null, fronts: [], centers: [] }
@@ -78,14 +91,16 @@ export function parseCodsus(text: string): SurfaceAnalysis {
       if (typeof section === 'object') {
         if (STRENGTHS.has(tok) && section.points.length === 0) {
           section.strength = tok
-        } else if (/^\d{7}$/.test(tok)) {
+        } else if (POINT_RE.test(tok)) {
           section.points.push(decodePoint(tok))
         }
         continue
       }
 
-      // Centers: alternating 3–4 digit pressures and 7-digit coordinates.
-      if (/^\d{7}$/.test(tok) && pending !== null) {
+      // Centers: alternating 3–4 digit pressures and coordinates. A 4-digit
+      // token is a pressure or a whole-degree point — the alternation
+      // (pending set or not) is what disambiguates.
+      if (POINT_RE.test(tok) && pending !== null) {
         const { lat, lon } = decodePoint(tok)
         out.centers.push({
           kind: section === 'highs' ? 'high' : 'low',
