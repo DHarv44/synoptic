@@ -45,17 +45,16 @@ off and on moves it to the top (this is how radar came to cover warnings).
 
 ## Where things stand (2026-08-15)
 
-**Current work is on branch `met-views` (pushed to origin), NOT merged to
-main.** Railway deploys main, so production predates Phase 8. The branch
-holds ALL of SLICES Phase 8 (meteorological views), M0–M7: the layering
-repair, GOES satellite bands, aviation hazards, gridded GFS fields with
-client-side contouring, the WPC surface chart, the SPC suite, observed
-RAOB soundings dashed on the Skew-T (IEM raob.py, open CORS, no proxy),
-NDBC buoys via a parsing `/proxy/ndbc`, NWPS river gauges with flood
-categories, and a US AQI row in the Now panel. Also fixed in passing: the
-Skew-T had been rendering vertically mirrored (yOfP put the surface at the
-top) since it shipped — orientation now pinned by a regression test.
-Phase 8 is feature-complete; what remains is review and merge.
+**`met-views` merged to main 2026-08-16 (fast-forward to f66ddd7) — Railway
+deploys main, so production now carries everything.** That includes all of
+Phase 8 (M0–M7: satellite, aviation, GFS fields, WPC fronts, SPC suite,
+RAOB overlay, buoys, gauges, air quality), scene presets with derived
+active-matching, the surface-chart war (MSLET + selectable PRMSL, spline
+smoothing, pips, ring-defined H/L centres), the /data documentation page,
+AIFS in the model panel, the MRMS precip-totals layer, hover opacity
+sliders on the layer rail, and the flight-category METAR plots. Next big
+agreed build: LIVE/SYNC loop mode (designed in-session; layers already
+carry cadence+lag metadata).
 
 **Awaiting the user**: a visual review. Every Phase 8 layer was verified
 through data (sources populated, health green, panels rendering real rows)
