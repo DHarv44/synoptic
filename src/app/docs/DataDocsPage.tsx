@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { Anchor, Badge, Box, Container, Divider, Group, NavLink, Stack, Text, Title } from '@mantine/core'
 import { DATA_CATALOG } from '@/app/help/dataCatalog'
 import { DatasetSection } from '@/app/docs/DatasetSection'
@@ -6,14 +7,25 @@ const NAV_WIDTH = 300
 const HEADER_H = 45
 
 /**
- * The data catalog as a real documentation page at /data — full width,
- * sidebar navigation, one section per dataset. The map shell never mounts
- * here; this is a document, not a workstation view. The page is its own
- * scroll container because global.css locks body scrolling for the map.
+ * The data catalog as a real documentation page at /data — sidebar picks a
+ * dataset, the content pane documents that one alone. Selection rides in
+ * the URL hash so a dataset is linkable. The map shell never mounts here,
+ * and the page is its own scroll container because global.css locks body
+ * scrolling for the map.
  */
 export function DataDocsPage() {
+  const [selected, setSelected] = useState(() => {
+    const hash = window.location.hash.slice(1)
+    return DATA_CATALOG.some((d) => d.id === hash) ? hash : DATA_CATALOG[0].id
+  })
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    scrollerRef.current?.scrollTo({ top: 0 })
+  }, [selected])
+  const dataset = DATA_CATALOG.find((d) => d.id === selected) ?? DATA_CATALOG[0]
+
   return (
-    <Box style={{ height: '100vh', overflowY: 'auto' }}>
+    <Box ref={scrollerRef} style={{ height: '100vh', overflowY: 'auto' }}>
       <Group
         px="md"
         py="xs"
@@ -57,6 +69,12 @@ export function DataDocsPage() {
               key={d.id}
               href={`#${d.id}`}
               label={d.name}
+              active={d.id === selected}
+              onClick={(e) => {
+                e.preventDefault()
+                setSelected(d.id)
+                window.history.replaceState(null, '', `#${d.id}`)
+              }}
               style={{ borderRadius: 4 }}
               styles={{ label: { whiteSpace: 'nowrap' } }}
               py={4}
@@ -85,12 +103,8 @@ export function DataDocsPage() {
                 means a known improvement is on the roadmap.
               </Text>
             </div>
-            {DATA_CATALOG.map((d) => (
-              <Stack gap="xl" key={d.id}>
-                <Divider />
-                <DatasetSection d={d} />
-              </Stack>
-            ))}
+            <Divider />
+            <DatasetSection d={dataset} />
           </Stack>
         </Container>
       </Group>
