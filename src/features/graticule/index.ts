@@ -24,5 +24,14 @@ registerFeature({
       ],
       defaultValue: '15',
     },
+    {
+      kind: 'number',
+      key: 'opacity',
+      label: 'Opacity %',
+      min: 5,
+      max: 80,
+      step: 5,
+      defaultValue: 20,
+    },
   ],
 })

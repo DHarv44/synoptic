@@ -33,6 +33,7 @@ function graticuleGeojson(spacing: number): GeoJSON.FeatureCollection {
 /** Lat/lon grid lines over the basemap. */
 export function GraticuleLayer() {
   const spacing = Number(useFeatureOption<string>('graticule', 'spacing'))
+  const opacity = useFeatureOption<number>('graticule', 'opacity')
   const data = useMemo(() => graticuleGeojson(spacing), [spacing])
 
   useMapLayer(
@@ -46,7 +47,7 @@ export function GraticuleLayer() {
           source: 'graticule',
           paint: {
             'line-color': '#748496',
-            'line-opacity': 0.18,
+            'line-opacity': opacity / 100,
             'line-width': 0.75,
           },
         },
@@ -58,6 +59,15 @@ export function GraticuleLayer() {
       }
     },
     [data],
+  )
+
+  useMapLayer(
+    (map) => {
+      if (map.getLayer('graticule')) {
+        map.setPaintProperty('graticule', 'line-opacity', opacity / 100)
+      }
+    },
+    [opacity],
   )
 
   return null

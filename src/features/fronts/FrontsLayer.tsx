@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { GeoJSONSource } from 'maplibre-gl'
-import { featureEnabled } from '@/core/settings/store'
+import { featureEnabled, useFeatureOption } from '@/core/settings/store'
 import { startPoller } from '@/core/data/scheduler'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
@@ -22,6 +22,7 @@ const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: 
  * a model field that disagrees by several hPa over terrain.
  */
 export function FrontsLayer() {
+  const showTroughs = useFeatureOption<boolean>('fronts', 'troughs')
   const [analysis, setAnalysis] = useState<SurfaceAnalysis | null>(null)
 
   useEffect(() => {
@@ -109,9 +110,17 @@ export function FrontsLayer() {
     (m) => {
       if (!analysis) return
       const lines = m.getSource('fronts') as GeoJSONSource | undefined
-      if (lines) lines.setData(frontsGeoJSON(analysis))
+      if (!lines) return
+      const geo = frontsGeoJSON(analysis)
+      // An overnight chart can carry 30+ troughs; the toggle declutters
+      // without touching the fronts themselves.
+      lines.setData(
+        showTroughs
+          ? geo
+          : { ...geo, features: geo.features.filter((f) => f.properties?.kind !== 'trough') },
+      )
     },
-    [analysis],
+    [analysis, showTroughs],
   )
 
   return null

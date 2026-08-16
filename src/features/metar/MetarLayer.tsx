@@ -3,6 +3,7 @@ import { useComputedColorScheme } from '@mantine/core'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { fetchJson } from '@/core/data/fetchJson'
 import { featureEnabled, useFeatureOption } from '@/core/settings/store'
+import { useUnits } from '@/core/units/useUnitSystem'
 import { startPoller } from '@/core/data/scheduler'
 import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
@@ -27,6 +28,7 @@ const THIN_DEG: Record<string, { near: number; wide: number; cap: number }> = {
 export function MetarLayer() {
   const { map } = useMapContext()
   const scheme = useComputedColorScheme('dark')
+  const tempUnit = useUnits().temp
   const density = useFeatureOption<string>('metar', 'density')
   const [stations, setStations] = useState<Metar[]>([])
   const [bboxKey, setBboxKey] = useState<string | null>(null)
@@ -118,15 +120,15 @@ export function MetarLayer() {
         features: stations.map((s) => ({
           type: 'Feature',
           geometry: { type: 'Point', coordinates: [s.lon, s.lat] },
-          properties: { img: stationImageId(s, scheme) },
+          properties: { img: stationImageId(s, scheme, tempUnit) },
         })),
       })
 
-      const cancel = ensureStationImages(m, stations, scheme)
+      const cancel = ensureStationImages(m, stations, scheme, tempUnit)
 
       // Drop sprites for stations that scrolled out, so the atlas stays the
       // size of a viewport rather than everywhere visited this session.
-      const wanted = new Set(stations.map((s) => stationImageId(s, scheme)))
+      const wanted = new Set(stations.map((s) => stationImageId(s, scheme, tempUnit)))
       for (const id of addedRef.current) {
         if (!wanted.has(id) && m.hasImage(id)) m.removeImage(id)
       }
@@ -134,7 +136,7 @@ export function MetarLayer() {
 
       return cancel
     },
-    [stations, scheme],
+    [stations, scheme, tempUnit],
   )
 
   return null

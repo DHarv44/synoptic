@@ -28,7 +28,11 @@ const FLTCAT_COLORS: Record<string, string> = {
 }
 
 /** Draw a WMO-style station model (temp, dewpoint, wind barb) to a canvas. */
-export function makeStationCanvas(m: Metar, colors: SpriteColors): HTMLCanvasElement {
+export function makeStationCanvas(
+  m: Metar,
+  colors: SpriteColors,
+  tempUnit: 'C' | 'F' = 'C',
+): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = SIZE
   canvas.height = SIZE
@@ -98,22 +102,25 @@ export function makeStationCanvas(m: Metar, colors: SpriteColors): HTMLCanvasEle
     drawBarb(colors.station, 2)
   }
 
-  // temperature (upper-left) and dewpoint (lower-left), whole °C.
+  // temperature (upper-left) and dewpoint (lower-left), whole degrees in
+  // the user's unit — AWC serves °C; the display follows Settings.
   // Finite check, not a null check: AWC ships the odd non-numeric value
   // through these fields and a NaN plots as the literal text "NaN".
   const finite = (v: number | null): v is number => v !== null && Number.isFinite(v)
+  const display = (c: number): string =>
+    String(Math.round(tempUnit === 'F' ? (c * 9) / 5 + 32 : c))
   ctx.font = 'bold 15px monospace'
   ctx.textAlign = 'right'
   ctx.strokeStyle = colors.halo
   ctx.lineWidth = 3
   if (finite(m.temp)) {
-    const t = String(Math.round(m.temp))
+    const t = display(m.temp)
     ctx.strokeText(t, CX - 8, CY - 8)
     ctx.fillStyle = colors.temp
     ctx.fillText(t, CX - 8, CY - 8)
   }
   if (finite(m.dewp)) {
-    const d = String(Math.round(m.dewp))
+    const d = display(m.dewp)
     ctx.strokeText(d, CX - 8, CY + 18)
     ctx.fillStyle = colors.dewp
     ctx.fillText(d, CX - 8, CY + 18)

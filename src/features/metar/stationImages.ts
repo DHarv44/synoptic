@@ -19,7 +19,7 @@ const cache = new Map<string, ImageData>()
 /** Per frame. Enough to fill a viewport quickly, small enough to stay smooth. */
 const BATCH = 6
 
-export function stationImageId(s: Metar, scheme: 'dark' | 'light'): string {
+export function stationImageId(s: Metar, scheme: 'dark' | 'light', tempUnit: 'C' | 'F'): string {
   // The id encodes everything the sprite draws: with only station+scheme,
   // a cached sprite kept showing its first observation all session.
   const dir = typeof s.wdir === 'number' ? Math.round(s.wdir / 10) : 'v'
@@ -29,12 +29,13 @@ export function stationImageId(s: Metar, scheme: 'dark' | 'light'): string {
     s.wspd === null ? '' : Math.round(s.wspd),
     dir,
     s.fltCat ?? '',
+    tempUnit,
   ].join('/')
   return `metar-${s.icaoId}-${scheme}-${bits}`
 }
 
-function draw(s: Metar, scheme: 'dark' | 'light'): ImageData {
-  const canvas = makeStationCanvas(s, STATION_COLORS[scheme])
+function draw(s: Metar, scheme: 'dark' | 'light', tempUnit: 'C' | 'F'): ImageData {
+  const canvas = makeStationCanvas(s, STATION_COLORS[scheme], tempUnit)
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   return ctx.getImageData(0, 0, canvas.width, canvas.height)
 }
@@ -48,10 +49,11 @@ export function ensureStationImages(
   map: MLMap,
   stations: Metar[],
   scheme: 'dark' | 'light',
+  tempUnit: 'C' | 'F',
 ): () => void {
   const pending: Metar[] = []
   for (const s of stations) {
-    const id = stationImageId(s, scheme)
+    const id = stationImageId(s, scheme, tempUnit)
     if (map.hasImage(id)) continue
     const hit = cache.get(id)
     if (hit) {
@@ -70,9 +72,9 @@ export function ensureStationImages(
     const end = Math.min(i + BATCH, pending.length)
     for (; i < end; i++) {
       const s = pending[i]
-      const id = stationImageId(s, scheme)
+      const id = stationImageId(s, scheme, tempUnit)
       if (map.hasImage(id)) continue
-      const data = draw(s, scheme)
+      const data = draw(s, scheme, tempUnit)
       cache.set(id, data)
       if (cache.size > CACHE_MAX) cache.delete(cache.keys().next().value as string)
       map.addImage(id, data, { pixelRatio: 2 })

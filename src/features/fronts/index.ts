@@ -14,5 +14,12 @@ registerFeature({
   layerComponent: FrontsLayer,
   sourceIds: ['wpc-fronts'],
   defaultEnabled: false,
-  settings: [],
+  settings: [
+    {
+      kind: 'boolean',
+      key: 'troughs',
+      label: 'Troughs (dashed orange)',
+      defaultValue: true,
+    },
+  ],
 })
