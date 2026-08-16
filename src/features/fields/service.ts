@@ -1,6 +1,6 @@
 import type { GridField } from '@/core/data/gfsGrid'
-import { chaikin, type Pt } from '@/core/geo/smooth'
-import { isolines, thresholdsFor } from '@/core/grid/isolines'
+import { contourLines } from '@/core/grid/contours'
+import { prepareGrid } from '@/core/grid/prepareGrid'
 
 export interface FieldSpec {
   key: string
@@ -51,59 +51,29 @@ export const FIELD_SPECS: Record<string, FieldSpec> = {
   },
 }
 
-/** Contouring resolution: full 0.5° grid. The 1° stride we started with
- * over-smoothed — isobars lost the kinks at fronts that make a chart read
- * as analysis, and the compute (one pass per fetch, ~30 min apart) is fine. */
-const STRIDE = 1
-
 /**
- * Contours of a global grid as GeoJSON lines, one feature per chained line,
- * labelled in display units.
- *
- * Longitude is rotated so the chart runs −180…180 like the map; lines that
- * cross the antimeridian terminate at the seam rather than wrapping. Over
- * the mid-Pacific that clips an isobar occasionally — accepted for now.
+ * Sea-level reduction noise over terrain needs the analyst's-eye smoothing
+ * pass or the Rockies wallpaper themselves in closed squiggles. Four
+ * passes of the 9-point smoother ≈ 1° of gentling on the 0.5° grid.
  */
+const SMOOTH_PASSES = 4
+
+/** Contours of a field as GeoJSON, one feature per line, chart semantics only. */
 export function fieldGeoJSON(
   field: GridField,
   spec: FieldSpec,
   intervalOverride?: number,
 ): GeoJSON.FeatureCollection {
-  const { width, height, step, latMin } = field.header
-  const w = Math.floor(width / STRIDE)
-  const h = Math.floor((height - 1) / STRIDE) + 1
-  const outStep = step * STRIDE
-
-  const grid = new Float64Array(w * h)
-  const half = Math.floor(w / 2)
-  for (let j = 0; j < h; j++) {
-    for (let i = 0; i < w; i++) {
-      const srcCol = ((i + half) % w) * STRIDE
-      grid[j * w + i] = spec.toDisplay(field.values[j * STRIDE * width + srcCol])
-    }
-  }
-
-  let min = Infinity
-  let max = -Infinity
-  for (const v of grid) {
-    if (v < min) min = v
-    if (v > max) max = v
-  }
-  const thresholds = thresholdsFor(min, max, intervalOverride ?? spec.interval).filter(
-    (t) => spec.floor === undefined || t >= spec.floor,
-  )
-
+  const lines = contourLines(prepareGrid(field, spec.toDisplay), {
+    interval: intervalOverride ?? spec.interval,
+    floor: spec.floor,
+    smoothPasses: SMOOTH_PASSES,
+  })
   return {
     type: 'FeatureCollection',
-    features: isolines(grid, w, h, thresholds).map((line) => ({
+    features: lines.map((line) => ({
       type: 'Feature',
-      geometry: {
-        type: 'LineString',
-        // Chaikin the grid-resolution polyline: analysts draw curves.
-        coordinates: chaikin(
-          line.points.map(([x, y]): Pt => [-180 + x * outStep, latMin + y * outStep]),
-        ),
-      },
+      geometry: { type: 'LineString', coordinates: line.coordinates },
       properties: { label: String(Math.round(line.level)) },
     })),
   }
