@@ -12,9 +12,23 @@ registerFeature({
   layerIcon: IconWind,
   layerComponent: WindLayer,
   sourceIds: ['gfs-wind'],
-  // Off by default until the pinned wind-field corruption is fixed (SLICES.md).
   defaultEnabled: false,
   settings: [
+    {
+      kind: 'boolean',
+      key: 'field',
+      label: 'Speed field wash',
+      defaultValue: true,
+    },
+    {
+      kind: 'number',
+      key: 'fieldOpacity',
+      label: 'Field opacity %',
+      min: 10,
+      max: 90,
+      step: 5,
+      defaultValue: 50,
+    },
     {
       kind: 'select',
       key: 'level',

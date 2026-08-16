@@ -4,15 +4,20 @@ import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { useFeatureOption } from '@/core/settings/store'
+import { invert4 } from '@/map/glUtils'
 import { ParticleSystem } from '@/features/wind/ParticleSystem'
+import { SpeedField } from '@/features/wind/SpeedField'
 import { fetchWindField, type WindField } from '@/features/wind/service'
 
 const SIM_MINUTES_PER_SECOND = 8 // sim time compression: readable motion
 
 interface WindCustomLayer extends CustomLayerInterface {
   system: ParticleSystem | null
+  field: SpeedField | null
   opacity: number
   pointSize: number
+  showField: boolean
+  fieldOpacity: number
   /** Latest fetched field; applied on setWind AND on (re)creation in onAdd —
    * the fetch usually resolves before MapLibre calls onAdd, and a field
    * delivered to a not-yet-created system used to vanish silently. */
@@ -26,17 +31,23 @@ function makeLayer(particleCount: number): WindCustomLayer {
     type: 'custom',
     renderingMode: '2d',
     system: null,
+    field: null,
     opacity: 0.8,
     pointSize: 1.6,
+    showField: true,
+    fieldOpacity: 0.5,
     pendingField: null,
     onAdd(_map: MLMap, gl: WebGLRenderingContext | WebGL2RenderingContext) {
       if (!(gl instanceof WebGL2RenderingContext)) throw new Error('WebGL2 required')
       this.system = new ParticleSystem(gl, particleCount)
+      this.field = new SpeedField(gl)
       if (this.pendingField) this.system.setWind(this.pendingField)
     },
     onRemove() {
       this.system?.dispose()
       this.system = null
+      this.field?.dispose()
+      this.field = null
     },
     render(_gl: WebGLRenderingContext | WebGL2RenderingContext, args) {
       if (!this.system) return
@@ -46,7 +57,19 @@ function makeLayer(particleCount: number): WindCustomLayer {
       this.system.step(dtReal * SIM_MINUTES_PER_SECOND * 60)
       const matrix = (args as unknown as { defaultProjectionData?: { mainMatrix?: number[] } })
         ?.defaultProjectionData?.mainMatrix ?? (args as unknown as number[])
-      this.system.draw(matrix as number[], this.opacity, this.pointSize * devicePixelRatio)
+      if (this.showField && this.field) {
+        const inv = invert4(matrix as number[])
+        if (inv) {
+          this.field.draw(inv, this.system.windTex, this.system.windScale, this.fieldOpacity)
+        }
+      }
+      // With the field carrying colour, particles go pale so motion reads.
+      this.system.draw(
+        matrix as number[],
+        this.opacity,
+        this.pointSize * devicePixelRatio,
+        this.showField,
+      )
     },
   }
   return layer
@@ -58,6 +81,8 @@ export function WindLayer() {
   const level = useFeatureOption<string>('wind', 'level')
   const opacity = useFeatureOption<number>('wind', 'opacity')
   const countK = useFeatureOption<number>('wind', 'particles')
+  const showField = useFeatureOption<boolean>('wind', 'field')
+  const fieldOpacity = useFeatureOption<number>('wind', 'fieldOpacity')
   const layerRef = useRef<WindCustomLayer | null>(null)
   const repaintRef = useRef<number>(0)
 
@@ -98,6 +123,13 @@ export function WindLayer() {
   useEffect(() => {
     if (layerRef.current) layerRef.current.opacity = opacity / 100
   }, [opacity])
+
+  useEffect(() => {
+    if (layerRef.current) {
+      layerRef.current.showField = showField
+      layerRef.current.fieldOpacity = fieldOpacity / 100
+    }
+  }, [showField, fieldOpacity])
 
   return null
 }

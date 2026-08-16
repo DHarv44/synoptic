@@ -1,24 +1,34 @@
-import { DRAW_FRAG, DRAW_VERT, QUAD_VERT, SIM_FRAG } from '@/features/wind/shaders'
+import { DRAW_FRAG, DRAW_VERT, QUAD_VERT, SIM_FRAG, TEX_FRAG } from '@/features/wind/shaders'
 import type { WindField } from '@/features/wind/service'
 import { linkProgram } from '@/map/glUtils'
 
 /**
  * GPGPU particle advection through a wind field (webgl-wind pattern):
- * positions ping-pong between two RG32F textures; draw pass projects
- * equirect positions through the map's mercator matrix.
+ * positions ping-pong between two RG32F textures; the draw composites
+ * through a screen-sized persistence buffer, so particles leave fading
+ * TRAILS — the difference between flow and static noise. History lives in
+ * screen space, so any camera change clears it rather than smearing it.
  */
 export class ParticleSystem {
   private readonly gl: WebGL2RenderingContext
   private readonly simProgram: WebGLProgram
   private readonly drawProgram: WebGLProgram
+  private readonly texProgram: WebGLProgram
   private readonly quadVao: WebGLVertexArrayObject
   private readonly emptyVao: WebGLVertexArrayObject
   private readonly fbo: WebGLFramebuffer
   private state: [WebGLTexture, WebGLTexture]
-  private windTex: WebGLTexture
-  private windScale = 100 / 127
+  private screen: [WebGLTexture, WebGLTexture] | null = null
+  private screenW = 0
+  private screenH = 0
+  private lastMatrix: Float32Array | null = null
+  readonly windTex: WebGLTexture
+  windScale = 100 / 127
   private res: number
   private frame = 0
+
+  /** Trail length: fraction of each frame kept. 0 disables persistence. */
+  fade = 0.955
 
   constructor(gl: WebGL2RenderingContext, particleCount: number) {
     this.gl = gl
@@ -27,6 +37,7 @@ export class ParticleSystem {
     }
     this.simProgram = linkProgram(gl, QUAD_VERT, SIM_FRAG)
     this.drawProgram = linkProgram(gl, DRAW_VERT, DRAW_FRAG)
+    this.texProgram = linkProgram(gl, QUAD_VERT, TEX_FRAG)
 
     this.quadVao = gl.createVertexArray() as WebGLVertexArrayObject
     gl.bindVertexArray(this.quadVao)
@@ -111,7 +122,60 @@ export class ParticleSystem {
     this.state = [this.state[1], this.state[0]]
   }
 
-  draw(matrix: number[] | Float32Array, opacity: number, pointSize: number): void {
+  /** (Re)build the screen ping-pong at the canvas size, cleared. */
+  private ensureScreen(): void {
+    const { gl } = this
+    const w = gl.drawingBufferWidth
+    const h = gl.drawingBufferHeight
+    if (this.screen && w === this.screenW && h === this.screenH) return
+    if (this.screen) {
+      gl.deleteTexture(this.screen[0])
+      gl.deleteTexture(this.screen[1])
+    }
+    const make = (): WebGLTexture => {
+      const tex = gl.createTexture() as WebGLTexture
+      gl.bindTexture(gl.TEXTURE_2D, tex)
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+      return tex
+    }
+    this.screen = [make(), make()]
+    this.screenW = w
+    this.screenH = h
+    this.clearScreen()
+  }
+
+  private clearScreen(): void {
+    const { gl } = this
+    if (!this.screen) return
+    for (const tex of this.screen) {
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0)
+      gl.clearColor(0, 0, 0, 0)
+      gl.clear(gl.COLOR_BUFFER_BIT)
+    }
+  }
+
+  private drawTexture(tex: WebGLTexture, fade: number): void {
+    const { gl } = this
+    gl.useProgram(this.texProgram)
+    gl.activeTexture(gl.TEXTURE2)
+    gl.bindTexture(gl.TEXTURE_2D, tex)
+    gl.uniform1i(gl.getUniformLocation(this.texProgram, 'u_tex'), 2)
+    gl.uniform1f(gl.getUniformLocation(this.texProgram, 'u_fade'), fade)
+    gl.bindVertexArray(this.quadVao)
+    gl.drawArrays(gl.TRIANGLES, 0, 3)
+    gl.bindVertexArray(null)
+  }
+
+  private drawParticles(
+    matrix: number[] | Float32Array,
+    opacity: number,
+    pointSize: number,
+    plain: boolean,
+  ): void {
     const { gl } = this
     gl.useProgram(this.drawProgram)
     this.bindCommon(this.drawProgram)
@@ -119,11 +183,42 @@ export class ParticleSystem {
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_stateRes'), this.res)
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_pointSize'), pointSize)
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_opacity'), opacity)
-    gl.enable(gl.BLEND)
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+    gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_plain'), plain ? 1 : 0)
     gl.bindVertexArray(this.emptyVao)
     gl.drawArrays(gl.POINTS, 0, this.res * this.res)
     gl.bindVertexArray(null)
+  }
+
+  draw(matrix: number[] | Float32Array, opacity: number, pointSize: number, plain: boolean): void {
+    const { gl } = this
+    const prevFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
+    const prevViewport = gl.getParameter(gl.VIEWPORT) as Int32Array
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.fbo)
+    this.ensureScreen()
+    // Trail history is screen-space: a moved camera would smear it sideways.
+    const m = Float32Array.from(matrix)
+    const moved =
+      this.lastMatrix === null || m.some((v, i) => Math.abs(v - (this.lastMatrix as Float32Array)[i]) > 1e-6)
+    if (moved) this.clearScreen()
+    this.lastMatrix = m
+
+    const [prev, next] = this.screen as [WebGLTexture, WebGLTexture]
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, next, 0)
+    gl.viewport(0, 0, this.screenW, this.screenH)
+    gl.clearColor(0, 0, 0, 0)
+    gl.clear(gl.COLOR_BUFFER_BIT)
+    gl.disable(gl.BLEND)
+    this.drawTexture(prev, this.fade)
+    this.drawParticles(matrix, opacity, pointSize, plain)
+
+    // Composite the accumulated trails onto the map.
+    gl.bindFramebuffer(gl.FRAMEBUFFER, prevFbo)
+    gl.viewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3])
+    gl.enable(gl.BLEND)
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+    this.drawTexture(next, 1)
+    this.screen = [next, prev]
   }
 
   private bindCommon(program: WebGLProgram): void {
@@ -142,8 +237,13 @@ export class ParticleSystem {
     gl.deleteTexture(this.state[0])
     gl.deleteTexture(this.state[1])
     gl.deleteTexture(this.windTex)
+    if (this.screen) {
+      gl.deleteTexture(this.screen[0])
+      gl.deleteTexture(this.screen[1])
+    }
     gl.deleteFramebuffer(this.fbo)
     gl.deleteProgram(this.simProgram)
     gl.deleteProgram(this.drawProgram)
+    gl.deleteProgram(this.texProgram)
   }
 }
