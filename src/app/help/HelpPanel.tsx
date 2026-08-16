@@ -1,9 +1,9 @@
 import { Stack } from '@mantine/core'
 import { DockSection } from '@/app/shell/DockSection'
+import { Anchor, Text } from '@mantine/core'
 import { GettingStarted } from '@/app/help/GettingStarted'
 import { Shortcuts } from '@/app/help/Shortcuts'
 import { Glossary } from '@/app/help/Glossary'
-import { DataPage } from '@/app/help/DataPage'
 import { About } from '@/app/help/About'
 
 /**
@@ -26,8 +26,14 @@ export function HelpPanel() {
       <DockSection id="help-terms" title="Reading the instruments">
         <Glossary />
       </DockSection>
-      <DockSection id="help-data" title="Data catalog">
-        <DataPage />
+      <DockSection id="help-data" title="Data sources">
+        <Text size="xs">
+          Every upstream dataset is documented on its own page — endpoints, parameters,
+          cadence, and what each source offers that we have not built yet.{' '}
+          <Anchor href="/data" target="_blank" size="xs">
+            Open the data documentation →
+          </Anchor>
+        </Text>
       </DockSection>
       <DockSection id="help-about" title="About">
         <About />
