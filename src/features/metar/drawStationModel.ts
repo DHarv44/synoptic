@@ -65,14 +65,17 @@ export function makeStationCanvas(m: Metar, colors: SpriteColors): HTMLCanvasEle
     ctx.restore()
   }
 
-  // temperature (upper-left) and dewpoint (lower-left), whole °C
+  // temperature (upper-left) and dewpoint (lower-left), whole °C.
+  // Finite check, not a null check: AWC ships the odd non-numeric value
+  // through these fields and a NaN plots as the literal text "NaN".
+  const finite = (v: number | null): v is number => v !== null && Number.isFinite(v)
   ctx.font = 'bold 15px monospace'
   ctx.textAlign = 'right'
-  if (m.temp !== null) {
+  if (finite(m.temp)) {
     ctx.fillStyle = colors.temp
     ctx.fillText(String(Math.round(m.temp)), CX - 8, CY - 8)
   }
-  if (m.dewp !== null) {
+  if (finite(m.dewp)) {
     ctx.fillStyle = colors.dewp
     ctx.fillText(String(Math.round(m.dewp)), CX - 8, CY + 18)
   }

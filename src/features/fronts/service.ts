@@ -76,17 +76,3 @@ export function frontsGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {
   }
 }
 
-export function centersGeoJSON(a: SurfaceAnalysis): GeoJSON.FeatureCollection {
-  return {
-    type: 'FeatureCollection',
-    features: a.centers.map((c) => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [c.lon, c.lat] },
-      properties: {
-        letter: c.kind === 'high' ? 'H' : 'L',
-        pressure: String(c.pressure),
-        color: c.kind === 'high' ? C.blue4 : C.red5,
-      },
-    })),
-  }
-}

@@ -5,9 +5,10 @@ import { useFeatureOption } from '@/core/settings/store'
 import { fetchGridField } from '@/core/data/gfsGrid'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
-import { FIELD_SPECS, fieldGeoJSON } from '@/features/fields/service'
+import { FIELD_SPECS, fieldChart, type FieldChart } from '@/features/fields/service'
 
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
+const EMPTY_CHART: FieldChart = { contours: EMPTY, centers: null }
 
 /**
  * Contoured GFS analysis fields — isobars and friends. Chart brown, the
@@ -19,16 +20,16 @@ export function FieldsLayer() {
   const field = useFeatureOption<string>('fields', 'field')
   const opacity = useFeatureOption<number>('fields', 'opacity')
   const mslpInterval = useFeatureOption<string>('fields', 'mslpInterval')
-  const [geojson, setGeojson] = useState<GeoJSON.FeatureCollection>(EMPTY)
+  const [chart, setChart] = useState<FieldChart>(EMPTY_CHART)
 
   useEffect(() => {
     let stale = false
-    setGeojson(EMPTY)
+    setChart(EMPTY_CHART)
     const spec = FIELD_SPECS[field] ?? FIELD_SPECS.mslp
     const interval = field === 'mslp' ? Number(mslpInterval) || spec.interval : undefined
     fetchGridField(spec.key)
       .then((grid) => {
-        if (!stale) setGeojson(fieldGeoJSON(grid, spec, interval))
+        if (!stale) setChart(fieldChart(grid, spec, interval))
       })
       .catch(() => {
         // Health strip already carries the error; the layer just stays empty.
@@ -42,6 +43,7 @@ export function FieldsLayer() {
     const ink = scheme === 'dark' ? '#cdb38a' : '#8a6d3b'
     const halo = scheme === 'dark' ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.9)'
     m.addSource('fields', { type: 'geojson', data: EMPTY })
+    m.addSource('fields-centers', { type: 'geojson', data: EMPTY })
     addDataLayer(
       m,
       {
@@ -78,23 +80,69 @@ export function FieldsLayer() {
       },
       'fields',
     )
+    // H/L marks from the same field the contours came from, chart typography.
+    addDataLayer(
+      m,
+      {
+        id: 'fields-centers',
+        type: 'symbol',
+        source: 'fields-centers',
+        layout: {
+          'text-field': ['get', 'letter'],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': 26,
+          'text-allow-overlap': true,
+        },
+        paint: {
+          'text-color': ['get', 'color'],
+          'text-halo-color': halo,
+          'text-halo-width': 1.6,
+        },
+      },
+      'annotation',
+    )
+    addDataLayer(
+      m,
+      {
+        id: 'fields-center-values',
+        type: 'symbol',
+        source: 'fields-centers',
+        layout: {
+          'text-field': ['get', 'value'],
+          'text-font': ['Noto Sans Bold'],
+          'text-size': 11,
+          'text-offset': [0, 1.5],
+          'text-allow-overlap': true,
+        },
+        paint: {
+          'text-color': scheme === 'dark' ? '#c3ccd4' : '#41474d',
+          'text-halo-color': halo,
+          'text-halo-width': 1.2,
+        },
+      },
+      'annotation',
+    )
     return () => {
-      for (const id of ['fields', 'fields-labels']) if (m.getLayer(id)) m.removeLayer(id)
-      if (m.getSource('fields')) m.removeSource('fields')
+      for (const id of ['fields', 'fields-labels', 'fields-centers', 'fields-center-values']) {
+        if (m.getLayer(id)) m.removeLayer(id)
+      }
+      for (const id of ['fields', 'fields-centers']) if (m.getSource(id)) m.removeSource(id)
     }
   }, [scheme])
 
   useMapLayer(
     (m) => {
       const src = m.getSource('fields') as GeoJSONSource | undefined
-      if (src) src.setData(geojson)
+      if (src) src.setData(chart.contours)
+      const centers = m.getSource('fields-centers') as GeoJSONSource | undefined
+      if (centers) centers.setData(chart.centers ?? EMPTY)
       if (m.getLayer('fields')) m.setPaintProperty('fields', 'line-opacity', opacity / 100)
       if (m.getLayer('fields-labels')) {
         m.setPaintProperty('fields-labels', 'text-opacity', opacity / 100)
       }
     },
     // scheme is a dep because the first effect rebuilds an empty source on toggle.
-    [geojson, scheme, opacity],
+    [chart, scheme, opacity],
   )
 
   return null

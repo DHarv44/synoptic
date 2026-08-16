@@ -1,6 +1,10 @@
 import type { GridField } from '@/core/data/gfsGrid'
+import { pickCenters } from '@/core/grid/centers'
 import { contourLines } from '@/core/grid/contours'
+import { findExtrema } from '@/core/grid/extrema'
 import { prepareGrid } from '@/core/grid/prepareGrid'
+import { smoothGrid } from '@/core/grid/smoothGrid'
+import { MAP_COLORS as C } from '@/core/mapColors'
 
 export interface FieldSpec {
   key: string
@@ -11,6 +15,8 @@ export interface FieldSpec {
   interval: number
   /** Lowest contour worth drawing; CAPE below ~500 is everywhere and nothing. */
   floor?: number
+  /** Mark H/L centres derived from this field (pressure and heights, not CAPE). */
+  markExtrema?: boolean
   unitLabel: string
 }
 
@@ -25,6 +31,7 @@ export const FIELD_SPECS: Record<string, FieldSpec> = {
     label: 'MSLP isobars',
     toDisplay: (pa) => pa / 100,
     interval: 4,
+    markExtrema: true,
     unitLabel: 'hPa',
   },
   hgt500: {
@@ -32,6 +39,7 @@ export const FIELD_SPECS: Record<string, FieldSpec> = {
     label: '500 mb heights',
     toDisplay: (gpm) => gpm / 10,
     interval: 6,
+    markExtrema: true,
     unitLabel: 'dam',
   },
   temp850: {
@@ -52,24 +60,33 @@ export const FIELD_SPECS: Record<string, FieldSpec> = {
 }
 
 /**
- * Sea-level reduction noise over terrain needs the analyst's-eye smoothing
- * pass or the Rockies wallpaper themselves in closed squiggles. Four
- * passes of the 9-point smoother ≈ 1° of gentling on the 0.5° grid.
+ * One light pass: MSLET is already a terrain-sane reduction, so smoothing
+ * only has to gentle the contours, not paper over reduction noise — and a
+ * heavier hand erases the very maxima the centres need.
  */
-const SMOOTH_PASSES = 4
+const SMOOTH_PASSES = 1
 
-/** Contours of a field as GeoJSON, one feature per line, chart semantics only. */
-export function fieldGeoJSON(
+export interface FieldChart {
+  contours: GeoJSON.FeatureCollection
+  centers: GeoJSON.FeatureCollection | null
+}
+
+/**
+ * Contours and H/L centres from ONE smoothed field. A centre is marked
+ * exactly when a closed isoline encloses a field extremum (pickCenters),
+ * so every letter on the chart sits inside a circle by construction.
+ */
+export function fieldChart(
   field: GridField,
   spec: FieldSpec,
   intervalOverride?: number,
-): GeoJSON.FeatureCollection {
-  const lines = contourLines(prepareGrid(field, spec.toDisplay), {
-    interval: intervalOverride ?? spec.interval,
-    floor: spec.floor,
-    smoothPasses: SMOOTH_PASSES,
-  })
-  return {
+): FieldChart {
+  const interval = intervalOverride ?? spec.interval
+  const grid = prepareGrid(field, spec.toDisplay)
+  const smoothed = { ...grid, values: smoothGrid(grid.values, grid.w, grid.h, SMOOTH_PASSES) }
+
+  const lines = contourLines(smoothed, { interval, floor: spec.floor, smoothPasses: 0 })
+  const contours: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
     features: lines.map((line) => ({
       type: 'Feature',
@@ -77,4 +94,22 @@ export function fieldGeoJSON(
       properties: { label: String(Math.round(line.level)) },
     })),
   }
+
+  if (!spec.markExtrema) return { contours, centers: null }
+  const centers: GeoJSON.FeatureCollection = {
+    type: 'FeatureCollection',
+    features: pickCenters(findExtrema(smoothed), lines, {
+      minDepth: interval / 2,
+      minRingDeg: 1.5,
+    }).map((c) => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [c.lon, c.lat] },
+      properties: {
+        letter: c.kind === 'high' ? 'H' : 'L',
+        value: String(Math.round(c.value)),
+        color: c.kind === 'high' ? C.blue4 : C.red5,
+      },
+    })),
+  }
+  return { contours, centers }
 }

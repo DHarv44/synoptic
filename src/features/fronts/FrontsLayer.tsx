@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useComputedColorScheme } from '@mantine/core'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { featureEnabled } from '@/core/settings/store'
 import { startPoller } from '@/core/data/scheduler'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import type { SurfaceAnalysis } from '@/core/data/wpc/codsus'
-import { WPC, centersGeoJSON, fetchSurfaceAnalysis, frontsGeoJSON } from '@/features/fronts/service'
+import { WPC, fetchSurfaceAnalysis, frontsGeoJSON } from '@/features/fronts/service'
 import { PIP_KINDS, makePipImage, pipImageId } from '@/features/fronts/pipIcons'
 
 /** WPC reissues roughly 3-hourly; polling faster only re-reads the same text. */
@@ -15,11 +14,14 @@ const POLL_MS = 30 * 60_000
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
 
 /**
- * The surface analysis: front lines with pip sprites (triangles and
- * semicircles) repeated along them, H/L centres set like chart typography.
+ * The surface analysis fronts: lines with pip sprites (triangles and
+ * semicircles) repeated along them. H/L centres deliberately come from the
+ * fields feature instead — marked on the same grid its isolines are traced
+ * from, so centres and rings can never disagree. WPC's bulletin centres
+ * are hand-placed on an unpublished pressure field and float ringless over
+ * a model field that disagrees by several hPa over terrain.
  */
 export function FrontsLayer() {
-  const scheme = useComputedColorScheme('dark')
   const [analysis, setAnalysis] = useState<SurfaceAnalysis | null>(null)
 
   useEffect(() => {
@@ -34,9 +36,7 @@ export function FrontsLayer() {
   }, [])
 
   useMapLayer((m) => {
-    const halo = scheme === 'dark' ? 'rgba(0,0,0,0.75)' : 'rgba(255,255,255,0.85)'
     m.addSource('fronts', { type: 'geojson', data: EMPTY })
-    m.addSource('fronts-centers', { type: 'geojson', data: EMPTY })
     for (const kind of PIP_KINDS) {
       if (!m.hasImage(pipImageId(kind))) {
         m.addImage(pipImageId(kind), makePipImage(kind), { pixelRatio: 2 })
@@ -94,70 +94,24 @@ export function FrontsLayer() {
       },
       'fronts',
     )
-    addDataLayer(
-      m,
-      {
-        id: 'fronts-centers',
-        type: 'symbol',
-        source: 'fronts-centers',
-        layout: {
-          'text-field': ['get', 'letter'],
-          'text-font': ['Noto Sans Bold'],
-          'text-size': 26,
-          'text-allow-overlap': true,
-        },
-        paint: {
-          'text-color': ['get', 'color'],
-          'text-halo-color': halo,
-          'text-halo-width': 1.6,
-        },
-      },
-      'annotation',
-    )
-    addDataLayer(
-      m,
-      {
-        id: 'fronts-pressures',
-        type: 'symbol',
-        source: 'fronts-centers',
-        layout: {
-          'text-field': ['get', 'pressure'],
-          'text-font': ['Noto Sans Bold'],
-          'text-size': 11,
-          'text-offset': [0, 1.5],
-          'text-allow-overlap': true,
-        },
-        paint: {
-          'text-color': scheme === 'dark' ? '#c3ccd4' : '#41474d',
-          'text-halo-color': halo,
-          'text-halo-width': 1.2,
-        },
-      },
-      'annotation',
-    )
     return () => {
-      for (const id of ['fronts', 'fronts-dashed', 'fronts-pips', 'fronts-centers', 'fronts-pressures']) {
+      for (const id of ['fronts', 'fronts-dashed', 'fronts-pips']) {
         if (m.getLayer(id)) m.removeLayer(id)
       }
-      for (const id of ['fronts', 'fronts-centers']) {
-        if (m.getSource(id)) m.removeSource(id)
-      }
+      if (m.getSource('fronts')) m.removeSource('fronts')
       for (const kind of PIP_KINDS) {
         if (m.hasImage(pipImageId(kind))) m.removeImage(pipImageId(kind))
       }
     }
-  }, [scheme])
+  }, [])
 
   useMapLayer(
     (m) => {
       if (!analysis) return
       const lines = m.getSource('fronts') as GeoJSONSource | undefined
       if (lines) lines.setData(frontsGeoJSON(analysis))
-      const centers = m.getSource('fronts-centers') as GeoJSONSource | undefined
-      if (centers) centers.setData(centersGeoJSON(analysis))
     },
-    // scheme is a dep because the first effect rebuilds empty sources on toggle.
-    [analysis, scheme],
+    [analysis],
   )
 
   return null
