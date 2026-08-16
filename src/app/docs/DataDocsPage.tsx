@@ -2,16 +2,18 @@ import { Anchor, Badge, Box, Container, Divider, Group, NavLink, Stack, Text, Ti
 import { DATA_CATALOG } from '@/app/help/dataCatalog'
 import { DatasetSection } from '@/app/docs/DatasetSection'
 
-const NAV_WIDTH = 250
+const NAV_WIDTH = 300
+const HEADER_H = 45
 
 /**
  * The data catalog as a real documentation page at /data — full width,
  * sidebar navigation, one section per dataset. The map shell never mounts
- * here; this is a document, not a workstation view.
+ * here; this is a document, not a workstation view. The page is its own
+ * scroll container because global.css locks body scrolling for the map.
  */
 export function DataDocsPage() {
   return (
-    <Box style={{ minHeight: '100vh' }}>
+    <Box style={{ height: '100vh', overflowY: 'auto' }}>
       <Group
         px="md"
         py="xs"
@@ -42,7 +44,13 @@ export function DataDocsPage() {
           visibleFrom="sm"
           w={NAV_WIDTH}
           p="md"
-          style={{ position: 'sticky', top: 45, flexShrink: 0 }}
+          style={{
+            position: 'sticky',
+            top: HEADER_H,
+            flexShrink: 0,
+            maxHeight: `calc(100vh - ${HEADER_H}px)`,
+            overflowY: 'auto',
+          }}
         >
           {DATA_CATALOG.map((d) => (
             <NavLink
@@ -50,6 +58,7 @@ export function DataDocsPage() {
               href={`#${d.id}`}
               label={d.name}
               style={{ borderRadius: 4 }}
+              styles={{ label: { whiteSpace: 'nowrap' } }}
               py={4}
             />
           ))}
