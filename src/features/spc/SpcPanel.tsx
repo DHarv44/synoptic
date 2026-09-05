@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Group, Stack, Text, UnstyledButton } from '@mantine/core'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
+import { useCameraStore } from '@/map/cameraStore'
+import { geometryBbox, type Bbox } from '@/map/viewStore'
 import { fetchMcdText, unexpired, watchColor, type McdProps } from '@/features/spc/service'
 import { acquireMcdFeed, acquireWatchFeed, useMcds, useWatches } from '@/features/spc/store'
 
-function McdRow({ mcd }: { mcd: McdProps }) {
+function McdRow({ mcd, bbox }: { mcd: McdProps; bbox: Bbox | null }) {
   const [text, setText] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
+  const requestFitBounds = useCameraStore((s) => s.requestFitBounds)
   const fmt = useTimeFormat()
 
   useEffect(() => {
@@ -14,8 +17,14 @@ function McdRow({ mcd }: { mcd: McdProps }) {
     fetchMcdText(mcd.product_id).then(setText, () => setText('(text unavailable)'))
   }, [open, text, mcd.product_id])
 
+  // A click opens the discussion text and takes the map to its polygon.
+  const onClick = () => {
+    setOpen(!open)
+    if (!open && bbox) requestFitBounds(bbox)
+  }
+
   return (
-    <UnstyledButton onClick={() => setOpen(!open)} style={{ display: 'block', width: '100%' }}>
+    <UnstyledButton onClick={onClick} style={{ display: 'block', width: '100%' }}>
       <Group gap={6} wrap="nowrap">
         <Text size="xs" fw={600} style={{ flexShrink: 0 }}>
           MCD {mcd.num}
@@ -41,6 +50,7 @@ function McdRow({ mcd }: { mcd: McdProps }) {
 export function SpcPanel() {
   useEffect(() => acquireMcdFeed(), [])
   useEffect(() => acquireWatchFeed(), [])
+  const requestFitBounds = useCameraStore((s) => s.requestFitBounds)
   const fmt = useTimeFormat()
   const now = Date.now()
   const mcds = unexpired(useMcds(), now)
@@ -56,34 +66,43 @@ export function SpcPanel() {
 
   return (
     <Stack gap={6}>
-      {watches.map((w) => (
-        <Group key={w.properties.number} gap={6} wrap="nowrap">
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 2,
-              background: watchColor(w.properties.type),
-              flexShrink: 0,
-            }}
-          />
-          <Text size="xs" fw={600}>
-            {w.properties.type} watch {w.properties.number}
-            {w.properties.is_pds && ' · PDS'}
-          </Text>
-          <Text size="xs" c="dimmed" truncate>
-            {[
-              w.properties.max_hail_size !== null && `hail ${w.properties.max_hail_size}"`,
-              w.properties.max_wind_gust_knots !== null &&
-                `gusts ${w.properties.max_wind_gust_knots} kt`,
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </Text>
-        </Group>
-      ))}
+      {watches.map((w) => {
+        const bbox = geometryBbox(w.geometry)
+        return (
+          <UnstyledButton
+            key={w.properties.number}
+            onClick={bbox ? () => requestFitBounds(bbox) : undefined}
+            style={{ display: 'block', width: '100%' }}
+          >
+            <Group gap={6} wrap="nowrap">
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 2,
+                  background: watchColor(w.properties.type),
+                  flexShrink: 0,
+                }}
+              />
+              <Text size="xs" fw={600}>
+                {w.properties.type} watch {w.properties.number}
+                {w.properties.is_pds && ' · PDS'}
+              </Text>
+              <Text size="xs" c="dimmed" truncate>
+                {[
+                  w.properties.max_hail_size !== null && `hail ${w.properties.max_hail_size}"`,
+                  w.properties.max_wind_gust_knots !== null &&
+                    `gusts ${w.properties.max_wind_gust_knots} kt`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
+            </Group>
+          </UnstyledButton>
+        )
+      })}
       {mcds.map((m) => (
-        <McdRow key={m.properties.product_id} mcd={m.properties} />
+        <McdRow key={m.properties.product_id} mcd={m.properties} bbox={geometryBbox(m.geometry)} />
       ))}
       <Text size="xs" c="dimmed">
         Issued {fmt.zone === 'utc' ? 'times UTC' : 'times local'} · SPC via IEM.

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Group, Stack, Text, UnstyledButton } from '@mantine/core'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
+import { useCameraStore } from '@/map/cameraStore'
+import { pointsBbox } from '@/map/viewStore'
 import { activeSigmets, sigmetColor, type AirSigmet } from '@/features/aviation/service'
 import { acquireSigmetFeed, useSigmetData } from '@/features/aviation/store'
 
@@ -11,13 +13,21 @@ function tops(s: AirSigmet): string | null {
 
 function SigmetRow({ s }: { s: AirSigmet }) {
   const [open, setOpen] = useState(false)
+  const requestFitBounds = useCameraStore((st) => st.requestFitBounds)
   const fmt = useTimeFormat()
   const detail = [tops(s), s.movementSpd ? `mov ${s.movementDir}° ${s.movementSpd} kt` : null]
     .filter(Boolean)
     .join(' · ')
 
+  // A click both shows the raw product and takes the map to the polygon.
+  const bbox = pointsBbox(s.coords ?? [])
+  const onClick = () => {
+    setOpen(!open)
+    if (!open && bbox) requestFitBounds(bbox)
+  }
+
   return (
-    <UnstyledButton onClick={() => setOpen(!open)} style={{ display: 'block', width: '100%' }}>
+    <UnstyledButton onClick={onClick} style={{ display: 'block', width: '100%' }}>
       <Group gap={6} wrap="nowrap">
         <span
           style={{
@@ -47,7 +57,7 @@ function SigmetRow({ s }: { s: AirSigmet }) {
   )
 }
 
-/** Active SIGMETs, worst-first; a row expands to the raw product text. */
+/** Active SIGMETs, worst-first; a click zooms to one and shows its raw text. */
 export function AviationPanel() {
   useEffect(() => acquireSigmetFeed(), [])
   const sigmets = activeSigmets(useSigmetData(), Date.now())
