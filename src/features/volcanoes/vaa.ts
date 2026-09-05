@@ -155,7 +155,8 @@ export function parseVaa(raw: string): VolcanicAshAdvisory | null {
 export const VAA_SLOTS: string[] = [
   ...['01', '02', '03', '04', '05', '06', '07', '08'].map((n) => `fvau${n}.adrm..txt`), // Darwin
   ...['21', '22', '23', '24', '25'].map((n) => `fvak${n}.pawu..txt`), // Anchorage
-  ...['01', '02', '03', '04'].map((n) => `fvfe${n}.rjtd..txt`), // Tokyo
+  // Tokyo publishes a single slot; fvfe02-04 do not exist on tgftp.
+  'fvfe01.rjtd..txt',
   ...['20', '21', '22', '23', '24', '25', '26', '27'].map((n) => `fvxx${n}.knes..txt`), // Washington
   ...['01', '02', '03', '04', '05'].map((n) => `fvxx${n}.lfpw..txt`), // Toulouse
   ...['01', '02', '05', '11'].map((n) => `fvxx${n}.egrr..txt`), // London

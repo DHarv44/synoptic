@@ -4,13 +4,13 @@ import { useHotkeys } from '@mantine/hooks'
 import { IconGauge, IconPlayerPause, IconPlayerPlay } from '@tabler/icons-react'
 import {
   FRAME_SPEEDS,
-  FUTURE_RANGE_MS,
   LOOP_END_HOLD,
-  PAST_RANGE_MS,
+  loopStart,
   newestFrame,
   stepSimTime,
   useTimeline,
 } from '@/core/time/timelineStore'
+import { TimeStepper } from '@/app/shell/TimeStepper'
 import { computeSyncLag } from '@/core/time/syncLag'
 import { useSettings } from '@/core/settings/store'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
@@ -19,6 +19,14 @@ import { RAIL_WIDTH } from '@/app/shell/ToolRail'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
 const STEP_MS = 10 * 60_000 // ←/→ step: 10 min
+
+/**
+ * The scrubber covers the recent past only — six hours at this width puts a
+ * 5-minute frame a comfortable few pixels apart. Anything further (deep
+ * history, the forecast side) is the steppers' job: a 64-day slider put five
+ * HOURS in every pixel, which is why no one could land on a frame with it.
+ */
+const SCRUB_WINDOW_MS = 6 * 3600_000
 
 const SPEED_LABELS = ['Slow', 'Medium', 'Fast', 'Fastest'] as const
 
@@ -78,9 +86,10 @@ function useLoopDriver() {
 }
 
 /**
- * Floating playback control: transport, clock and scrubber over the map.
- * Past is solid, the forecast half is hatched, and the now tick marks the
- * boundary — the timeline is honest about which side of "now" you're on.
+ * Floating playback control: transport, steppable clock, and a fine-grained
+ * scrubber over the recent past. The clock segments step day/hour/10-min —
+ * any moment is a few precise clicks away, and play from a historical
+ * position sweeps forward to now instead of yanking back to the live loop.
  */
 export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
   useLiveClock()
@@ -123,9 +132,9 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
   ])
 
   const now = Date.now()
-  const start = now - PAST_RANGE_MS
-  const end = now + FUTURE_RANGE_MS
-  const nowPct = ((now - start) / (end - start)) * 100
+  const scrubStart = now - SCRUB_WINDOW_MS
+  // Play means different things by playhead position; say which one it is.
+  const willSweep = !isLive && simTime < loopStart(now)
 
   return (
     <Paper
@@ -152,7 +161,9 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
               ? 'Loading frames…'
               : playing
                 ? 'Pause (space)'
-                : 'Play the last hour (space)'
+                : willSweep
+                  ? 'Play forward from here (space)'
+                  : 'Play the last hour (space)'
           }
         >
           <ActionIcon
@@ -168,28 +179,19 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
             )}
           </ActionIcon>
         </Tooltip>
-        <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
-          {isMobile ? fmt.hm(simTime) : fmt.dateTime(simTime)}
-        </Text>
-        <div style={{ flex: 1, position: 'relative', minWidth: 60 }}>
-          <div
-            style={{
-              position: 'absolute',
-              inset: '45% 0',
-              pointerEvents: 'none',
-              background:
-                'repeating-linear-gradient(45deg, transparent 0 4px, var(--mantine-color-default-border) 4px 5px)',
-              maskImage: `linear-gradient(to right, transparent ${nowPct}%, black ${nowPct}%)`,
-              WebkitMaskImage: `linear-gradient(to right, transparent ${nowPct}%, black ${nowPct}%)`,
-              opacity: 0.7,
-              borderRadius: 2,
-            }}
-          />
+        {isMobile ? (
+          <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
+            {fmt.hm(simTime)}
+          </Text>
+        ) : (
+          <TimeStepper />
+        )}
+        <div style={{ flex: 1, minWidth: 60 }}>
           <Slider
             size="xs"
-            min={start}
-            max={end}
-            value={simTime}
+            min={scrubStart}
+            max={now}
+            value={Math.min(Math.max(simTime, scrubStart), now)}
             onChange={setSimTime}
             label={(v) => fmt.dateTime(v)}
             aria-label="Timeline scrubber"

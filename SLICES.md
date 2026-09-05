@@ -326,3 +326,25 @@ Built during the Krakatau eruption (ash to FL500). `features/volcanoes/`:
   plus transient magnitude-scaled dots ('volcano-quakes' slot) that clear
   with the card. Verified live on Great Sitkin (7 events) and Krakatau (0).
 Deferred: plume-height history, SO2 imagery when a live product returns.
+
+## Phase 11 — Timeline as a clock (2026-09-05) ✅ borrowed from zoom.earth
+
+Studied zoom.earth's playback (their smoothness: self-hosted multi-satellite
+geocolor tiles, worker decode, single-canvas compositor — pipeline out of
+reach, client patterns not).
+
+- **Steppable clock**: day/hour/10-min segments with chevrons (TimeStepper)
+  replace the 64-day slider — 5 h/pixel made a 10-min frame unreachable.
+  Scrubber now covers the recent 6 h, fine-grained; steppers reach the rest.
+- **Play-from-here**: play while scrubbed past the loop window SWEEPS
+  forward from the playhead (frame-aligned, ungated) and goes live on
+  catching up; live/recent keeps the radar-loop semantics. playMode in the
+  timeline store; tooltip says which play you're getting.
+- **Deep-linkable time**: `#t=2026-09-05T05:40Z` sets the clock on boot
+  (urlTime.ts); a resting scrubbed clock writes itself back, live clears it.
+  No writes during playback or drags (replaceState rate limits).
+- **Fixes surfaced while verifying**: Tokyo VAAC publishes only fvfe01
+  (fvfe02-04 were phantom slots, resurveyed tgftp live); AVO notices can
+  share a noticeId across volcanoes (panel key now vnum+noticeId).
+Deferred: historical radar depth via IEM archive tiles (probe first) — the
+UI now reaches −48 h but most layers only have frames for the last hours.

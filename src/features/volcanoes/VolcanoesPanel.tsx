@@ -86,7 +86,9 @@ export function VolcanoesPanel() {
       ))}
       {notices.map((n) => (
         <UnstyledButton
-          key={n.noticeId ?? n.vnum}
+          // One AVO notice can cover several volcanoes with the same
+          // noticeId, so the volcano number has to be part of the key.
+          key={`${n.vnum}-${n.noticeId ?? ''}`}
           onClick={() => requestFlyTo(n.lat, n.long, 8)}
           style={{ display: 'block', width: '100%' }}
         >

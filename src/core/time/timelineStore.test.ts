@@ -16,7 +16,14 @@ const NOW = Date.parse('2026-08-11T23:18:40Z')
 beforeEach(() => {
   vi.useFakeTimers()
   vi.setSystemTime(NOW)
-  useTimeline.setState({ simTime: NOW, isLive: true, playing: false, mode: 'live', syncLagMs: 0 })
+  useTimeline.setState({
+    simTime: NOW,
+    isLive: true,
+    playing: false,
+    playMode: 'loop',
+    mode: 'live',
+    syncLagMs: 0,
+  })
 })
 
 afterEach(() => {
@@ -68,10 +75,11 @@ describe('play', () => {
     expect(state().simTime).toBe(mid)
   })
 
-  it('restarts the loop when resuming from outside the window', () => {
-    useTimeline.setState({ simTime: NOW - 6 * 3600_000, isLive: false, playing: false })
+  it('restarts the loop when resuming from the forecast side', () => {
+    useTimeline.setState({ simTime: NOW + 6 * 3600_000, isLive: false, playing: false })
     state().setPlaying(true)
     expect(state().simTime).toBe(loopStart(NOW))
+    expect(state().playMode).toBe('loop')
   })
 
   it('pausing keeps the current frame', () => {
@@ -80,6 +88,57 @@ describe('play', () => {
     const held = state().simTime
     state().setPlaying(false)
     expect(state()).toMatchObject({ playing: false, simTime: held })
+  })
+})
+
+describe('historical sweep', () => {
+  const YESTERDAY = NOW - 24 * 3600_000
+
+  it('play from deep history sweeps from there, frame-aligned', () => {
+    useTimeline.setState({ simTime: YESTERDAY + 42_000, isLive: false, playing: false })
+    state().setPlaying(true)
+    expect(state().playMode).toBe('sweep')
+    expect(state().simTime).toBe(Math.floor((YESTERDAY + 42_000) / LOOP_FRAME_MS) * LOOP_FRAME_MS)
+  })
+
+  it('advances toward now without wrapping', () => {
+    useTimeline.setState({ simTime: YESTERDAY, isLive: false, playing: true, playMode: 'sweep' })
+    state().advanceFrame()
+    expect(state().simTime).toBe(YESTERDAY + LOOP_FRAME_MS)
+    expect(state().playing).toBe(true)
+  })
+
+  it('ignores warm-frame gating — the loop prefetcher does not cover history', () => {
+    useTimeline.setState({
+      simTime: YESTERDAY,
+      isLive: false,
+      playing: true,
+      playMode: 'sweep',
+      warmFrames: 0,
+    })
+    state().advanceFrame()
+    expect(state().simTime).toBe(YESTERDAY + LOOP_FRAME_MS)
+  })
+
+  it('goes live and stops on catching up to now', () => {
+    useTimeline.setState({
+      simTime: newestFrame(NOW) - LOOP_FRAME_MS,
+      isLive: false,
+      playing: true,
+      playMode: 'sweep',
+    })
+    state().advanceFrame()
+    expect(state()).toMatchObject({ isLive: true, playing: false, simTime: NOW })
+  })
+
+  it('play from inside the loop window still loops', () => {
+    useTimeline.setState({
+      simTime: loopStart(NOW) + LOOP_FRAME_MS,
+      isLive: false,
+      playing: false,
+    })
+    state().setPlaying(true)
+    expect(state().playMode).toBe('loop')
   })
 })
 

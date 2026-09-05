@@ -16,10 +16,13 @@ export const FUTURE_RANGE_MS = 16 * 24 * 3600_000 // +16d (forecast region)
 const LIVE_STEP_MS = 10_000
 
 /**
- * Playback is a radar loop, not a scrub of the whole timeline. Radar has no
- * forecast, so running the clock forward from now just freezes the picture
- * while the date climbs — which is what the play button used to do. Instead
- * it cycles a window of recent frames, the way every radar display does.
+ * Play has two meanings, decided by where the playhead sits. Live (or inside
+ * the recent window) it cycles the last hour of frames, the way every radar
+ * display does — radar has no forecast, so running the clock forward from
+ * now would just freeze the picture while the date climbs. Scrubbed further
+ * into the past it SWEEPS: advances from the playhead toward now, and on
+ * catching up goes live and stops. That is what makes history playable —
+ * set the clock to yesterday noon and watch it roll forward.
  */
 export const LOOP_WINDOW_MS = 60 * 60_000
 
@@ -37,6 +40,9 @@ export const DEFAULT_FRAME_MS = 350
  * image. LIVE mode anchors at the wall clock and lets laggy layers freeze.
  */
 export type LoopMode = 'live' | 'sync'
+
+/** What play is doing: cycling the recent window, or sweeping history → now. */
+export type PlayMode = 'loop' | 'sweep'
 
 /** A layer lagging beyond this is broken or daily, not a coherence trade. */
 export const SYNC_LAG_CAP_MS = 2 * 3600_000
@@ -90,6 +96,8 @@ interface TimelineState {
   simTime: number
   isLive: boolean
   playing: boolean
+  /** Meaningful only while playing; setPlaying picks it from the playhead. */
+  playMode: PlayMode
   /** LIVE anchors the loop at the wall clock; SYNC holds it back syncLagMs. */
   mode: LoopMode
   /** Max publication lag across enabled animating layers (computed outside). */
@@ -167,6 +175,7 @@ export const useTimeline = create<TimelineState>()(
       simTime: Date.now(),
       isLive: true,
       playing: false,
+      playMode: 'loop',
       mode: 'live',
       syncLagMs: 0,
       frameMs: DEFAULT_FRAME_MS,
@@ -180,16 +189,27 @@ export const useTimeline = create<TimelineState>()(
       goLive: () => set({ simTime: Date.now(), isLive: true, playing: false }),
       setPlaying: (playing) =>
         set((s) => {
-          // Stopping ends the sweep, so nothing is reporting again.
+          // Stopping ends the prefetch sweep, so nothing is reporting again.
           if (!playing) return { playing: false, warmFrames: null }
           const now = Date.now()
           const start = loopStart(now)
+          // Scrubbed past the loop window: play means "advance from here",
+          // aligned to a frame boundary so tiles match real generations.
+          if (!s.isLive && s.simTime < start) {
+            const aligned = Math.floor(s.simTime / LOOP_FRAME_MS) * LOOP_FRAME_MS
+            return { playing: true, playMode: 'sweep', isLive: false, simTime: aligned }
+          }
           // Resume where it was paused, as long as that is still a frame the
-          // loop covers. From live — or from anywhere outside the window —
-          // begin at the oldest frame so the cycle starts immediately rather
-          // than sitting on "now" waiting to wrap.
+          // loop covers. From live — or from the forecast side — begin at the
+          // oldest frame so the cycle starts immediately rather than sitting
+          // on "now" waiting to wrap.
           const resumable = !s.isLive && s.simTime >= start && s.simTime < newestFrame(now)
-          return { playing: true, isLive: false, simTime: resumable ? s.simTime : start }
+          return {
+            playing: true,
+            playMode: 'loop',
+            isLive: false,
+            simTime: resumable ? s.simTime : start,
+          }
         }),
       setMode: (mode) =>
         set((s) => {
@@ -197,7 +217,12 @@ export const useTimeline = create<TimelineState>()(
           // Mid-loop the window jumps; restart at the new oldest frame so
           // the badge change and the picture change land together.
           if (s.playing) {
-            return { mode, simTime: loopStartFor(mode, s.syncLagMs), warmFrames: null }
+            return {
+              mode,
+              playMode: 'loop' as const,
+              simTime: loopStartFor(mode, s.syncLagMs),
+              warmFrames: null,
+            }
           }
           return { mode }
         }),
@@ -214,6 +239,15 @@ export const useTimeline = create<TimelineState>()(
           const now = Date.now()
           const start = loopStart(now)
           const next = s.simTime + LOOP_FRAME_MS
+          // A sweep runs from history toward now — ungated (the loop
+          // prefetcher only warms the recent window) — and on catching up
+          // it goes live and stops rather than wrapping.
+          if (s.playMode === 'sweep') {
+            if (next >= newestFrame(now)) {
+              return { simTime: now, isLive: true, playing: false, warmFrames: null }
+            }
+            return { simTime: next, isLive: false }
+          }
           // Cycle only what has loaded. Running past the warm edge is what
           // made the loop stall on cold frames and then lurch as several
           // landed at once; instead the loop is short at first and lengthens
