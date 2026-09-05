@@ -1,15 +1,33 @@
 import { useEffect, useState } from 'react'
 import { Group, Stack, Text, UnstyledButton } from '@mantine/core'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
+import { useCameraStore } from '@/map/cameraStore'
+import { pointsBbox } from '@/map/viewStore'
 import { STATUS_COLORS } from '@/features/volcanoes/service'
 import { acquireAdvisoryFeed, acquireUsgsFeed, useAdvisories, useUsgsNotices } from '@/features/volcanoes/store'
 import type { VolcanicAshAdvisory } from '@/features/volcanoes/vaa'
 
 function AdvisoryRow({ advisory }: { advisory: VolcanicAshAdvisory }) {
   const [open, setOpen] = useState(false)
+  const { requestFitBounds, requestFlyTo } = useCameraStore()
   const fmt = useTimeFormat()
+
+  // A click shows the raw bulletin and takes the map to the eruption —
+  // framing the whole ash cloud when the advisory carries polygons.
+  const points = [
+    ...(advisory.position ? [advisory.position] : []),
+    ...advisory.timesteps.flatMap((t) => t.polygons.flatMap((p) => p.points)),
+  ]
+  const bbox = pointsBbox(points)
+  const onClick = () => {
+    setOpen(!open)
+    if (open) return
+    if (bbox && points.length > 1) requestFitBounds(bbox)
+    else if (advisory.position) requestFlyTo(advisory.position.lat, advisory.position.lon)
+  }
+
   return (
-    <UnstyledButton onClick={() => setOpen(!open)} style={{ display: 'block', width: '100%' }}>
+    <UnstyledButton onClick={onClick} style={{ display: 'block', width: '100%' }}>
       <Group gap={6} wrap="nowrap">
         <span
           style={{
@@ -41,10 +59,11 @@ function AdvisoryRow({ advisory }: { advisory: VolcanicAshAdvisory }) {
   )
 }
 
-/** Erupting volcanoes (live VAAs) then US elevated notices. */
+/** Erupting volcanoes (live VAAs) then US elevated notices; click to go there. */
 export function VolcanoesPanel() {
   useEffect(() => acquireAdvisoryFeed(), [])
   useEffect(() => acquireUsgsFeed(), [])
+  const requestFlyTo = useCameraStore((s) => s.requestFlyTo)
   const advisories = useAdvisories()
   const vaaNumbers = new Set(advisories.map((a) => a.volcanoNumber))
   // US notices already covered by a live advisory don't need a second row.
@@ -66,24 +85,30 @@ export function VolcanoesPanel() {
         <AdvisoryRow key={`${a.vaac}-${a.volcanoName}-${a.issuedMs}`} advisory={a} />
       ))}
       {notices.map((n) => (
-        <Group key={n.noticeId ?? n.vnum} gap={6} wrap="nowrap">
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 2,
-              background:
-                n.colorCode === 'ORANGE' ? STATUS_COLORS.watch : STATUS_COLORS.advisory,
-              flexShrink: 0,
-            }}
-          />
-          <Text size="xs" fw={600}>
-            {n.vName}
-          </Text>
-          <Text size="xs" c="dimmed" truncate>
-            {n.colorCode} / {n.alertLevel}
-          </Text>
-        </Group>
+        <UnstyledButton
+          key={n.noticeId ?? n.vnum}
+          onClick={() => requestFlyTo(n.lat, n.long, 8)}
+          style={{ display: 'block', width: '100%' }}
+        >
+          <Group gap={6} wrap="nowrap">
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                background:
+                  n.colorCode === 'ORANGE' ? STATUS_COLORS.watch : STATUS_COLORS.advisory,
+                flexShrink: 0,
+              }}
+            />
+            <Text size="xs" fw={600}>
+              {n.vName}
+            </Text>
+            <Text size="xs" c="dimmed" truncate>
+              {n.colorCode} / {n.alertLevel}
+            </Text>
+          </Group>
+        </UnstyledButton>
       ))}
       <Text size="xs" c="dimmed">
         Ash advisories · VAACs via NOAA. US alerts · USGS.

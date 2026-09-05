@@ -13,6 +13,7 @@ import {
 export const GVP: SourceRef = { id: 'gvp', label: 'Volcanoes (Smithsonian GVP)' }
 export const USGS_VOLCANO: SourceRef = { id: 'usgs-volcano', label: 'US volcano alerts (USGS)' }
 export const VAAC: SourceRef = { id: 'vaac', label: 'Volcanic ash advisories (VAACs)' }
+export const USGS_QUAKES: SourceRef = { id: 'usgs-quakes', label: 'Seismicity (USGS ANSS)' }
 
 /** Trimmed via WFS propertyName: 465 KB for the full Holocene list. */
 const GVP_URL =
@@ -114,6 +115,46 @@ export async function fetchAshAdvisories(nowMs: number): Promise<VolcanicAshAdvi
   }
 }
 
+export interface VolcanoQuake {
+  lat: number
+  lon: number
+  mag: number | null
+  depthKm: number
+  timeMs: number
+}
+
+export const QUAKE_RADIUS_KM = 30
+export const QUAKE_DAYS = 7
+
+interface FdsnResponse {
+  features: Array<{
+    geometry: { coordinates: [number, number, number] }
+    properties: { mag: number | null; time: number }
+  }>
+}
+
+/**
+ * Located earthquakes near a volcano, the way observatories watch one.
+ * Honesty note carried into the card: ANSS is dense where US networks
+ * report (AVO, HVO…) and only M4.5+ elsewhere — an empty answer abroad
+ * means "not catalogued", not "not shaking".
+ */
+export async function fetchQuakesNear(lat: number, lon: number): Promise<VolcanoQuake[]> {
+  const start = new Date(Date.now() - QUAKE_DAYS * 86400_000).toISOString().slice(0, 10)
+  const url =
+    'https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson' +
+    `&latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}` +
+    `&maxradiuskm=${QUAKE_RADIUS_KM}&starttime=${start}&orderby=time`
+  const res = await fetchJson<FdsnResponse>(USGS_QUAKES, url, { fixture: 'usgs-quakes' })
+  return res.features.map((f) => ({
+    lat: f.geometry.coordinates[1],
+    lon: f.geometry.coordinates[0],
+    depthKm: f.geometry.coordinates[2],
+    mag: f.properties.mag,
+    timeMs: f.properties.time,
+  }))
+}
+
 /** Marker status, worst-first. */
 export type VolcanoStatus = 'erupting' | 'watch' | 'advisory' | 'quiet'
 
@@ -167,6 +208,8 @@ export function volcanoGeoJSON(
           rank: status === 'erupting' ? 3 : status === 'watch' ? 2 : status === 'advisory' ? 1 : 0,
           name: v.name,
           number: v.number,
+          lat: v.lat,
+          lon: v.lon,
           country: v.country,
           vtype: v.type,
           elevation: v.elevation,

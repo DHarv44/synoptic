@@ -41,6 +41,8 @@ export const LAYER_ORDER = [
   'alerts-fill',
   // — the basemap's own labels draw here —
   'cells',
+  // Inspect-time quake dots under their volcano's triangle, never over it.
+  'volcano-quakes',
   'volcanoes',
   'gauges',
   'buoys',
@@ -60,6 +62,7 @@ export type LayerSlot = (typeof LAYER_ORDER)[number]
  */
 const ABOVE_LABELS = new Set<LayerSlot>([
   'cells',
+  'volcano-quakes',
   'volcanoes',
   'gauges',
   'buoys',

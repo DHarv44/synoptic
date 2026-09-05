@@ -87,6 +87,11 @@ export const CREDITS: Credit[] = [
     what: 'Volcanic ash advisories: observed and forecast ash-cloud polygons.',
   },
   {
+    label: 'USGS Earthquake Hazards Program',
+    href: 'https://earthquake.usgs.gov/',
+    what: 'ANSS earthquake catalog behind the volcano seismicity dots.',
+  },
+  {
     label: 'Blitzortung',
     href: 'https://www.blitzortung.org/',
     what: 'Community lightning detection network, seconds of latency.',

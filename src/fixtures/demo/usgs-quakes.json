@@ -1,0 +1,51 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "title": "USGS Earthquakes (fixture: Great Sitkin, 7 days)",
+    "count": 7
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "mag": 0.85, "place": "40 km NE of Adak, Alaska", "time": 1788407109710, "type": "earthquake" },
+      "geometry": { "type": "Point", "coordinates": [-176.159166666667, 52.0908333333333, 4.18] },
+      "id": "av94414583"
+    },
+    {
+      "type": "Feature",
+      "properties": { "mag": 1.61, "place": "38 km NE of Adak, Alaska", "time": 1788406948600, "type": "earthquake" },
+      "geometry": { "type": "Point", "coordinates": [-176.207333333333, 52.1018333333333, 8.25] },
+      "id": "av94414573"
+    },
+    {
+      "type": "Feature",
+      "properties": { "mag": 1.14, "place": "38 km ENE of Adak, Alaska", "time": 1788402703340, "type": "earthquake" },
+      "geometry": { "type": "Point", "coordinates": [-176.141, 52.0378333333333, 4.84] },
+      "id": "av94414533"
+    },
+    {
+      "type": "Feature",
+      "properties": { "mag": 0.44, "place": "38 km ENE of Adak, Alaska", "time": 1788400082570, "type": "earthquake" },
+      "geometry": { "type": "Point", "coordinates": [-176.168833333333, 52.0663333333333, 5.38] },
+      "id": "av94414518"
+    },
+    {
+      "type": "Feature",
+      "properties": { "mag": 0.89, "place": "41 km NE of Adak, Alaska", "time": 1788191176370, "type": "earthquake" },
+      "geometry": { "type": "Point", "coordinates": [-176.167666666667, 52.1098333333333, -1.76] },
+      "id": "av93066399"
+    },
+    {
+      "type": "Feature",
+      "properties": { "mag": 1.8, "place": "59 km ENE of Adak, Alaska", "time": 1788120325137, "type": "earthquake" },
+      "geometry": { "type": "Point", "coordinates": [-175.836, 52.092, 13.9] },
+      "id": "aka2026rermdi"
+    },
+    {
+      "type": "Feature",
+      "properties": { "mag": 0.36, "place": "39 km NE of Adak, Alaska", "time": 1787990701030, "type": "earthquake" },
+      "geometry": { "type": "Point", "coordinates": [-176.153666666667, 52.0748333333333, 4.69] },
+      "id": "av93066349"
+    }
+  ]
+}

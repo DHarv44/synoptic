@@ -1,3 +1,4 @@
+import { create } from 'zustand'
 import { createSharedFeed } from '@/core/data/sharedFeed'
 import {
   USGS_VOLCANO,
@@ -5,6 +6,7 @@ import {
   fetchAshAdvisories,
   fetchElevatedUs,
   type UsgsNotice,
+  type VolcanoQuake,
 } from '@/features/volcanoes/service'
 import type { VolcanicAshAdvisory } from '@/features/volcanoes/vaa'
 
@@ -33,3 +35,23 @@ export function useAdvisories(): VolcanicAshAdvisory[] {
 export function useUsgsNotices(): UsgsNotice[] {
   return usgsFeed.useData((s) => s.data) ?? []
 }
+
+/**
+ * Seismicity being inspected: set by an open volcano card, cleared when it
+ * closes, drawn by the layer as a transient halo of quake dots. Volcano
+ * number keys it so a second card cleanly replaces the first.
+ */
+interface InspectState {
+  volcanoNumber: number | null
+  quakes: VolcanoQuake[]
+  setInspect: (volcanoNumber: number, quakes: VolcanoQuake[]) => void
+  clearInspect: (volcanoNumber: number) => void
+}
+
+export const useInspect = create<InspectState>((set) => ({
+  volcanoNumber: null,
+  quakes: [],
+  setInspect: (volcanoNumber, quakes) => set({ volcanoNumber, quakes }),
+  clearInspect: (volcanoNumber) =>
+    set((s) => (s.volcanoNumber === volcanoNumber ? { volcanoNumber: null, quakes: [] } : s)),
+}))

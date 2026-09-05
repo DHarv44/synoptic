@@ -1,7 +1,15 @@
+import { useEffect } from 'react'
 import { Badge, Group, Stack, Text } from '@mantine/core'
+import { useCachedFetch } from '@/core/data/useCachedFetch'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
-import { STATUS_COLORS, type VolcanoStatus } from '@/features/volcanoes/service'
-import { useAdvisories } from '@/features/volcanoes/store'
+import {
+  QUAKE_DAYS,
+  QUAKE_RADIUS_KM,
+  STATUS_COLORS,
+  fetchQuakesNear,
+  type VolcanoStatus,
+} from '@/features/volcanoes/service'
+import { useAdvisories, useInspect } from '@/features/volcanoes/store'
 import type { MapPopupProps } from '@/map/popups/registry'
 
 const STATUS_TEXT: Record<string, string> = {
@@ -18,6 +26,24 @@ export function VolcanoPopup({ properties }: MapPopupProps) {
   const number = typeof properties.number === 'number' ? properties.number : null
   const advisory = useAdvisories().find((a) => a.volcanoNumber === number)
   const lastYear = properties.lastEruptionYear
+
+  const lat = typeof properties.lat === 'number' ? properties.lat : null
+  const lon = typeof properties.lon === 'number' ? properties.lon : null
+  const quakes = useCachedFetch(
+    number !== null && lat !== null && lon !== null ? `volcano-quakes-${number}` : null,
+    10 * 60_000,
+    () => fetchQuakesNear(lat!, lon!),
+  ).data
+
+  // While this card is open, the layer draws its quakes as dots on the map.
+  const { setInspect, clearInspect } = useInspect()
+  useEffect(() => {
+    if (number === null || quakes === null) return
+    setInspect(number, quakes)
+    return () => clearInspect(number)
+  }, [number, quakes, setInspect, clearInspect])
+
+  const mags = quakes?.map((q) => q.mag).filter((m): m is number => m !== null) ?? []
 
   return (
     <Stack gap={4}>
@@ -55,6 +81,14 @@ export function VolcanoPopup({ properties }: MapPopupProps) {
       {!advisory && properties.synopsis !== '' && (
         <Text size="xs" lineClamp={3}>
           {String(properties.synopsis)}
+        </Text>
+      )}
+      {quakes !== null && (
+        <Text size="xs" c="dimmed">
+          {quakes.length > 0
+            ? `${quakes.length} quake${quakes.length === 1 ? '' : 's'} ≤${QUAKE_RADIUS_KM} km / ${QUAKE_DAYS} d` +
+              (mags.length > 0 ? ` · max M${Math.max(...mags).toFixed(1)}` : '')
+            : `no quakes catalogued ≤${QUAKE_RADIUS_KM} km / ${QUAKE_DAYS} d`}
         </Text>
       )}
     </Stack>

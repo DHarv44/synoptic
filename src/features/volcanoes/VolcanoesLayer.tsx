@@ -15,6 +15,7 @@ import {
   acquireAdvisoryFeed,
   acquireUsgsFeed,
   useAdvisories,
+  useInspect,
   useUsgsNotices,
 } from '@/features/volcanoes/store'
 import { makeTriangleImage, triangleImageId } from '@/features/volcanoes/triangleIcons'
@@ -34,6 +35,7 @@ export function VolcanoesLayer() {
   const [volcanoes, setVolcanoes] = useState<Volcano[]>([])
   const usgs = useUsgsNotices()
   const advisories = useAdvisories()
+  const inspectQuakes = useInspect((s) => s.quakes)
 
   useEffect(() => acquireAdvisoryFeed(), [])
   useEffect(() => acquireUsgsFeed(), [])
@@ -58,6 +60,31 @@ export function VolcanoesLayer() {
     }
     m.addSource('volcanoes', { type: 'geojson', data: EMPTY })
     m.addSource('volcano-ash', { type: 'geojson', data: EMPTY })
+    m.addSource('volcano-quakes', { type: 'geojson', data: EMPTY })
+    // Inspect-time seismicity: dots sized by magnitude while a card is open.
+    addDataLayer(
+      m,
+      {
+        id: 'volcano-quakes',
+        type: 'circle',
+        source: 'volcano-quakes',
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['coalesce', ['get', 'mag'], 0],
+            0, 2.5,
+            2, 4.5,
+            5, 10,
+          ],
+          'circle-color': '#f39c12',
+          'circle-opacity': 0.8,
+          'circle-stroke-color': 'rgba(0,0,0,0.6)',
+          'circle-stroke-width': 1,
+        },
+      },
+      'volcano-quakes',
+    )
     // Ash: observed cloud as a wash + firm outline, forecasts dashed and
     // fading with lead time. Same source, filtered layers.
     addDataLayer(
@@ -138,10 +165,10 @@ export function VolcanoesLayer() {
       'volcanoes',
     )
     return () => {
-      for (const id of ['volcano-ash-fill', 'volcano-ash-outline', 'volcano-ash-forecast', 'volcanoes', 'volcano-labels']) {
+      for (const id of ['volcano-ash-fill', 'volcano-ash-outline', 'volcano-ash-forecast', 'volcano-quakes', 'volcanoes', 'volcano-labels']) {
         if (m.getLayer(id)) m.removeLayer(id)
       }
-      for (const id of ['volcanoes', 'volcano-ash']) {
+      for (const id of ['volcanoes', 'volcano-ash', 'volcano-quakes']) {
         if (m.getSource(id)) m.removeSource(id)
       }
       for (const s of STATUSES) {
@@ -161,8 +188,17 @@ export function VolcanoesLayer() {
           ? geo
           : { ...geo, features: geo.features.filter((f) => f.properties?.observed === true) },
       )
+      const quakes = m.getSource('volcano-quakes') as GeoJSONSource | undefined
+      quakes?.setData({
+        type: 'FeatureCollection',
+        features: inspectQuakes.map((q) => ({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [q.lon, q.lat] },
+          properties: { mag: q.mag },
+        })),
+      })
     },
-    [volcanoes, usgs, advisories, showAll, showAsh, showForecast],
+    [volcanoes, usgs, advisories, showAll, showAsh, showForecast, inspectQuakes],
   )
 
   return null

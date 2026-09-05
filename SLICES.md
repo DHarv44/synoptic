@@ -320,5 +320,9 @@ Built during the Krakatau eruption (ash to FL500). `features/volcanoes/`:
   of erupting/elevated with raw bulletin expand, intl VA SIGMETs merged
   into the aviation feed (VA only — global TS/TURB would be clutter), and
   a Volcanic preset (VIIRS true color — GOES-East can't see Sunda).
-Deferred: quake-swarm overlay near a selected volcano, plume-height
-history, SO2 imagery when a live product returns.
+- **Seismicity**: opening a volcano card fetches USGS ANSS quakes ≤30 km /
+  7 d (CORS-open, no proxy) — card line ("7 quakes · max M1.8" or "no
+  quakes catalogued", honest about the ~M4.5+ floor outside US networks)
+  plus transient magnitude-scaled dots ('volcano-quakes' slot) that clear
+  with the card. Verified live on Great Sitkin (7 events) and Krakatau (0).
+Deferred: plume-height history, SO2 imagery when a live product returns.

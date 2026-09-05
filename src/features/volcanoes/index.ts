@@ -16,7 +16,7 @@ registerFeature({
   layerGroup: 'reference',
   layerIcon: IconVolcano,
   layerComponent: VolcanoesLayer,
-  sourceIds: ['gvp', 'usgs-volcano', 'vaac'],
+  sourceIds: ['gvp', 'usgs-volcano', 'vaac', 'usgs-quakes'],
   panels: [
     {
       id: 'volcanoes',
