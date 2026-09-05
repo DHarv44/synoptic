@@ -296,3 +296,29 @@ server/index.mjs, above the /proxy 404.
 
 Order: M0 → M1 → M2 → M3 → M4 → M5 → M6 → M7. M4 depends on M3; the rest
 are independent and can reorder if a data-format unknown blocks one.
+
+## Phase 10 — volcanoes (2026-09-05) ✅ V1–V4 in one pass
+
+Built during the Krakatau eruption (ash to FL500). `features/volcanoes/`:
+- **Data** (all verified live before building): Smithsonian GVP WFS via
+  `/proxy/gvp` (no CORS upstream; propertyName-trimmed to 465 KB, volcano
+  NUMBER is the join key VAAs carry); USGS elevated API (CORS-open, US
+  alert levels); VAAC ash advisories as FV* text bulletins via
+  `/proxy/vaa` → tgftp (~39 fixed slots across seven VAACs, stale DTGs
+  filtered at 24 h). GIBS SO2/aerosol was evaluated and REJECTED — the
+  whole product family 404s past 2026-06-01.
+- **vaa.ts parser**: header fields, deg+min coordinate decode, and
+  token-stream polygon parsing — one section stacks several flight-level
+  polygons (Krakatau ran SFC/FL200 + SFC/FL500 per timestep), each opened
+  by a level band and closed by MOV; observed + est + 6/12/18 h forecasts.
+- **Status model**: a live VAA = erupting, globally, whatever any database
+  says; USGS colour codes fill in US watch/advisory; markers hide quiet
+  volcanoes unless "show all Holocene" is on.
+- **Display**: status-coloured triangle sprites + labels, observed ash as
+  wash+outline, forecasts dashed fading with lead time (new 'volcano-ash'
+  + 'volcanoes' slots), click card (GVP identity + live advisory), panel
+  of erupting/elevated with raw bulletin expand, intl VA SIGMETs merged
+  into the aviation feed (VA only — global TS/TURB would be clutter), and
+  a Volcanic preset (VIIRS true color — GOES-East can't see Sunda).
+Deferred: quake-swarm overlay near a selected volcano, plume-height
+history, SO2 imagery when a live product returns.

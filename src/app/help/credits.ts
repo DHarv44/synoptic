@@ -72,6 +72,21 @@ export const CREDITS: Credit[] = [
     what: 'Moored buoy and coastal station observations: waves, water temperature, marine wind.',
   },
   {
+    label: 'Smithsonian Global Volcanism Program',
+    href: 'https://volcano.si.edu/',
+    what: 'The Holocene volcano database behind the volcano markers.',
+  },
+  {
+    label: 'USGS Volcano Hazards Program',
+    href: 'https://www.usgs.gov/programs/VHP',
+    what: 'US volcano alert levels and aviation color codes.',
+  },
+  {
+    label: 'VAACs via NOAA',
+    href: 'https://www.ospo.noaa.gov/products/atmosphere/vaac/',
+    what: 'Volcanic ash advisories: observed and forecast ash-cloud polygons.',
+  },
+  {
     label: 'Blitzortung',
     href: 'https://www.blitzortung.org/',
     what: 'Community lightning detection network, seconds of latency.',

@@ -1,0 +1,35 @@
+import { createSharedFeed } from '@/core/data/sharedFeed'
+import {
+  USGS_VOLCANO,
+  VAAC,
+  fetchAshAdvisories,
+  fetchElevatedUs,
+  type UsgsNotice,
+} from '@/features/volcanoes/service'
+import type { VolcanicAshAdvisory } from '@/features/volcanoes/vaa'
+
+/** Ash advisories and US alert notices feed the layer, panel and summary. */
+const advisoryFeed = createSharedFeed<VolcanicAshAdvisory[]>({
+  source: VAAC,
+  cadenceMs: 10 * 60_000,
+  featureId: 'volcanoes',
+  fetcher: () => fetchAshAdvisories(Date.now()),
+})
+
+const usgsFeed = createSharedFeed<UsgsNotice[]>({
+  source: USGS_VOLCANO,
+  cadenceMs: 10 * 60_000,
+  featureId: 'volcanoes',
+  fetcher: fetchElevatedUs,
+})
+
+export const acquireAdvisoryFeed = advisoryFeed.acquire
+export const acquireUsgsFeed = usgsFeed.acquire
+
+export function useAdvisories(): VolcanicAshAdvisory[] {
+  return advisoryFeed.useData((s) => s.data) ?? []
+}
+
+export function useUsgsNotices(): UsgsNotice[] {
+  return usgsFeed.useData((s) => s.data) ?? []
+}

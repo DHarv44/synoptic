@@ -27,6 +27,8 @@ const DIST = fileURLToPath(new URL('../dist', import.meta.url))
 const METAR = 'https://aviationweather.gov/api/data/metar'
 const AWC = 'https://aviationweather.gov/api/data'
 const NEXRAD = 'https://unidata-nexrad-level2-chunks.s3.amazonaws.com'
+const GVP = 'https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows'
+const VAA = 'https://tgftp.nws.noaa.gov/data/raw/fv'
 
 const app = express()
 app.disable('x-powered-by')
@@ -105,6 +107,25 @@ app.use('/proxy/gfs-grid', async (req, res) => {
     res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Cache-Control', 'public, max-age=600')
     res.end(payload)
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** Smithsonian GVP volcano database — WFS GeoJSON, no CORS upstream. */
+app.use('/proxy/gvp', async (req, res) => {
+  try {
+    // The Holocene list changes on academic timescales; cache a day.
+    await pipeUpstream(res, GVP + req.url, { cacheSeconds: 86400 })
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** VAAC volcanic ash advisories: raw text bulletins, no CORS upstream. */
+app.use('/proxy/vaa', async (req, res) => {
+  try {
+    await pipeUpstream(res, VAA + req.url, { cacheSeconds: 300 })
   } catch (e) {
     fail(res, e)
   }

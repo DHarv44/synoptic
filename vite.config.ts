@@ -92,6 +92,18 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace('/proxy/nexrad', ''),
       },
+      // Smithsonian GVP volcano database (WFS; no CORS upstream).
+      '/proxy/gvp': {
+        target: 'https://webservices.volcano.si.edu',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/proxy/gvp', '/geoserver/GVP-VOTW/ows'),
+      },
+      // VAAC volcanic ash advisories, raw text bulletins (no CORS upstream).
+      '/proxy/vaa': {
+        target: 'https://tgftp.nws.noaa.gov',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/proxy/vaa', '/data/raw/fv'),
+      },
     },
   },
 })

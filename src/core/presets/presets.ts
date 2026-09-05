@@ -24,6 +24,7 @@ export const SCENE_FEATURES = [
   'lightning',
   'gauges',
   'buoys',
+  'volcanoes',
 ] as const
 
 export type SceneFeature = (typeof SCENE_FEATURES)[number]
@@ -95,6 +96,20 @@ export const BUILT_IN_PRESETS: Preset[] = [
       metar: true,
       aviation: true,
       satellite: { product: 'geocolor' },
+      volcanoes: true,
+    },
+  },
+  {
+    id: 'volcanic',
+    label: 'Volcanic',
+    description: 'Erupting volcanoes, ash clouds and forecasts, ash SIGMETs, upper flow.',
+    scene: {
+      volcanoes: true,
+      aviation: { sigmets: true, pireps: false },
+      // VIIRS true color is the global imagery — GOES-East can't see Sunda.
+      satellite: { product: 'truecolor', opacity: 70 },
+      wind: { level: '250', fieldOpacity: 30 },
+      graticule: true,
     },
   },
   {

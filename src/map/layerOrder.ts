@@ -32,12 +32,16 @@ export const LAYER_ORDER = [
   // and the surface-analysis fronts directly over their isobars.
   'fields',
   'fronts',
+  // Ash clouds under the aviation wash: the VAA polygon is the analysis,
+  // the SIGMET drawn over it is the operational instruction.
+  'volcano-ash',
   // Aviation hazard washes sit under the NWS warning wash: a SIGMET is
   // advisory context, a tornado warning is the thing itself.
   'aviation-fill',
   'alerts-fill',
   // — the basemap's own labels draw here —
   'cells',
+  'volcanoes',
   'gauges',
   'buoys',
   'pirep',
@@ -56,6 +60,7 @@ export type LayerSlot = (typeof LAYER_ORDER)[number]
  */
 const ABOVE_LABELS = new Set<LayerSlot>([
   'cells',
+  'volcanoes',
   'gauges',
   'buoys',
   'pirep',

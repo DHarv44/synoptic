@@ -6,6 +6,42 @@ export const AWC: SourceRef = { id: 'awc-hazards', label: 'Aviation hazards (AWC
 /** SIGMETs are issued nationally; no bbox parameter exists or is needed. */
 export const SIGMET_URL = '/proxy/awc/airsigmet?format=json&type=sigmet'
 
+/**
+ * International SIGMETs — every FIR worldwide. Only volcanic ash is taken
+ * from this feed: global TS/TURB would triple the clutter for hazards the
+ * domestic feed already covers where we fly, but an ash cloud over the
+ * Sunda Strait is exactly what this layer exists to show.
+ */
+export const ISIGMET_URL = '/proxy/awc/isigmet?format=json'
+
+export interface IntlSigmet {
+  hazard: string
+  qualifier: string | null
+  firName: string
+  validTimeFrom: number
+  validTimeTo: number
+  coords: Array<{ lat: number; lon: number }> | null
+  rawSigmet: string
+}
+
+/** Volcanic-ash intl SIGMETs mapped into the domestic record shape. */
+export function intlVaAsAirSigmets(items: IntlSigmet[]): AirSigmet[] {
+  return items
+    .filter((s) => s.hazard === 'VA')
+    .map((s) => ({
+      airSigmetType: 'SIGMET',
+      hazard: 'VA',
+      validTimeFrom: s.validTimeFrom,
+      validTimeTo: s.validTimeTo,
+      altitudeHi1: null,
+      altitudeLow1: null,
+      movementDir: null,
+      movementSpd: null,
+      rawAirSigmet: s.rawSigmet,
+      coords: s.coords,
+    }))
+}
+
 /** PIREPs require a bbox upstream; hours of history kept short — they age fast. */
 export function pirepUrl(latMin: number, lonMin: number, latMax: number, lonMax: number): string {
   return `/proxy/awc/pirep?format=json&age=2&bbox=${latMin},${lonMin},${latMax},${lonMax}`
@@ -51,6 +87,9 @@ export function sigmetColor(hazard: string): string {
     case 'MTW':
     case 'MTN OBSCN':
       return C.violet5
+    case 'VA':
+    case 'ASH':
+      return C.red5
     default:
       return C.gray5
   }
