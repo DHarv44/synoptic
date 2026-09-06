@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ActionIcon, Popover, Stack, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Group, Popover, Stack, Text, Tooltip, UnstyledButton } from '@mantine/core'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled, useSettings } from '@/core/settings/store'
 import { useHealth } from '@/core/data/healthStore'
@@ -27,7 +27,7 @@ function useWorstHealth(sourceIds: string[] | undefined): SourceHealth | null {
   return mine.find((s) => s.status === 'error') ?? mine.find((s) => s.status === 'stale') ?? mine[0]
 }
 
-function LayerButton({ manifest }: { manifest: FeatureManifest }) {
+function LayerButton({ manifest, labeled }: { manifest: FeatureManifest; labeled: boolean }) {
   const enabled = useFeatureEnabled(manifest.id)
   const setEnabled = useSettings((s) => s.setEnabled)
   const setOption = useSettings((s) => s.setOption)
@@ -51,6 +51,43 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
   const label = enabled
     ? `${manifest.title}${health ? ` — ${health.status}${age}` : ''}`
     : `${manifest.title} (off)`
+
+  // Touch has no hover: the label rides beside the icon instead of in a
+  // tooltip, and the settings flyout (a hover surface) is simply absent —
+  // per-layer options live in Settings on a phone.
+  if (labeled) {
+    return (
+      <UnstyledButton
+        onClick={() => setEnabled(manifest.id, !enabled)}
+        aria-pressed={enabled}
+        px={10}
+        py={7}
+        style={{
+          width: '100%',
+          color: enabled ? 'var(--mantine-color-text)' : 'var(--mantine-color-dimmed)',
+          opacity: enabled ? 1 : 0.55,
+        }}
+      >
+        <Group gap={8} wrap="nowrap">
+          {Icon ? <Icon size={17} stroke={1.6} /> : <Text size="xs">{manifest.title[0]}</Text>}
+          <Text size="sm" style={{ flex: 1, minWidth: 0 }} truncate>
+            {manifest.title}
+          </Text>
+          {enabled && health && (
+            <div
+              style={{
+                width: 6,
+                height: 6,
+                borderRadius: 3,
+                flexShrink: 0,
+                background: STATUS_COLOR[health.status],
+              }}
+            />
+          )}
+        </Group>
+      </UnstyledButton>
+    )
+  }
 
   const button = (
     <ActionIcon
@@ -132,13 +169,14 @@ function LayerButton({ manifest }: { manifest: FeatureManifest }) {
 /**
  * Layer visibility toggles, grouped by kind. Visibility is an operation you
  * perform while working; opacity, colour tables and products are
- * preferences and live in Settings.
+ * preferences and live in Settings. `labeled` is the touch variant: titles
+ * beside icons, since tooltips and hover flyouts don't exist on a phone.
  */
-export function LayerToggles() {
+export function LayerToggles({ labeled = false }: { labeled?: boolean }) {
   const layers = listFeatures().filter((f) => f.layer)
 
   return (
-    <Stack gap={4} align="center" px={2}>
+    <Stack gap={4} align={labeled ? 'stretch' : 'center'} px={2}>
       {GROUP_ORDER.map((group, i) => {
         const inGroup = layers.filter((f) => (f.layerGroup ?? 'reference') === group)
         if (inGroup.length === 0) return null
@@ -146,7 +184,7 @@ export function LayerToggles() {
           <Stack
             key={group}
             gap={0}
-            align="center"
+            align={labeled ? 'stretch' : 'center'}
             w="100%"
             style={
               i > 0
@@ -155,7 +193,7 @@ export function LayerToggles() {
             }
           >
             {inGroup.map((f) => (
-              <LayerButton key={f.id} manifest={f} />
+              <LayerButton key={f.id} manifest={f} labeled={labeled} />
             ))}
           </Stack>
         )

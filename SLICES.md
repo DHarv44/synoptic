@@ -385,3 +385,10 @@ UI now reaches −48 h but most layers only have frames for the last hours.
   and forecast unreachable on phones — and stepper chevrons grew to a
   usable touch size everywhere. Popups, settings (13-product select wraps),
   and sheet scrolling verified at 375×812.
+- **Mobile layer menu** (user-caught): the layers button expanded into the
+  desktop rail's bare-icon column — 18 unlabeled icons whose names lived in
+  hover tooltips no phone can show, growing uncapped until the top rows sat
+  hidden under the top bar. Now a labeled, height-capped scrolling menu
+  (LayerToggles `labeled` variant: title beside icon, health dot inline; no
+  hover flyout — per-layer options stay in Settings on touch). Desktop rail
+  unchanged.
