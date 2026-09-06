@@ -7,6 +7,11 @@ import { LocateButton } from '@/map/LocateButton'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
 const BUTTON = 44
+const GAP = 8
+/** The column at its tallest (compass showing), menu excluded. */
+const COLUMN_HEIGHT = 3 * (BUTTON + GAP)
+/** The top bar the viewport sits under, plus a margin the menu keeps from it. */
+const TOP_CLEARANCE = 44 + 8
 
 /**
  * The phone's map controls: one column on the right edge above the
@@ -21,13 +26,13 @@ export function MobileMapControls({ bottom }: { bottom: number }) {
 
   return (
     <Stack
-      gap={8}
+      gap={GAP}
       align="flex-end"
       style={{ position: 'absolute', right: 12, bottom, zIndex: 6 }}
     >
       {open && (
         <ScrollArea.Autosize
-          mah={`calc(100dvh - ${bottom + 44 + 2 * (BUTTON + 8) + 24}px)`}
+          mah={`calc(100dvh - ${bottom + COLUMN_HEIGHT + TOP_CLEARANCE}px)`}
           type="auto"
           style={{ ...mapChromeStyle, width: 200, borderRadius: 12, paddingBlock: 6 }}
         >
