@@ -32,8 +32,18 @@ Three surfaces, split by kind, not by topic:
   `FeatureManifest.panels` with a `group`.
 - Clicking the active rail tab collapses that panel; there are no separate
   collapse buttons. Mobile replaces the right rail with a bottom tab bar
-  (peek/half/full) and the tool rail with buttons across the top of the map;
-  layers expand from a map button into the same vertical icon strip.
+  (peek/half/full, and it collapses to peek whenever panel content requests
+  a camera move) and the tool rail with buttons across the top of the map;
+  layers expand from a map button into a labeled, height-capped scrolling
+  menu (`LayerToggles labeled`).
+- **Map cards** (`map/popups/MapPopup.tsx`): a left click opens a card only
+  for a registered popup layer and otherwise closes whatever is open; the
+  location card (interrogate / set home) is right-click on desktop and a
+  timed long-press on touch. A card closes itself when its layer leaves the
+  style.
+- **Legends** (`app/shell/MapLegends.tsx`): features declare
+  `legendComponent`; the shell stacks enabled ones bottom-left above the
+  playback bar. Wind and model fields use it.
 
 Radar state is centralised in `features/radar/level2/store.ts` — the map layer
 is the only writer; bench, workbench and readouts all read from it.
@@ -43,7 +53,51 @@ map layers with `addDataLayer(map, spec, slot)`, never `map.addLayer` — the
 order otherwise depends on which feature mounted last, and toggling a layer
 off and on moves it to the top (this is how radar came to cover warnings).
 
-## Where things stand (2026-08-15)
+## Where things stand (2026-09-06)
+
+Everything below is on `main` and deployed; SLICES.md Phases 10–20 carry the
+per-slice detail. Working tree clean. Tests: 279 green (`npm test`).
+
+- **Volcanoes** (Phase 10, 16): GVP database via proxy, USGS alert levels,
+  VAAC FV* bulletins parsed in-browser (`features/volcanoes/vaa.ts`) into
+  observed + forecast ash polygons, international VA SIGMETs merged into the
+  aviation feed, a Volcanic preset (Himawari IR), on-demand USGS quake dots
+  on the card, plume-top history with sparklines. Tokyo publishes ONE slot
+  (fvfe01); GIBS SO2 is dead (404s past 2026-06-01) — both recorded.
+- **Timeline as a clock** (Phase 11): day/hour/10-min steppers replace the
+  64-day slider (6-h scrubber remains); play LOOPS the last hour when live
+  and SWEEPS forward from history (`playMode` in `timelineStore`);
+  `#t=…Z` deep links (`core/time/urlTime.ts`).
+- **Satellite ring** (11b): GOES-West + Himawari products; satellite loop
+  frames warmed (`satellite/prefetch.ts`) with a warmth combiner
+  (`core/time/warmth.ts`) so several prefetchers gate on the slowest;
+  GOES-East gets source `bounds` (West/Himawari wrap the antimeridian and
+  cannot).
+- **Wind finished** (Phases 3, 13, 14): the "pinned" corruption was already
+  fixed by `grib2RefValue` — proven against Open-Meteo GFS to <0.2 m/s and
+  unpinned; bicubic `windAt()` sampling; PCG spawn hash (the sin hash made a
+  lattice zoomed in); native 0.25° grid gzipped; speed legend from one
+  `WIND_RAMP`; zoom-aware draw fraction; defaults on, both opacities 30.
+- **Paper cuts** (12): pollers wake the instant their feature is enabled
+  (scheduler subscribes to settings); popups die with their layer;
+  RainViewer returns no frame beyond 15 min before its oldest instead of
+  faking history.
+- **User-saved presets** (15), **MRMS zero-precip transparency** (18,
+  `synoptic-precip://` protocol), **zone outlines for unmapped alerts on
+  demand** (17 — ~52 KB/zone, IndexedDB 14 d, drawn dashed; wholesale is
+  ~40 MB and the batch endpoint has no geometry), **GFS layers follow the
+  clock** (19 — `valid=` → `server/gfsValid.mjs` resolves run/hour; "now"
+  is the short-range forecast for the current hour; legends carry run and
+  hour), **left click only on points of interest** (20).
+- Mobile pass (11c): sheet yields to fly-to, steppers on phones, labeled
+  layer menu.
+
+**Next: everything hurricane** (README roadmap item 8) — see the queue.
+
+## Where things stood (2026-08-15)
+
+*(The visual review asked for below happened over the 2026-09-05 session;
+the layers have been seen and tuned.)*
 
 **`met-views` merged to main 2026-08-16 (fast-forward to f66ddd7) — Railway
 deploys main, so production now carries everything.** That includes all of
@@ -234,13 +288,17 @@ How it works, and why each piece is the way it is:
   0.7 ms and memoized per floor. No worker needed; `recolor` is pure, so
   moving it to one is a lift-and-shift if that changes.
 
-### Playback is a loop, not a scrub
+### Playback is a loop when live, a sweep from history
 
 `play` cycles `LOOP_WINDOW_MS` (1 h) in `LOOP_FRAME_MS` (5 min) steps — 13
 frames — and wraps, holding the newest for `LOOP_END_HOLD` frames so the
 cycle is readable. It used to run `simTime` forward continuously from now,
 which meant pressing play at LIVE (the default state) advanced the clock into
 the forecast while the radar sat frozen, because radar has no forecast.
+*(2026-09-05: with the playhead scrubbed past the loop window, play now
+SWEEPS forward from there to now and goes live on arrival — `playMode:
+'sweep'`, ungated by warm frames. Inside the window or live, it loops as
+described.)*
 
 - The **accumulator lives in the driver, not the store.** Each frame schedules
   the next via `setTimeout`; putting a counter in the store would notify every
@@ -326,12 +384,11 @@ installs and update flow in a real Brave/Chrome window.
 
 ## The end-game queue (user-agreed order: features first, then these)
 
-1. **Pinned wind bug** — full diagnosis state in SLICES.md "Phase 3". Resume at:
-   VGRD region spike vs known-good values (e.g. Open-Meteo point winds at
-   250 hPa, 22N 120W). Suspects: grib2class VGRD decode, or u/v assembly.
-   Also re-test after any fix WITH the globe/mercator note below in mind —
-   part of the original misplacement was the globe-projection matrix issue.
-   The wind feature ships `defaultEnabled: false` until fixed.
+1. **Wind — DONE (2026-09-05).** The corruption was the negative GRIB
+   reference-value misparse, already corrected by `grib2RefValue`; the
+   spike (`SLICES.md` Phase 3) matched Open-Meteo to <0.2 m/s and the layer
+   ships on by default. Optional polish left: feel tuning, gust/streamline
+   variants, globe port.
 2. **UI overhaul — STRUCTURAL WORK DONE** (see README roadmap item 2 for the
    full shipped list). Rail + 4-tab dock + collapsible reorderable sections +
    rebuilt settings + mobile bottom-tab layout + translucent chrome +
@@ -362,9 +419,10 @@ installs and update flow in a real Brave/Chrome window.
      take a unit rather than a system, each setting defaulting to `auto`.
      Still open (README has the list): height/distance units, L2 defaults,
      radar loop length/speed, METAR content/density, timeline defaults,
-     per-source cadence. Then **presets** (PLAN §3.13a, never built) and
-     settings search. Adding fields is cheap — they're declared in
-     `FeatureManifest.settings` and the UI generates itself.
+     per-source cadence. **Presets are done** (built-ins by task with
+     full-replace semantics in `core/presets/presets.ts`, user-saved scenes
+     in `core/presets/userPresets.ts`). Adding fields is cheap — they're
+     declared in `FeatureManifest.settings` and the UI generates itself.
    - **Session persistence**: done. Persisted stores are `synoptic.` +
      settings / dock / tools / home / camera / probe / timeline / radar, all
      versioned (add a version + migration to any new one, per CLAUDE.md).
@@ -384,12 +442,13 @@ installs and update flow in a real Brave/Chrome window.
      shortcut list there is hand-maintained, so update it when a binding
      changes. `credits.ts` is the single source for attribution, read by
      both the footer strip and About. Version comes from a Vite `define`.
-   - Plus: timeline affordances, empty states, keyboard (tab switch, Esc),
-     deferred polish (alert ticker, `.pal` tables,
-     layer re-ordering, zone-alert geometry, globe projection restore).
-   - **Mobile/responsive pass** (drawers as bottom sheets, touch targets,
-     phone timeline) — shares groundwork with the Chase HUD, do it
-     before/with item 4.
+   - Plus: timeline information overlays, empty states, keyboard (tab
+     switch, Esc), deferred polish (alert ticker, `.pal` tables, layer
+     re-ordering, globe projection restore). Zone-alert geometry resolves on
+     demand now; a shipped zone atlas would do it wholesale.
+   - **Mobile**: two passes done (bottom sheet, tab bar, labeled layer
+     menu, steppers, sheet-yields-to-fly-to). Left: drag-to-resize the
+     sheet, a mobile "Data sources" entry, a radar-bench touch pass.
 3. **"Make it personal" — DONE** (location button, forecast panels, warning
    notifications, verdict line, model confidence). Where the last two live:
    - `forecast/characterize.ts` — pure; returns tokens (`{timeMs}`,
@@ -437,23 +496,27 @@ installs and update flow in a real Brave/Chrome window.
    (own Level 2 volumes / GRIB / CSV — needs format + validation decisions
    and a hard boundary so imported data never mixes with live feeds), and
    replay-specific playback controls (loop, step-by-volume, export).
-8. **Meteorological views** (README roadmap item 9, slices in SLICES.md
-   Phase 8, M0–M7) — satellite bands, aviation hazards, gridded fields
-   (isobars/heights/CAPE — generalizes the wind GRIB pipeline, which is
-   where the pinned wind bug lives), surface chart, SPC, real soundings,
-   buoys/gauges/air-quality. ACTIVE as of 2026-08-15; start at M0.
-9. **Everything hurricane** (README roadmap item 8) — a tropical mode in the
-   same sense as the Chase HUD. Nearly all of it is free and keyless from
-   NHC. Core: active storms as selectable objects, track + cone, 34/50/64 kt
-   wind radii (which is what gives arrival time at the home location),
-   tropical watches/warnings, storm surge. Then spaghetti/ensemble tracks,
-   recon HDOB and dropsondes, a satellite floater that follows the storm, and
-   an intensity trace. Two things to settle before code: whether it is a mode
-   or just layers that appear when storms are active, and how the 6-hourly
-   advisory cadence sits on a timeline built for continuous radar. Two things
-   to get right rather than fast: the cone shows where the *centre* may go,
-   not where the effects reach, and surge is the layer most likely to be read
-   as a promise.
+8. **Meteorological views — DONE** (README roadmap item 9; SLICES Phases
+   8–19): satellite bands incl. West + Himawari, aviation hazards, gridded
+   fields that follow the clock, surface chart, SPC, buoys/gauges/air
+   quality, MRMS totals, volcanoes. Still open in the cluster: real RAOB
+   soundings (adapter must return the existing `Sounding` shape; needs
+   `/proxy/raob`), gridded severe/winter fields, ob-vs-model delta.
+9. **Everything hurricane — NEXT** (README roadmap item 8) — a tropical
+   mode in the same sense as the Chase HUD. Nearly all of it is free and
+   keyless from NHC. Core: active storms as selectable objects, track +
+   cone, 34/50/64 kt wind radii (which is what gives arrival time at the
+   home location), tropical watches/warnings, storm surge. Then
+   spaghetti/ensemble tracks, recon HDOB and dropsondes, a satellite
+   floater that follows the storm, and an intensity trace. Probe first:
+   NHC CurrentStorms.json, the NOAA tropical ArcGIS MapServer (GeoJSON
+   queries), ATCF a/b-decks on ftp.nhc.noaa.gov (CORS?). Two things to
+   settle before code: whether it is a mode or layers that appear when
+   storms are active, and how the 6-hourly advisory cadence sits on the
+   timeline. Two things to get right rather than fast: the cone shows where
+   the *centre* may go, not where the effects reach, and surge is the layer
+   most likely to be read as a promise. Reuse: shared feeds, presets,
+   legends slot, panel fly-to, zone-alert outlines for coastal watches.
 10. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
 
@@ -481,6 +544,15 @@ installs and update flow in a real Brave/Chrome window.
   (e.g. 80 METAR sprites = 119 ms, 111 ms of it `getImageData`), never fps
   across tool-call gaps. If fps is genuinely needed, drive real input in the
   same evaluation and keep the whole measurement inside one JS call.
+- **`queryRenderedFeatures` needs a real `Point`.** A plain `{x, y}` is
+  treated as "no geometry" and searches the whole viewport, so a synthetic
+  `map.fire('click', {point: {x,y}})` hits everything on screen. Build
+  points with `map.project(map.unproject([x, y]))`. Two false "bare click
+  opened a popup" readings came from this.
+- **Browser-pane mobile emulation times out synthesized clicks** on this
+  app (touch translation); drive the same handlers with DOM `.click()` and
+  trust real devices. Also: editing `vite.config.ts` restarts Vite and the
+  pane loses track of the server — `preview_start` again.
 - **User's standing orders**: between-phase dedup/monolith review (do it, they
   check); audit packages before installing (npm audit + downloads + install
   scripts — policy in CLAUDE.md); don't overthink; don't over-verify small
@@ -499,8 +571,10 @@ installs and update flow in a real Brave/Chrome window.
   `__wx.stores.map.jumpTo({center:[-97,35], zoom:7}); map.fire('moveend')`
   → screenshot (screenshots drive rAF in the hidden pane). Level 2 control
   appears bottom-left at zoom ≥ 6; SRV/RAW chips under VEL.
-- Tests: `npm test` (24 green: science reference values + L2 decoder against
-  a real committed KTLX chunk). Typecheck: `npm run typecheck`.
+- Tests: `npm test` (279 green: science reference values, the L2 decoder
+  against a real committed KTLX chunk, the VAA parser against a live
+  Krakatau bulletin, timeline/scheduler/preset/zone logic, server
+  `gfsValid`). Typecheck: `npm run typecheck`.
 
 ## Style expectations for continuing
 

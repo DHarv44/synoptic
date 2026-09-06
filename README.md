@@ -10,8 +10,9 @@ instrument-panel UI.
 ![stack](https://img.shields.io/badge/react-19-blue) ![stack](https://img.shields.io/badge/maplibre-5-green) ![stack](https://img.shields.io/badge/vite-7-purple) ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 Every layer and tool is individually togglable, the whole workstation follows one
-timeline (−48 h of observations → +16 d of forecast), and clicking anywhere on Earth
-probes that point. Works on desktop and mobile, in dark or light.
+timeline (−48 h of observations → +16 d of forecast, model layers included), and a
+right-click (long-press on touch) anywhere on Earth probes that point. Works on
+desktop and mobile, in dark or light.
 
 ---
 
@@ -38,7 +39,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Isosurface raymarch | Solid volume instead of tilt surfaces | 🔭 |
 | `.pal` color tables | Import GRLevelX community palettes | 🔭 |
 
-### Analysis (click anywhere on Earth)
+### Analysis (right-click / long-press anywhere on Earth)
 
 | Feature | What it does | Status |
 |---|---|---|
@@ -56,12 +57,19 @@ probes that point. Works on desktop and mobile, in dark or light.
 
 | Feature | What it does | Status |
 |---|---|---|
-| NWS alerts | Warning polygons above every layer + viewport-filtered panel, filtered by severity and category | ✅ |
+| NWS alerts | Warning polygons above every layer + viewport-filtered panel, filtered by severity and category; zone-based alerts outlined on demand (dashed) | ✅ |
 | Lightning | Live Blitzortung strikes, bolt icons with flash decay | ✅ |
 | Surface obs | METAR station models (temp/dewpoint/barb), decluttered | ✅ |
-| Satellite | NASA GIBS imagery, timeline-dated | ✅ |
+| Satellite | NASA GIBS: GOES-East, GOES-West and Himawari bands every 10 min (~1 month archive), VIIRS daily; loop frames pre-warmed | ✅ |
 | Basemap | OpenFreeMap vector tiles — cities, roads, labels, dark/light | ✅ |
-| Wind particles | GPU flow: speed field wash with legend + streamline trails, native 0.25° GFS, surface → jet | ✅ |
+| Wind particles | GPU flow: speed field wash with legend + streamline trails, native 0.25° GFS, surface → jet, follows the clock | ✅ |
+| Model fields | Contoured GFS isobars / 500 mb heights / 850 mb temp / CAPE with H/L centres; follow the clock (forecast hours ahead, earlier analyses behind); run + hour on the product label | ✅ |
+| Surface fronts | WPC surface analysis fronts with pips | ✅ |
+| Aviation hazards | SIGMETs (domestic + international volcanic ash), PIREPs | ✅ |
+| SPC | Day 1–3 outlooks, watch boxes, mesoscale discussions with text | ✅ |
+| Volcanoes | Smithsonian database, USGS alert levels, VAAC ash advisories parsed to observed + forecast polygons, plume-top history, nearby quakes on the card | ✅ |
+| Precip totals | MRMS 1–72 h accumulations; zero accumulation transparent | ✅ |
+| Buoys + river gauges | NDBC marine obs; NWPS river stages | ✅ |
 | My location | Locate button → centre/zoom, remembered as home | ✅ |
 | Notifications | Desktop alerts for warnings covering your location (rain nowcast still planned) | ✅ |
 | Alert ticker | Top-bar scrolling severe ticker | 🔭 |
@@ -74,14 +82,17 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Analysis dock | Location / Nearby / Radar / Settings / Help — one scrolling column of collapsible sections | ✅ |
 | Section expansion | Collapse/expand per section, persisted | ✅ |
 | Settings | Registry-generated, searchable, with per-feature and global reset | ✅ |
-| Radar loop | Play cycles the last hour in 5-min frames, four speeds, holds on the newest | ✅ |
-| Loop prefetch | All frames warmed on play, so the first pass runs as smoothly as the rest (~800 ms → 11 ms) | ✅ |
+| Scene presets | Built-ins cut by task (Severe ops, Synoptic, Surface chart, Aviation, Volcanic, Marine, Hydro) plus user-saved scenes | ✅ |
+| Timeline | A steppable clock (day / hour / 10 min) with a fine 6-hour scrubber; play loops the last hour live or sweeps forward from history; `#t=` deep links | ✅ |
+| Loop prefetch | Radar and satellite frames warmed on play, gated on the slowest, so the first pass runs as smoothly as the rest | ✅ |
+| Legends | Wind speed key in the user's unit; model-field product label with run and forecast hour | ✅ |
+| Map cards | Left click a point of interest for its card; bare clicks dismiss; right-click / long-press for the location card | ✅ |
 | Installable desktop app | Manifest, icon set and a shell-only service worker; installs from Brave/Chrome/Edge into its own window | ✅ |
 | Session persistence | Camera, probe, timeline, tabs and radar selection survive a reload | ✅ |
 | Dark + light | Follows the OS by default; translucent map chrome with adjustable opacity | ✅ |
 | Units & time | Metric/imperial, with temperature, wind, pressure and precipitation independently switchable; local or UTC clock | ✅ |
 | Loading + health | Live loading indicator plus per-source status dots | ✅ |
-| Mobile layout | Bottom tab bar with three panel heights; layers expand from a map button | ✅ |
+| Mobile layout | Bottom tab bar with three panel heights that yields to the map on fly-to; labeled scrolling layer menu; steppable clock | ✅ |
 | Section summaries | Collapsed sections showing their headline value, alert-toned when it matters | ✅ |
 | Help & About | Help tab: interaction guide, keyboard map, instrument glossary, credits | ✅ |
 
@@ -130,7 +141,7 @@ probes that point. Works on desktop and mobile, in dark or light.
    loading indicator reports both API fetches and tile loads; times follow a
    local/UTC preference (local by default). **Mobile** drops the rail for a
    bottom tab bar with three panel heights, and the layers button expands
-   into the same vertical icon strip. The **radar bench left the map**: its
+   into a labeled, scrolling menu. The **radar bench left the map**: its
    controls now lead the Radar panel where each can be labelled, with ↑/↓
    stepping tilts so walking a storm needs no panel, a searchable picker for
    all 159 WSR-88D sites, a button to centre the map on the chosen radar, and
@@ -155,9 +166,9 @@ probes that point. Works on desktop and mobile, in dark or light.
    - **Timeline as an information display** — radar frame ticks, warning
      issue/expiry bars, model-run boundaries, and a precip-probability
      sparkline for the probed point, so scrubbing has a visible purpose.
-     The loop makes this more pressing: an hour of frames is a sliver of a
-     −48 h/+16 d scrubber, so playback barely moves the handle. A loop-range
-     inset, or a scrubber that rescales while playing, would show it.
+     *(2026-09-05: the 64-day slider is gone — the clock is day/hour/10-min
+     steppers with a 6-hour scrubber, so the loop now visibly moves the
+     handle; the information overlays above are still open.)*
    - **Desktop panel resize** — 360 px is cramped for a skew-T; a drag handle
      would let it widen for analysis and narrow for monitoring.
    - **Section reordering, done safely** — briefly shipped with native HTML5
@@ -196,9 +207,11 @@ probes that point. Works on desktop and mobile, in dark or light.
      product/band expansion, wind trail length and color-by, timeline
      defaults (range, arrow-key step, auto-return-to-live), basemap style
      and label density, per-source refresh cadence for bandwidth/battery.
-   - **Presets** — Workstation / Chase / Minimal plus user-saved profiles
-     (specified in PLAN.md §3.13a, never built) and **settings search**;
-     both matter much more once the knob count grows.
+   - **Presets** ✅ — built-ins cut by task (Severe ops, Synoptic analysis,
+     Surface chart, Aviation, Volcanic, Marine, Hydro) with full-replace
+     scene semantics and a derived active-preset chip, plus **user-saved
+     scenes** (capture the current stack under a name); settings search
+     shipped with the settings rebuild.
    - **Session persistence** ✅ — a reload now comes back where you were: map
      camera (centre, zoom, bearing, pitch), probe point, dock tab and section
      expansion, tool panel and width, and the radar selection. Only choices
@@ -235,15 +248,19 @@ probes that point. Works on desktop and mobile, in dark or light.
      Deliberately scoped after the structural UI work — it's content writing,
      not layout, and it should attach to panels whose shape has settled.
 
-   Also still open: keyboard access (tab switching, Esc), and the deferred
-   polish items (alert ticker, zone-alert geometry
-   resolution, restoring globe projection once custom WebGL layers adopt
-   MapLibre's projection API).
+   Also still open: keyboard access (tab switching, Esc), the alert ticker,
+   and restoring globe projection once custom WebGL layers adopt MapLibre's
+   projection API. Zone-alert geometry now resolves **on demand** (a click
+   on an unmapped alert fetches its zones, ~52 KB each, cached two weeks,
+   drawn dashed); a shipped simplified zone atlas would map them all at once
+   and is a separate build-step slice.
 
    - **Mobile follow-ups** — the first pass shipped (bottom tab bar, three
-     panel heights, expanding layer strip, full-width playback, relocated
-     radar bench, UTC-only clock). Remaining: **drag-to-resize** the panel
-     with momentum and snap points (tap-to-cycle only today — needs
+     panel heights, full-width playback, relocated radar bench, UTC-only
+     clock), and a second pass fixed the sheet covering its own fly-to
+     target, put the steppable clock on phones, and replaced the icon strip
+     with a labeled scrolling layer menu. Remaining: **drag-to-resize** the
+     panel with momentum and snap points (tap-to-cycle only today — needs
      hand-rolled pointer handling or a small dep like `vaul`), a "Data
      sources" entry to replace the footer that mobile hides, and a touch
      pass on the radar bench. This is the groundwork the Chase HUD builds on.
@@ -413,11 +430,12 @@ probes that point. Works on desktop and mobile, in dark or light.
    - **Playback controls** distinct from live scrubbing: loop a window, step
      by volume, and export a frame or animation for sharing.
 
-8. **Everything hurricane** — a tropical mode, in the way the Chase HUD is a
-   severe-convective mode: the same map and timeline, refocused on a storm
-   rather than a county. Almost all of it is free and keyless from the
-   National Hurricane Center, and several pieces reuse machinery that already
-   exists here.
+8. **Everything hurricane** *(next up, 2026-09-06)* — a tropical mode, in the
+   way the Chase HUD is a severe-convective mode: the same map and timeline,
+   refocused on a storm rather than a county. Almost all of it is free and
+   keyless from the National Hurricane Center, and several pieces reuse
+   machinery that already exists here (feeds, presets, legends, panel
+   fly-to, the steppable clock, zone-alert outlines for coastal watches).
 
    The core, in rough dependency order:
    - **Active storms as first-class objects** — a list with position,
@@ -457,37 +475,32 @@ probes that point. Works on desktop and mobile, in dark or light.
    6-hourly advisory cadence against continuous radar; and how to present
    forecast uncertainty without either burying it or overstating it.
 
-9. **Meteorological views — the synoptic gap** *(planned; slices in
-   SLICES.md Phase 8)*. The app is deep at storm scale and thin at synoptic
-   scale — the scale the name promises. Ranked by value against cost, using
-   pipelines that already exist wherever possible:
-   - **Satellite bands** — IR, water vapor and GeoColor via GOES ABI on the
-     existing GIBS layer. The current products are daily-only; sub-daily
-     bands need the (declared, never wired) `daily` flag and a timestamp
-     snapped to the product cadence, plus the setTiles-not-rebuild pattern
-     the radar composite already uses.
-   - **Aviation hazards** — SIGMETs, AIRMETs, PIREPs, TAFs from
-     aviationweather.gov, which we already proxy for METAR. PIREPs are real
-     aircraft reporting real turbulence and icing: ground truth aloft.
-   - **Gridded model fields** — the one investment that unlocks a class:
-     generalize the GFS wind pipeline (`server/gfsWind.mjs`) to serve any
-     scalar field with per-plane scale/offset (int16 where int8 can't span
-     the range), then contour client-side. First customers: MSLP isobars,
-     500 mb heights, 850 temp, CAPE. Note: the pinned wind decode bug lives
-     in exactly this code, so this slice confronts roadmap item 1.
-   - **The surface chart** — MSLP isobars + WPC fronts + the METAR layer:
-     an actual surface analysis. Fronts data format needs verification
-     before the slice is committed.
-   - **SPC suite** — Day 1–3 categorical/probabilistic outlooks, watch
-     boxes, mesoscale discussions with full text. Free GeoJSON.
-   - **Real soundings** — observed 00Z/12Z RAOBs overlaid on the model
-     Skew-T (PLAN §3.8 always promised this). Adapter returns the existing
-     `Sounding` shape so every renderer works unchanged.
-   - **More observations** — NDBC buoys (the marine picture), USGS river
-     gauges (the flood picture), Open-Meteo air quality (free, keyless,
-     same provider). Each a METAR-shaped point layer or panel line.
-   - Later in this cluster: gridded severe/winter fields, ob-vs-model
-     delta mode (PLAN §3.6), MRMS accumulations.
+9. **Meteorological views — the synoptic gap** *(largely shipped; slices in
+   SLICES.md Phases 8–19)*. The app was deep at storm scale and thin at
+   synoptic scale — the scale the name promises. Where it stands:
+   - **Satellite bands** ✅ — GOES-East and GOES-West GeoColor / Clean IR /
+     Red Visible / Air Mass and Himawari IR / Visible / Air Mass, all
+     10-minute with ~a month of archive, plus VIIRS daily; loop frames
+     pre-warmed; footprints bounded so out-of-disk tiles are never requested.
+   - **Aviation hazards** ✅ — SIGMETs (domestic plus international volcanic
+     ash) and PIREPs; AIRMETs and TAFs still open.
+   - **Gridded model fields** ✅ — the GFS pipeline generalised to any scalar
+     (uint16 with per-field scale/offset), contoured client-side: MSLP
+     isobars (two sea-level reductions), 500 mb heights, 850 mb temperature,
+     CAPE, with H/L centres. **Follow the clock**: forecast hours ahead,
+     earlier cycles' analyses behind, run and hour on the product label.
+   - **The surface chart** ✅ — isobars + WPC fronts + station plots, as the
+     "Surface chart" preset.
+   - **SPC suite** ✅ — outlooks, watch boxes, mesoscale discussions with
+     text.
+   - **More observations** ✅ — NDBC buoys, NWPS river gauges, Open-Meteo air
+     quality on the Now panel; **MRMS accumulations** ✅ as Precip totals.
+   - **Volcanoes** ✅ — a whole suite arrived in this cluster (Smithsonian
+     GVP, USGS alert levels, VAAC ash advisories, plume history, quakes).
+   - Still open: **real soundings** (observed 00Z/12Z RAOBs overlaid on the
+     model Skew-T — the adapter returns the existing `Sounding` shape so
+     every renderer works unchanged), gridded severe/winter fields, and the
+     ob-vs-model delta mode (PLAN §3.6).
 
 **Later** — run-to-run
 forecast trends (dProg/dt), forecast verification, shareable workspace URLs,
@@ -502,9 +515,10 @@ npm install
 npm run dev        # http://localhost:5192
 ```
 
-`npm run dev` also serves the data proxy routes (METAR CORS shim, GFS wind
-subsetting, NEXRAD chunk passthrough) via Vite middleware. `?fixture=demo` boots
-the app offline on recorded API responses.
+`npm run dev` also serves the data proxy routes (METAR CORS shim, GFS wind and
+field subsetting by valid time, NEXRAD chunk passthrough, VAAC bulletins, the
+Smithsonian volcano database) via Vite middleware. `?fixture=demo` boots the app
+offline on recorded API responses.
 
 ```bash
 npm run typecheck  # strict TS
@@ -513,12 +527,14 @@ npm test           # vitest — decoder + atmospheric-science reference tests
 
 ## Data sources
 
-All free; keyless where possible. RainViewer · Iowa Environmental Mesonet ·
-NEXRAD Level 2 (Unidata/AWS Open Data) · NWS API · Open-Meteo (forecast,
-pressure levels, ensembles, geocoding) · NASA GIBS · Blitzortung.org ·
-aviationweather.gov · NOMADS GFS · OpenFreeMap / OpenMapTiles / OpenStreetMap
-basemap. Attribution is displayed in-app. **Not a substitute for official
-warnings.**
+All free; keyless where possible. RainViewer · Iowa Environmental Mesonet
+(NEXRAD mosaic, MRMS, SPC products) · NEXRAD Level 2 (Unidata/AWS Open Data) ·
+NWS API (alerts, zones) · Open-Meteo (forecast, pressure levels, ensembles, air
+quality, geocoding) · NASA GIBS · Blitzortung.org · aviationweather.gov · NOMADS
+GFS · WPC · NDBC · NWPS · Smithsonian Global Volcanism Program · USGS Volcano
+Hazards and Earthquake Hazards Programs · VAACs via NOAA tgftp · OpenFreeMap /
+OpenMapTiles / OpenStreetMap basemap. Attribution is displayed in-app, with a
+per-source catalog under Help. **Not a substitute for official warnings.**
 
 ## License
 
