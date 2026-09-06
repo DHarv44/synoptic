@@ -554,3 +554,34 @@ Verified live: requests carry valid=; +18 h step → fields legend +23 h.
   geometry" (whole viewport); synthetic events must carry a real Point
   (map.project()). Two earlier "bare click opened a popup" readings were
   that artefact, not the app.
+
+## Phase 21 — Everything hurricane (started 2026-09-06)
+
+Probed live against three active EPac storms (Marie HU 80 kt, Lowell HU
+110 kt, Karina TS 50 kt): nhc.noaa.gov/CurrentStorms.json (no CORS → proxy)
+and NOAA's tropical ArcGIS MapServer (per-slot GeoJSON: forecast points
+with maxwind/gust/mslp/ssnum/datelbl/tau/validtime, track, cone, past
+track/points, wind radii per tau, watch-warning, arrival times, inundation;
+no CORS → proxy). ATCF a/b-decks reachable via proxy for later.
+
+- [x] **H0 — Feed + storm list.** `/proxy/nhc-storms` and `/proxy/nhc-gis`
+  on both servers (Vite proxy keys match by PREFIX — `/proxy/nhc` swallowed
+  `/proxy/nhc-gis`, hence the name). One shared feed (10 min) fetches the
+  list then every storm's products; slot layer ids resolved by name from
+  the service's own layer list. Nearby → Tropical panel: rows by strength
+  with category dot, Vmax/MSLP in the user's units, motion, advisory number
+  and time; click flies to the storm; summary "3 active · Lowell Cat 3".
+- [x] **H1 — Track and cone.** Cone as a pale wash + outline, past track
+  dashed, forecast track solid with Saffir-Simpson-coloured points labelled
+  by NHC's date labels, current position with name + category. Cards: storm
+  point (Vmax/gust/MSLP, +tau and valid time) and — on the cone itself —
+  what it is and is not (centre-track uncertainty, not storm size). Legend
+  via the legendComponent slot, only while a storm exists. Settings: cone,
+  past track. Fixtures from the live Marie products.
+- **Resilience fix found on the way**: a malformed product response threw
+  inside a layer's render and unmounted the ENTIRE app. Every feature layer
+  now sits in `LayerErrorBoundary` (drops out, reports its source red,
+  remounts on toggle) and the GIS fetcher validates the response shape.
+Next: H2 wind radii following the clock + TS-wind arrival at home; H3
+watches/warnings + Tropical preset; H4 intensity trace (b-deck), spaghetti
+(a-deck), discussion text. Surge and recon parked for their own pass.

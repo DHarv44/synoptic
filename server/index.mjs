@@ -29,6 +29,9 @@ const AWC = 'https://aviationweather.gov/api/data'
 const NEXRAD = 'https://unidata-nexrad-level2-chunks.s3.amazonaws.com'
 const GVP = 'https://webservices.volcano.si.edu/geoserver/GVP-VOTW/ows'
 const VAA = 'https://tgftp.nws.noaa.gov/data/raw/fv'
+const NHC_STORMS = 'https://www.nhc.noaa.gov/CurrentStorms.json'
+const NHC_GIS =
+  'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer'
 
 const app = express()
 app.disable('x-powered-by')
@@ -138,6 +141,24 @@ app.use('/proxy/gvp', async (req, res) => {
 app.use('/proxy/vaa', async (req, res) => {
   try {
     await pipeUpstream(res, VAA + req.url, { cacheSeconds: 300 })
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** NHC active-storm list (no CORS upstream). Advisories are 3–6-hourly. */
+app.use('/proxy/nhc-storms', async (_req, res) => {
+  try {
+    await pipeUpstream(res, NHC_STORMS, { cacheSeconds: 300 })
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** NOAA tropical map service: track, cone, points, radii as GeoJSON. */
+app.use('/proxy/nhc-gis', async (req, res) => {
+  try {
+    await pipeUpstream(res, NHC_GIS + req.url, { cacheSeconds: 300 })
   } catch (e) {
     fail(res, e)
   }

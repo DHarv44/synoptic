@@ -116,6 +116,20 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace('/proxy/vaa', '/data/raw/fv'),
       },
+      // NHC active-storm list (no CORS upstream). Vite proxy keys match by
+      // prefix, so this must not be a prefix of /proxy/nhc-gis.
+      '/proxy/nhc-storms': {
+        target: 'https://www.nhc.noaa.gov',
+        changeOrigin: true,
+        rewrite: () => '/CurrentStorms.json',
+      },
+      // NOAA tropical map service: per-storm track/cone/radii as GeoJSON.
+      '/proxy/nhc-gis': {
+        target: 'https://mapservices.weather.noaa.gov',
+        changeOrigin: true,
+        rewrite: (path) =>
+          path.replace('/proxy/nhc-gis', '/tropical/rest/services/tropical/NHC_tropical_weather/MapServer'),
+      },
     },
   },
 })

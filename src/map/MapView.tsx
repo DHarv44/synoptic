@@ -17,6 +17,7 @@ import { useHealth } from '@/core/data/healthStore'
 import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
 import { attachDevStore } from '@/dev/wx'
+import { LayerErrorBoundary } from '@/map/LayerErrorBoundary'
 import { MapPopup } from '@/map/popups/MapPopup'
 import type { FeatureManifest } from '@/core/settings/types'
 
@@ -39,7 +40,11 @@ function FeatureLayer({ manifest }: { manifest: FeatureManifest }) {
   const enabled = useFeatureEnabled(manifest.id)
   const Layer = manifest.layerComponent
   if (!enabled || !Layer) return null
-  return <Layer />
+  return (
+    <LayerErrorBoundary featureId={manifest.id} sourceId={manifest.sourceIds?.[0]}>
+      <Layer />
+    </LayerErrorBoundary>
+  )
 }
 
 /** The map surface: MapLibre globe with the registry's layers on top. */

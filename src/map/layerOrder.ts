@@ -38,12 +38,15 @@ export const LAYER_ORDER = [
   // Aviation hazard washes sit under the NWS warning wash: a SIGMET is
   // advisory context, a tornado warning is the thing itself.
   'aviation-fill',
+  // Tropical cone and tracks: forecast context, under the warning wash.
+  'tropical',
   'alerts-fill',
   // — the basemap's own labels draw here —
   'cells',
   // Inspect-time quake dots under their volcano's triangle, never over it.
   'volcano-quakes',
   'volcanoes',
+  'tropical-points',
   'gauges',
   'buoys',
   'pirep',
@@ -64,6 +67,7 @@ const ABOVE_LABELS = new Set<LayerSlot>([
   'cells',
   'volcano-quakes',
   'volcanoes',
+  'tropical-points',
   'gauges',
   'buoys',
   'pirep',

@@ -92,6 +92,11 @@ export const CREDITS: Credit[] = [
     what: 'ANSS earthquake catalog behind the volcano seismicity dots.',
   },
   {
+    label: 'National Hurricane Center',
+    href: 'https://www.nhc.noaa.gov/',
+    what: 'Active tropical cyclones: advisories, tracks, cones and forecast points.',
+  },
+  {
     label: 'Blitzortung',
     href: 'https://www.blitzortung.org/',
     what: 'Community lightning detection network, seconds of latency.',
