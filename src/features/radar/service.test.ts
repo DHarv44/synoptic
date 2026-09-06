@@ -12,8 +12,14 @@ describe('pickFrame', () => {
   it('picks the latest frame at or before sim time', () => {
     expect(pickFrame(frames, 1700_000)?.path).toBe('/b')
   })
-  it('clamps to the first frame before the range', () => {
-    expect(pickFrame(frames, 0)?.path).toBe('/a')
+  it('clamps to the first frame just before the range', () => {
+    // 500 s before the oldest frame: within a frame-and-a-half, still that frame.
+    expect(pickFrame(frames, 500_000)?.path).toBe('/a')
+  })
+  it('has no frame for a time RainViewer no longer keeps', () => {
+    // Its oldest frame is not yesterday's sky; say nothing rather than lie.
+    expect(pickFrame(frames, 0)).toBeNull()
+    expect(pickFrame(frames, -24 * 3600_000)).toBeNull()
   })
   it('clamps to the last frame after the range', () => {
     expect(pickFrame(frames, 9999_000)?.path).toBe('/c')

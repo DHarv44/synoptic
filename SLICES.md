@@ -394,3 +394,25 @@ UI now reaches −48 h but most layers only have frames for the last hours.
   (LayerToggles `labeled` variant: title beside icon, health dot inline; no
   hover flyout — per-layer options stay in Settings on touch). Desktop rail
   unchanged.
+
+## Phase 12 — Paper cuts (2026-09-05) ✅
+
+- **Poller wake-on-enable**: a feed held open by a panel while its layer was
+  off parked in startPoller with a full cadence on the clock (10 min for the
+  volcano feeds), so enabling the layer showed nothing until that timer ran.
+  The scheduler now subscribes to the settings store and runs a parked
+  poller the instant `enabled()` flips true (5 tests, minimal `document`
+  stub in the node env).
+- **Popup dies with its layer**: MapPopup watches `styledata`; when the
+  layer behind an open card is removed from the style the card closes.
+- **RainViewer stops faking history**: pickFrame returned its oldest frame
+  for ANY earlier time — at −24 h the global composite showed a 2-hour-old
+  sky as yesterday's. Past a frame-and-a-half before the oldest frame there
+  is now no frame and the layer draws nothing (future still clamps to the
+  newest scan, matching the mosaic: radar has no forecast).
+- **The "Marine-preset 404s" were a misread**: with fetch, map-error and
+  transformRequest hooks installed at map creation on a fresh load, every
+  request is 200 and MapLibre reports no errors, idle or panning, live or
+  scrubbed. The counts came from the tab's cumulative console buffer left by
+  the earlier satellite-switching session (GIBS out-of-footprint 404s, since
+  bounded for GOES-East). Nothing to fix; recorded so nobody chases it again.

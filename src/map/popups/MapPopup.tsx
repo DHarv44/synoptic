@@ -67,6 +67,21 @@ export function MapPopup() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // A card describing a feature of a layer that is no longer on the map is
+  // a card about nothing — it used to sit there after the layer was toggled
+  // off. Every layer add/remove fires styledata, so that is the hook.
+  useEffect(() => {
+    if (!open || open.layerId === null) return
+    const layerId = open.layerId
+    const check = (): void => {
+      if (map.getLayer(layerId) === undefined) setOpen(null)
+    }
+    map.on('styledata', check)
+    return () => {
+      map.off('styledata', check)
+    }
+  }, [open, map])
+
   useEffect(() => {
     if (!open) {
       popupRef.current?.remove()

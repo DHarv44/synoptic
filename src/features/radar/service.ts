@@ -21,10 +21,24 @@ export function allFrames(maps: RainViewerMaps): RadarFrame[] {
   return [...maps.radar.past, ...maps.radar.nowcast]
 }
 
-/** Frame nearest to (at or before) simTime; clamps to the available range. */
+/**
+ * How far before the oldest frame the clock may sit and still get that
+ * frame — one and a half of RainViewer's 10-minute intervals.
+ */
+export const FRAME_TOLERANCE_S = 15 * 60
+
+/**
+ * Frame nearest to (at or before) simTime. Future times clamp to the newest
+ * frame, as the mosaic does — radar has no forecast, so the latest scan is
+ * the honest answer. The PAST does not clamp: RainViewer keeps only a couple
+ * of hours, and showing its oldest frame at −24 h presented a 2-hour-old sky
+ * as yesterday's. Past the tolerance there is no frame, and the layer
+ * draws nothing.
+ */
 export function pickFrame(frames: RadarFrame[], simTimeMs: number): RadarFrame | null {
   if (frames.length === 0) return null
   const simS = simTimeMs / 1000
+  if (simS < frames[0].time - FRAME_TOLERANCE_S) return null
   let best = frames[0]
   for (const f of frames) {
     if (f.time <= simS) best = f

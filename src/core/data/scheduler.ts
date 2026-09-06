@@ -1,4 +1,5 @@
 import { reportDisabled } from '@/core/data/healthStore'
+import { useSettings } from '@/core/settings/store'
 import type { SourceRef } from '@/core/data/types'
 
 export interface PollerOptions {
@@ -22,14 +23,18 @@ export function startPoller(opts: PollerOptions): () => void {
   let stopped = false
   let timer: ReturnType<typeof setTimeout> | undefined
   let backoff = 1
+  /** Parked because the feature was off: the next enable must not wait a cadence. */
+  let parkedDisabled = false
 
   async function cycle(): Promise<void> {
     if (stopped) return
     if (!opts.enabled()) {
+      parkedDisabled = true
       reportDisabled(opts.source)
       schedule(opts.cadenceMs)
       return
     }
+    parkedDisabled = false
     if (opts.pauseWhenHidden === true && document.hidden) {
       schedule(opts.cadenceMs)
       return
@@ -58,10 +63,23 @@ export function startPoller(opts: PollerOptions): () => void {
   }
   document.addEventListener('visibilitychange', onVisible)
 
+  // Wake on enable. A feed a panel holds open while its layer is off parks
+  // here with a full cadence on the clock — ten minutes for the volcano
+  // feeds — so flipping the layer on showed nothing until that timer ran.
+  // The settings store is the only thing that flips `enabled`, so it is
+  // the only thing worth listening to.
+  const unsubSettings = useSettings.subscribe(() => {
+    if (stopped || !parkedDisabled || !opts.enabled()) return
+    parkedDisabled = false
+    if (timer !== undefined) clearTimeout(timer)
+    void cycle()
+  })
+
   void cycle()
   return () => {
     stopped = true
     if (timer !== undefined) clearTimeout(timer)
     document.removeEventListener('visibilitychange', onVisible)
+    unsubSettings()
   }
 }
