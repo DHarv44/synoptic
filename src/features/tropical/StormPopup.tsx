@@ -71,6 +71,35 @@ export function RadiiPopup({ properties }: MapPopupProps) {
   )
 }
 
+/** One model's track. */
+export function ModelPopup({ properties }: MapPopupProps) {
+  const run = String(properties.run ?? '')
+  const runLabel = run.length === 10 ? `${run.slice(6, 8)}/${run.slice(8, 10)}Z run` : run
+  return (
+    <Stack gap={4}>
+      <Group gap={6} wrap="nowrap">
+        <span
+          style={{
+            width: 14,
+            height: 0,
+            borderTop: `2px solid ${String(properties.color ?? '#888')}`,
+            flexShrink: 0,
+          }}
+        />
+        <Text size="sm" fw={600}>
+          {String(properties.label ?? properties.tech ?? 'Model')}
+        </Text>
+      </Group>
+      <Text size="xs" c="dimmed">
+        {String(properties.name ?? '')} · {runLabel} · to +{String(properties.hours ?? '')} h
+      </Text>
+      <Text size="xs" c="dimmed">
+        One model's track. Spread between models is not a probability.
+      </Text>
+    </Stack>
+  )
+}
+
 /** A coastal watch or warning segment. */
 export function WatchWarnPopup({ properties }: MapPopupProps) {
   return (

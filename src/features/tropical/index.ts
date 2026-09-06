@@ -5,7 +5,13 @@ import { TropicalLayer } from '@/features/tropical/TropicalLayer'
 import { TropicalLegend } from '@/features/tropical/TropicalLegend'
 import { TropicalPanel } from '@/features/tropical/TropicalPanel'
 import { TropicalSummary } from '@/features/tropical/TropicalSummary'
-import { ConePopup, RadiiPopup, StormPopup, WatchWarnPopup } from '@/features/tropical/StormPopup'
+import {
+  ConePopup,
+  ModelPopup,
+  RadiiPopup,
+  StormPopup,
+  WatchWarnPopup,
+} from '@/features/tropical/StormPopup'
 
 /** Tropical cyclones: NHC's active storms with track, cone and forecast points. */
 registerFeature({
@@ -18,7 +24,7 @@ registerFeature({
   layerIcon: IconStorm,
   layerComponent: TropicalLayer,
   legendComponent: TropicalLegend,
-  sourceIds: ['nhc', 'nhc-gis'],
+  sourceIds: ['nhc', 'nhc-gis', 'nhc-atcf'],
   panels: [
     {
       id: 'tropical',
@@ -36,10 +42,17 @@ registerFeature({
     { kind: 'boolean', key: 'arrival', label: 'TS-wind arrival-time lines', defaultValue: true },
     { kind: 'boolean', key: 'watchWarn', label: 'Coastal watches and warnings', defaultValue: true },
     { kind: 'boolean', key: 'pastTrack', label: 'Past track', defaultValue: true },
+    {
+      kind: 'boolean',
+      key: 'models',
+      label: 'Model tracks (spaghetti — spread is not probability)',
+      defaultValue: false,
+    },
   ],
 })
 
 registerMapPopup({ layerIds: ['tropical-current', 'tropical-points'], component: StormPopup })
+registerMapPopup({ layerIds: ['tropical-models'], component: ModelPopup })
 registerMapPopup({ layerIds: ['tropical-ww-warning', 'tropical-ww-watch'], component: WatchWarnPopup })
 registerMapPopup({ layerIds: ['tropical-radii-fill'], component: RadiiPopup })
 registerMapPopup({ layerIds: ['tropical-cone-fill'], component: ConePopup })

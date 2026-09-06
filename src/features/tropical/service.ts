@@ -21,6 +21,8 @@ export interface ActiveStorm {
   lastUpdateMs: number
   advNum: string
   advisoryUrl: string
+  /** Forecast discussion page, when NHC publishes one for the storm. */
+  discussionUrl: string | null
 }
 
 interface CurrentStormsResponse {
@@ -37,6 +39,7 @@ interface CurrentStormsResponse {
     movementSpeed: number | null
     lastUpdate: string
     publicAdvisory: { advNum: string; issuance: string; url: string }
+    forecastDiscussion?: { url: string }
   }>
 }
 
@@ -64,6 +67,7 @@ export async function fetchActiveStorms(): Promise<ActiveStorm[]> {
     lastUpdateMs: Date.parse(s.lastUpdate),
     advNum: s.publicAdvisory.advNum,
     advisoryUrl: s.publicAdvisory.url,
+    discussionUrl: s.forecastDiscussion?.url ?? null,
   }))
 }
 

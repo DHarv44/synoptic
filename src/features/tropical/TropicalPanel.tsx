@@ -1,5 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Group, Stack, Text, UnstyledButton } from '@mantine/core'
+import type { BestTrackPoint } from '@/features/tropical/atcf'
+import { Discussion, IntensityTrace } from '@/features/tropical/StormDetails'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useUnits } from '@/core/units/useUnitSystem'
 import { fmtPressure, fmtWind } from '@/core/units/format'
@@ -27,16 +29,27 @@ function HomeArrival({ gis }: { gis: StormGis | undefined }) {
   )
 }
 
-function StormRow({ storm, gis }: { storm: ActiveStorm; gis: StormGis | undefined }) {
+function StormRow({
+  storm,
+  gis,
+  history,
+}: {
+  storm: ActiveStorm
+  gis: StormGis | undefined
+  history: BestTrackPoint[] | undefined
+}) {
   const fmt = useTimeFormat()
   const u = useUnits()
   const requestFlyTo = useCameraStore((s) => s.requestFlyTo)
+  const [open, setOpen] = useState(false)
   const cat = stormCategory(storm.classification, storm.intensityKt)
+  // A click flies to the storm and opens its details; a second closes them.
+  const onClick = (): void => {
+    setOpen(!open)
+    if (!open) requestFlyTo(storm.lat, storm.lon, 5)
+  }
   return (
-    <UnstyledButton
-      onClick={() => requestFlyTo(storm.lat, storm.lon, 5)}
-      style={{ display: 'block', width: '100%' }}
-    >
+    <UnstyledButton onClick={onClick} style={{ display: 'block', width: '100%' }}>
       <Group gap={6} wrap="nowrap">
         <span
           style={{
@@ -61,6 +74,12 @@ function StormRow({ storm, gis }: { storm: ActiveStorm; gis: StormGis | undefine
         </Text>
       </Group>
       <HomeArrival gis={gis} />
+      {open && (
+        <Stack gap={6} pl={16} pt={4} onClick={(e) => e.stopPropagation()}>
+          <IntensityTrace history={history} />
+          <Discussion storm={storm} />
+        </Stack>
+      )}
     </UnstyledButton>
   )
 }
@@ -88,7 +107,7 @@ export function TropicalPanel() {
   return (
     <Stack gap={6}>
       {storms.map((s) => (
-        <StormRow key={s.id} storm={s} gis={data.gis[s.id]} />
+        <StormRow key={s.id} storm={s} gis={data.gis[s.id]} history={data.history[s.id]} />
       ))}
       <Text size="xs" c="dimmed">
         NHC advisories. The cone is where the centre may go, not how far the storm reaches.

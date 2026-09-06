@@ -609,3 +609,20 @@ watches/warnings + Tropical preset; H4 intensity trace (b-deck), spaghetti
   buoys, graticule. `tropical` is deliberately NOT a scene feature (like
   `alerts`): an active hurricane never disappears with a preset change;
   pinned by test.
+- [x] **H4 — Intensity trace, model tracks, discussion.** `server/atcf.mjs`
+  (shared by both servers, 5 tests) parses ATCF decks: the b-deck to one
+  fix per synoptic time (Vmax/MSLP/type), the a-deck — 7.6 MB across 27
+  runs and 34 techs for Marie — trimmed server-side to the LATEST run and
+  a curated model set (OFCL, GFS, HWRF, HMON, HAFS-A/B, COAMPS-TC, UKMET,
+  CMC, NAVGEM, GEFS mean, consensus, ECMWF) so ~10 KB crosses the wire;
+  and the discussion's <pre> from NHC's HTML page. Panel rows now expand on
+  click (and fly): an intensity sparkline over the storm's life ("peak …
+  now …", peak-category colour, via a new shared `ui/Sparkline` that the
+  volcano plume trend also uses now) and the forecast discussion verbatim.
+  Model tracks are OPT-IN (`models` setting, default off): thin per-model
+  lines, official heavier and on top, labelled along the line, a card per
+  line, and the legend says "spread is not probability". The model poller
+  is gated on the setting and wakes when it flips (scheduler). Fixtures
+  from the live Marie decks and discussion.
+Parked with their own pass: storm surge / inundation (the layer most
+likely to be read as a promise), recon HDOB/dropsondes, satellite floater.

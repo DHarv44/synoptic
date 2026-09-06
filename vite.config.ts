@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 import { getWindPayloadEncoded } from './server/gfsWind.mjs'
 import { getGridPayload } from './server/gfsGrid.mjs'
+import { getADeck, getBDeck, getDiscussion } from './server/atcf.mjs'
 import { getBuoysJson } from './server/ndbc.mjs'
 
 // Surfaced in the About panel, so a bug report can name a build.
@@ -44,6 +45,34 @@ function windProxy(): Plugin {
             res.setHeader('Content-Type', 'application/json')
             res.setHeader('Cache-Control', 'public, max-age=300')
             res.end(body)
+          })
+          .catch((e: unknown) => {
+            res.statusCode = 502
+            res.end(String(e))
+          })
+      })
+      server.middlewares.use('/proxy/nhc-atcf', (req, res) => {
+        const q = new URL(req.url ?? '', 'http://x').searchParams
+        const storm = q.get('storm') ?? ''
+        const load = q.get('deck') === 'a' ? getADeck(storm) : getBDeck(storm)
+        load
+          .then((data) => {
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Cache-Control', 'public, max-age=600')
+            res.end(JSON.stringify(data))
+          })
+          .catch((e: unknown) => {
+            res.statusCode = 502
+            res.end(String(e))
+          })
+      })
+      server.middlewares.use('/proxy/nhc-text', (req, res) => {
+        const product = new URL(req.url ?? '', 'http://x').searchParams.get('product') ?? ''
+        getDiscussion(product)
+          .then((data) => {
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Cache-Control', 'public, max-age=300')
+            res.end(JSON.stringify(data))
           })
           .catch((e: unknown) => {
             res.statusCode = 502

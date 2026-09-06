@@ -19,6 +19,7 @@ import express from 'express'
 import { fileURLToPath } from 'node:url'
 import { getWindPayloadEncoded } from './gfsWind.mjs'
 import { getGridPayload } from './gfsGrid.mjs'
+import { getADeck, getBDeck, getDiscussion } from './atcf.mjs'
 import { getBuoysJson } from './ndbc.mjs'
 
 const PORT = process.env.PORT ?? 8080
@@ -159,6 +160,33 @@ app.use('/proxy/nhc-storms', async (_req, res) => {
 app.use('/proxy/nhc-gis', async (req, res) => {
   try {
     await pipeUpstream(res, NHC_GIS + req.url, { cacheSeconds: 300 })
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** ATCF decks, parsed here: ?deck=b (best track) or a (latest-run guidance). */
+app.use('/proxy/nhc-atcf', async (req, res) => {
+  try {
+    const q = new URL(req.url, 'http://x').searchParams
+    const storm = q.get('storm') ?? ''
+    const data = q.get('deck') === 'a' ? await getADeck(storm) : await getBDeck(storm)
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Cache-Control', 'public, max-age=600')
+    res.end(JSON.stringify(data))
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** NHC text products (forecast discussion), the <pre> of the HTML page. */
+app.use('/proxy/nhc-text', async (req, res) => {
+  try {
+    const product = new URL(req.url, 'http://x').searchParams.get('product') ?? ''
+    const data = await getDiscussion(product)
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Cache-Control', 'public, max-age=300')
+    res.end(JSON.stringify(data))
   } catch (e) {
     fail(res, e)
   }

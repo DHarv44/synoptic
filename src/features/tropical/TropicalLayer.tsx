@@ -4,7 +4,9 @@ import { useFeatureOption } from '@/core/settings/store'
 import { useValidHour } from '@/core/time/validHour'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
+import { modelColor } from '@/features/tropical/atcf'
 import { tropicalSources } from '@/features/tropical/geojson'
+import { acquireModelTracks, useModelTracks } from '@/features/tropical/modelStore'
 import { RADII_COLORS, radiiAtTime } from '@/features/tropical/radii'
 import { acquireTropicalFeed, useTropical } from '@/features/tropical/store'
 
@@ -17,8 +19,11 @@ const SOURCES = [
   'tropical-points',
   'tropical-current',
   'tropical-ww',
+  'tropical-models',
 ]
 const LAYERS = [
+  'tropical-models',
+  'tropical-model-labels',
   'tropical-cone-fill',
   'tropical-cone-line',
   'tropical-radii-fill',
@@ -63,9 +68,39 @@ export function TropicalLayer() {
   const showRadii = useFeatureOption<boolean>('tropical', 'windRadii')
   const showArrival = useFeatureOption<boolean>('tropical', 'arrival')
   const showWw = useFeatureOption<boolean>('tropical', 'watchWarn')
+  const showModels = useFeatureOption<boolean>('tropical', 'models')
   const data = useTropical()
   useEffect(() => acquireTropicalFeed(), [])
+  useEffect(() => acquireModelTracks(), [])
   const sources = useMemo(() => tropicalSources(data), [data])
+  const guidance = useModelTracks((s) => s.byStorm)
+  // Spaghetti: one line per model per storm, official guidance last so it
+  // draws on top. Spread is not probability — the legend says so.
+  const models = useMemo(() => {
+    const features: GeoJSON.Feature[] = []
+    for (const s of data?.storms ?? []) {
+      const g = guidance[s.id]
+      if (!g) continue
+      const ordered = [...g.models].sort((a, b) => (a.tech === 'OFCL' ? 1 : 0) - (b.tech === 'OFCL' ? 1 : 0))
+      for (const m of ordered) {
+        features.push({
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: m.points.map((p) => [p.lon, p.lat]) },
+          properties: {
+            stormId: s.id,
+            name: s.name,
+            tech: m.tech,
+            label: m.label,
+            color: modelColor(m.tech),
+            official: m.tech === 'OFCL',
+            run: g.dtg,
+            hours: m.points[m.points.length - 1]?.tau ?? 0,
+          },
+        })
+      }
+    }
+    return { type: 'FeatureCollection' as const, features }
+  }, [data, guidance])
   // The radii follow the clock: one forecast hour's set per storm.
   const hour = useValidHour()
   const radiiNow = useMemo(() => {
@@ -99,6 +134,42 @@ export function TropicalLayer() {
         type: 'line',
         source: 'tropical-cone',
         paint: { 'line-color': '#e8edf2', 'line-width': 1.2, 'line-opacity': 0.75 },
+      },
+      'tropical',
+    )
+    // Model tracks under everything else in the slot: thin, translucent,
+    // the official forecast heavier — context, never the product.
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-models',
+        type: 'line',
+        source: 'tropical-models',
+        layout: { 'line-join': 'round' },
+        paint: {
+          'line-color': ['get', 'color'],
+          'line-width': ['case', ['get', 'official'], 2.2, 1.2],
+          'line-opacity': ['case', ['get', 'official'], 0.95, 0.7],
+        },
+      },
+      'tropical',
+    )
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-model-labels',
+        type: 'symbol',
+        source: 'tropical-models',
+        minzoom: 4,
+        layout: {
+          'symbol-placement': 'line',
+          'symbol-spacing': 400,
+          'text-field': ['get', 'label'],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': 9,
+          'text-padding': 6,
+        },
+        paint: { 'text-color': ['get', 'color'], 'text-halo-color': HALO, 'text-halo-width': 1 },
       },
       'tropical',
     )
@@ -310,8 +381,9 @@ export function TropicalLayer() {
       set('tropical-points', sources.points)
       set('tropical-current', sources.current)
       set('tropical-ww', showWw ? sources.watchWarn : EMPTY)
+      set('tropical-models', showModels ? models : EMPTY)
     },
-    [sources, radiiNow, showCone, showPast, showRadii, showArrival, showWw],
+    [sources, radiiNow, models, showCone, showPast, showRadii, showArrival, showWw, showModels],
   )
 
   return null

@@ -22,6 +22,7 @@ export function TropicalLegend() {
   const storms = data?.storms ?? []
   const showRadii = useFeatureOption<boolean>('tropical', 'windRadii')
   const showWw = useFeatureOption<boolean>('tropical', 'watchWarn')
+  const showModels = useFeatureOption<boolean>('tropical', 'models')
   const hasWw =
     showWw && Object.values(data?.gis ?? {}).some((g) => (g.watchWarn.features?.length ?? 0) > 0)
   if (storms.length === 0) return null
@@ -74,6 +75,11 @@ export function TropicalLegend() {
               at the clock's hour
             </Text>
           </Group>
+        )}
+        {showModels && (
+          <Text size="xs" c="dimmed" lh={1.2} style={{ fontSize: 10 }}>
+            Model tracks: latest run, one line each — spread is not probability
+          </Text>
         )}
         {hasWw && (
           <Group gap={6} wrap="nowrap">
