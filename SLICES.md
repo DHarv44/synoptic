@@ -510,3 +510,12 @@ Verified live: Extreme Heat Warning (3 zones) → 12 zone polygons dashed on
 the map, camera fit to Fort Smith, card hint cleared. 5 tests.
 Deferred: a shipped, simplified zone atlas (NWS shapefiles → TopoJSON via
 a build step) would make every zone alert mappable at once for ~1–2 MB.
+
+## Phase 18 — MRMS zero-precip recolor (2026-09-05) ✅
+
+- Probed four CONUS p24h tiles: IEM paints zero accumulation over land as
+  opaque grey (144,144,144) — the only grey in the palette — which laid a
+  dark wash across every dry state. A `synoptic-precip://` protocol (the
+  mosaic-protocol pattern: fetch → OffscreenCanvas → pixel pass → bitmap)
+  clears exactly that colour to transparent; real values keep IEM's own
+  palette. Verified live: the dry West shows the basemap, rain shows rain.

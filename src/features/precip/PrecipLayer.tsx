@@ -3,17 +3,20 @@ import { useFeatureOption } from '@/core/settings/store'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { precipTileTemplate } from '@/features/precip/service'
+import { precipUrl, registerPrecipProtocol } from '@/features/precip/protocol'
 
 /**
  * MRMS accumulated precipitation under the radar: how much has fallen,
  * beside the mosaic's how hard it is falling. The rolling accumulations
  * turn over gently, so live (unpinned) tiles carry none of the per-zoom
  * generation skew that forced the reflectivity mosaic onto pinned TIME.
+ * Tiles pass through a protocol that clears IEM's zero-accumulation grey.
  */
 export function PrecipLayer() {
   const product = useFeatureOption<string>('precip', 'product')
   const opacity = useFeatureOption<number>('precip', 'opacity')
-  const tiles = precipTileTemplate(product)
+  registerPrecipProtocol()
+  const tiles = precipUrl(precipTileTemplate(product))
 
   useMapLayer((map) => {
     map.addSource('precip', {
