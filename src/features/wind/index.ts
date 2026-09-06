@@ -33,7 +33,9 @@ registerFeature({
       min: 10,
       max: 90,
       step: 5,
-      defaultValue: 50,
+      // Wind is on by default; at 30 the wash reads as context under radar
+      // and satellite rather than as the picture.
+      defaultValue: 30,
     },
     {
       kind: 'select',
