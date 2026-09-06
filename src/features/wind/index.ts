@@ -66,7 +66,8 @@ registerFeature({
       min: 10,
       max: 100,
       step: 5,
-      defaultValue: 80,
+      // Streaks, like the wash, are context in the default scene.
+      defaultValue: 30,
     },
   ],
 })
