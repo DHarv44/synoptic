@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Popup, type MapMouseEvent } from 'maplibre-gl'
+import { Popup, type MapMouseEvent, type MapTouchEvent } from 'maplibre-gl'
 import { useMapContext } from '@/map/MapView'
 import { popupFor, popupLayerIds } from '@/map/popups/registry'
 import { PointPopup } from '@/map/popups/PointPopup'
@@ -12,11 +12,16 @@ interface Open {
   properties: Record<string, unknown>
 }
 
+/** Hold this long without moving to count as a long-press on touch. */
+const LONG_PRESS_MS = 500
+const LONG_PRESS_SLOP_PX = 10
+
 /**
- * The map's one click story: every click answers AT the click. An orb
- * (registered feature) wins over the bare map; the bare map opens the
- * location card, where interrogating a point is a deliberate action —
- * clicks no longer silently retarget every panel.
+ * The map's click story. A left click on a registered feature opens its
+ * card; a left click on the bare map opens nothing and closes whatever is
+ * open — panning around must never leave cards behind. The location card
+ * (interrogate a point, set home) is a deliberate gesture: right-click on
+ * a desktop, long-press on touch.
  */
 export function MapPopup() {
   const { map } = useMapContext()
@@ -29,13 +34,39 @@ export function MapPopup() {
       const ids = popupLayerIds().filter((id) => map.getLayer(id) !== undefined)
       const hits = ids.length > 0 ? map.queryRenderedFeatures(e.point, { layers: ids }) : []
       const top = hits[0]
+      if (!top) {
+        setOpen(null)
+        return
+      }
       setOpen({
         lngLat: { lat: e.lngLat.lat, lng: e.lngLat.lng },
-        layerId: top?.layer.id ?? null,
-        properties: (top?.properties as Record<string, unknown>) ?? {},
+        layerId: top.layer.id,
+        properties: (top.properties as Record<string, unknown>) ?? {},
       })
     }
+    const openLocation = (lngLat: { lat: number; lng: number }): void => {
+      setOpen({ lngLat: { lat: lngLat.lat, lng: lngLat.lng }, layerId: null, properties: {} })
+    }
+    const onContextMenu = (e: MapMouseEvent): void => {
+      e.preventDefault()
+      openLocation(e.lngLat)
+    }
+    // iOS never fires contextmenu; time a still touch ourselves.
+    let press: { at: number; x: number; y: number } | null = null
+    const onTouchStart = (e: MapTouchEvent): void => {
+      press = e.points.length === 1 ? { at: Date.now(), x: e.point.x, y: e.point.y } : null
+    }
+    const onTouchEnd = (e: MapTouchEvent): void => {
+      if (!press) return
+      const held = Date.now() - press.at
+      const moved = Math.hypot(e.point.x - press.x, e.point.y - press.y)
+      press = null
+      if (held >= LONG_PRESS_MS && moved < LONG_PRESS_SLOP_PX) openLocation(e.lngLat)
+    }
     map.on('click', onClick)
+    map.on('contextmenu', onContextMenu)
+    map.on('touchstart', onTouchStart)
+    map.on('touchend', onTouchEnd)
 
     // Pointer cursor over anything clickable. Layer-scoped handlers match
     // lazily, so layers added later still get the affordance.
@@ -52,6 +83,9 @@ export function MapPopup() {
     }
     return () => {
       map.off('click', onClick)
+      map.off('contextmenu', onContextMenu)
+      map.off('touchstart', onTouchStart)
+      map.off('touchend', onTouchEnd)
       for (const id of ids) {
         map.off('mouseenter', id, enter)
         map.off('mouseleave', id, leave)

@@ -44,7 +44,7 @@ export function LocateButton({ size = 34, style }: { size?: number; style?: CSSP
           title: 'Could not get your location',
           message:
             err.code === err.PERMISSION_DENIED
-              ? 'Location permission was denied. You can still click anywhere on the map.'
+              ? 'Location permission was denied. You can still right-click (long-press on touch) anywhere on the map.'
               : err.message,
         })
       },

@@ -18,7 +18,8 @@ export function PanelGuard({ error, loading, children }: PanelGuardProps) {
   if (!point) {
     return (
       <Text size="xs" c="dimmed">
-        Click anywhere on the map for conditions, forecast, and a sounding.
+        Right-click (long-press on touch) anywhere on the map for conditions, forecast, and a
+        sounding.
       </Text>
     )
   }

@@ -12,7 +12,7 @@ import { HelpPanel } from '@/app/help/HelpPanel'
 import type { PanelContribution, PanelGroup } from '@/core/settings/types'
 
 const EMPTY: Record<PanelGroup, string> = {
-  place: 'Click anywhere on the map to analyse that point.',
+  place: 'Right-click (long-press on touch) anywhere on the map to analyse that point.',
   nearby: 'No active warnings or storm cells in view.',
   radar: 'Zoom in to a radar site for interrogation tools.',
 }

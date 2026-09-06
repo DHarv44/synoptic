@@ -540,3 +540,17 @@ a build step) would make every zone alert mappable at once for ~1–2 MB.
 - Behaviour change worth knowing: "now" is the latest run's short-range
   forecast for the current hour (+5 h here), not a 4–9-hour-old analysis.
 Verified live: requests carry valid=; +18 h step → fields legend +23 h.
+
+## Phase 20 — Left click only on points of interest (2026-09-06) user-requested ✅
+
+- A left click on the bare map used to open the location card, and clicking
+  elsewhere just moved it — cards never went away. Now: left click on a
+  registered feature opens its card; left click on the bare map opens
+  nothing and CLOSES whatever is open. The location card (interrogate a
+  point, set home) moved to a deliberate gesture — right-click on desktop,
+  a 500 ms still long-press on touch (timed ourselves; iOS never fires
+  contextmenu). Hints in the Location panels, dock and locate button follow.
+- Test note: MapLibre's queryRenderedFeatures treats a plain {x,y} as "no
+  geometry" (whole viewport); synthetic events must carry a real Point
+  (map.project()). Two earlier "bare click opened a popup" readings were
+  that artefact, not the app.
