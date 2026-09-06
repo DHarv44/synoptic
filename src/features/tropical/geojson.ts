@@ -1,4 +1,5 @@
 import type { TropicalData } from '@/features/tropical/store'
+import { radiiValidMs, type RadiiKt } from '@/features/tropical/radii'
 import {
   CATEGORY_COLORS,
   motionText,
@@ -19,15 +20,29 @@ export interface TropicalSources {
   track: GeoJSON.FeatureCollection
   points: GeoJSON.FeatureCollection
   current: GeoJSON.FeatureCollection
+  /** Every forecast hour's radii; the layer picks the hour for the clock. */
+  radii: GeoJSON.FeatureCollection
+  arrival: GeoJSON.FeatureCollection
 }
 
 export function tropicalSources(data: TropicalData | null): TropicalSources {
-  if (!data) return { cone: fc([]), past: fc([]), track: fc([]), points: fc([]), current: fc([]) }
+  const empty = (): TropicalSources => ({
+    cone: fc([]),
+    past: fc([]),
+    track: fc([]),
+    points: fc([]),
+    current: fc([]),
+    radii: fc([]),
+    arrival: fc([]),
+  })
+  if (!data) return empty()
   const cone: GeoJSON.Feature[] = []
   const past: GeoJSON.Feature[] = []
   const track: GeoJSON.Feature[] = []
   const points: GeoJSON.Feature[] = []
   const current: GeoJSON.Feature[] = []
+  const radii: GeoJSON.Feature[] = []
+  const arrival: GeoJSON.Feature[] = []
 
   for (const s of data.storms) {
     const cat = stormCategory(s.classification, s.intensityKt)
@@ -80,6 +95,43 @@ export function tropicalSources(data: TropicalData | null): TropicalSources {
         },
       })
     }
+    for (const f of feats(g.windRadii)) {
+      const p = (f.properties ?? {}) as Record<string, unknown>
+      const kt = Number(p.radii)
+      const validMs = radiiValidMs(String(p.validtime ?? ''))
+      if ((kt !== 34 && kt !== 50 && kt !== 64) || validMs === null) continue
+      radii.push({
+        ...f,
+        properties: {
+          stormId: s.id,
+          name: s.name,
+          radii: kt as RadiiKt,
+          tau: Number(p.tau) || 0,
+          validMs,
+          ne: Number(p.ne) || 0,
+          se: Number(p.se) || 0,
+          sw: Number(p.sw) || 0,
+          nw: Number(p.nw) || 0,
+        },
+      })
+    }
+    for (const [kind, coll] of [['likely', g.arrivalLikely], ['earliest', g.arrivalEarliest]] as const) {
+      for (const f of feats(coll)) {
+        const p = (f.properties ?? {}) as Record<string, unknown>
+        arrival.push({
+          ...f,
+          properties: { stormId: s.id, name: s.name, kind, label: String(p.arrival_time ?? '') },
+        })
+      }
+    }
   }
-  return { cone: fc(cone), past: fc(past), track: fc(track), points: fc(points), current: fc(current) }
+  return {
+    cone: fc(cone),
+    past: fc(past),
+    track: fc(track),
+    points: fc(points),
+    current: fc(current),
+    radii: fc(radii),
+    arrival: fc(arrival),
+  }
 }

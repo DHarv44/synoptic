@@ -585,3 +585,16 @@ no CORS → proxy). ATCF a/b-decks reachable via proxy for later.
 Next: H2 wind radii following the clock + TS-wind arrival at home; H3
 watches/warnings + Tropical preset; H4 intensity trace (b-deck), spaghetti
 (a-deck), discussion text. Surge and recon parked for their own pass.
+- [x] **H2 — Wind radii that follow the clock + arrival at home.** NHC's
+  34/50/64 kt quadrant polygons come per forecast hour (taus 0–72,
+  `validtime` YYYYMMDDHH); `radiiAtTime` draws the latest set at or before
+  the clock's hour (tau 0 before, last set beyond — clamped, not invented),
+  threshold-coloured, core over envelope, with a card giving quadrant
+  extents. Arrival-time isochrones (polylines labelled "Mon 8 am", ~6 h
+  apart: ~70 km near the storm, ~190 km far out) draw when NHC issues them
+  — they did for all three EPac storms — earliest dashed, most likely
+  solid, labelled along the line. `arrivalAtPoint` answers "TS-force winds
+  at home ≈ Mon 8 am · earliest Sun 8 pm" from the nearest labelled line
+  within 120 km (about ±6 h), and nothing outside the drawn area. Verified
+  live: radii tau 0 → 24 → 72 (clamped at +200 h), card correct, home on
+  the "Mon 8 am" line reads "≈ Mon 8 am". 9 tests.

@@ -5,14 +5,14 @@ import { TropicalLayer } from '@/features/tropical/TropicalLayer'
 import { TropicalLegend } from '@/features/tropical/TropicalLegend'
 import { TropicalPanel } from '@/features/tropical/TropicalPanel'
 import { TropicalSummary } from '@/features/tropical/TropicalSummary'
-import { ConePopup, StormPopup } from '@/features/tropical/StormPopup'
+import { ConePopup, RadiiPopup, StormPopup } from '@/features/tropical/StormPopup'
 
 /** Tropical cyclones: NHC's active storms with track, cone and forecast points. */
 registerFeature({
   id: 'tropical',
   title: 'Tropical cyclones',
   description:
-    'Active tropical cyclones from the National Hurricane Center — current position and intensity, past track, forecast track with category at each forecast hour, and the forecast cone (centre uncertainty, not storm size).',
+    'Active tropical cyclones from the National Hurricane Center — current position and intensity, past track, forecast track with category at each forecast hour, the forecast cone (centre uncertainty, not storm size), and 34/50/64 kt wind radii that follow the clock.',
   layer: true,
   layerGroup: 'reference',
   layerIcon: IconStorm,
@@ -32,9 +32,12 @@ registerFeature({
   defaultEnabled: true,
   settings: [
     { kind: 'boolean', key: 'cone', label: 'Forecast cone', defaultValue: true },
+    { kind: 'boolean', key: 'windRadii', label: 'Wind radii (34/50/64 kt, follow the clock)', defaultValue: true },
+    { kind: 'boolean', key: 'arrival', label: 'TS-wind arrival-time lines', defaultValue: true },
     { kind: 'boolean', key: 'pastTrack', label: 'Past track', defaultValue: true },
   ],
 })
 
 registerMapPopup({ layerIds: ['tropical-current', 'tropical-points'], component: StormPopup })
+registerMapPopup({ layerIds: ['tropical-radii-fill'], component: RadiiPopup })
 registerMapPopup({ layerIds: ['tropical-cone-fill'], component: ConePopup })

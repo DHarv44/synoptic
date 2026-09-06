@@ -18,6 +18,11 @@ export const STORM_LAYERS = {
   points: 'Forecast Points',
   past: 'Past Track',
   pastPoints: 'Past Points',
+  /** 34/50/64 kt quadrant polygons per forecast hour (tau 0 = now). */
+  windRadii: 'Forecast Wind Radii',
+  /** Isochrones (polylines, `arrival_time`); present only with a land threat. */
+  arrivalLikely: 'Most Likely Arrival Time',
+  arrivalEarliest: 'Earliest Reasonable Arrival Time',
 } as const
 
 export type StormLayerKey = keyof typeof STORM_LAYERS
@@ -64,6 +69,9 @@ export async function fetchStormGis(storm: ActiveStorm): Promise<StormGis> {
     points: EMPTY_FC,
     past: EMPTY_FC,
     pastPoints: EMPTY_FC,
+    windRadii: EMPTY_FC,
+    arrivalLikely: EMPTY_FC,
+    arrivalEarliest: EMPTY_FC,
   })
   if (fixtureActive()) {
     const all = await loadFixture<Record<string, Partial<StormGis>>>('nhc-gis')

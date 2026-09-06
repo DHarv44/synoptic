@@ -4,12 +4,30 @@ import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useUnits } from '@/core/units/useUnitSystem'
 import { fmtPressure, fmtWind } from '@/core/units/format'
 import { useCameraStore } from '@/map/cameraStore'
+import { useHome } from '@/core/home/store'
+import { arrivalAtPoint } from '@/features/tropical/arrival'
+import type { StormGis } from '@/features/tropical/gis'
 import { CATEGORY_COLORS, motionText, stormCategory, type ActiveStorm } from '@/features/tropical/service'
 import { acquireTropicalFeed, useTropical } from '@/features/tropical/store'
 
 const KT_TO_MS = 0.514444
+const arrivalLabel = (f: GeoJSON.Feature): string => String(f.properties?.arrival_time ?? '')
 
-function StormRow({ storm }: { storm: ActiveStorm }) {
+/** "TS-force winds at home ≈ Mon 8 am · earliest Sun 8 pm", when NHC drew lines there. */
+function HomeArrival({ gis }: { gis: StormGis | undefined }) {
+  const home = useHome((s) => s.point)
+  if (!home || !gis) return null
+  const a = arrivalAtPoint(gis.arrivalLikely.features, gis.arrivalEarliest.features, home.lat, home.lon, arrivalLabel)
+  if (!a) return null
+  return (
+    <Text size="xs" c="orange" pl={16}>
+      TS-force winds at {home.name ?? 'home'} ≈ {a.likely}
+      {a.earliest && ` · earliest ${a.earliest}`}
+    </Text>
+  )
+}
+
+function StormRow({ storm, gis }: { storm: ActiveStorm; gis: StormGis | undefined }) {
   const fmt = useTimeFormat()
   const u = useUnits()
   const requestFlyTo = useCameraStore((s) => s.requestFlyTo)
@@ -42,6 +60,7 @@ function StormRow({ storm }: { storm: ActiveStorm }) {
           #{storm.advNum} {fmt.hm(storm.lastUpdateMs)}
         </Text>
       </Group>
+      <HomeArrival gis={gis} />
     </UnstyledButton>
   )
 }
@@ -69,7 +88,7 @@ export function TropicalPanel() {
   return (
     <Stack gap={6}>
       {storms.map((s) => (
-        <StormRow key={s.id} storm={s} />
+        <StormRow key={s.id} storm={s} gis={data.gis[s.id]} />
       ))}
       <Text size="xs" c="dimmed">
         NHC advisories. The cone is where the centre may go, not how far the storm reaches.

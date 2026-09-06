@@ -47,6 +47,30 @@ export function StormPopup({ properties }: MapPopupProps) {
   )
 }
 
+/** A wind-radii quadrant: which threshold, which forecast hour, how far. */
+export function RadiiPopup({ properties }: MapPopupProps) {
+  const fmt = useTimeFormat()
+  const kt = Number(properties.radii)
+  const tau = Number(properties.tau) || 0
+  const validMs = typeof properties.validMs === 'number' ? properties.validMs : null
+  const label = kt === 64 ? 'hurricane-force' : kt === 50 ? '50-kt' : 'tropical-storm-force'
+  const q = (k: string): string => `${Number(properties[k]) || 0}`
+  return (
+    <Stack gap={4}>
+      <Text size="sm" fw={600}>
+        {String(properties.name ?? 'Storm')} · {kt} kt winds
+      </Text>
+      <Text size="xs" c="dimmed">
+        Extent of {label} winds {tau === 0 ? 'now' : `+${tau} h`}
+        {validMs !== null && ` · valid ${fmt.dateTime(validMs)}`}
+      </Text>
+      <Text size="xs" ff="monospace">
+        NE {q('ne')} · SE {q('se')} · SW {q('sw')} · NW {q('nw')} nm
+      </Text>
+    </Stack>
+  )
+}
+
 /** Clicking the cone itself explains what it is — and what it is not. */
 export function ConePopup({ properties }: MapPopupProps) {
   return (

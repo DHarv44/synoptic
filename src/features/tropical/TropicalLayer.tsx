@@ -1,15 +1,30 @@
 import { useEffect, useMemo } from 'react'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { useFeatureOption } from '@/core/settings/store'
+import { useValidHour } from '@/core/time/validHour'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { tropicalSources } from '@/features/tropical/geojson'
+import { RADII_COLORS, radiiAtTime } from '@/features/tropical/radii'
 import { acquireTropicalFeed, useTropical } from '@/features/tropical/store'
 
-const SOURCES = ['tropical-cone', 'tropical-past', 'tropical-track', 'tropical-points', 'tropical-current']
+const SOURCES = [
+  'tropical-cone',
+  'tropical-radii',
+  'tropical-arrival',
+  'tropical-past',
+  'tropical-track',
+  'tropical-points',
+  'tropical-current',
+]
 const LAYERS = [
   'tropical-cone-fill',
   'tropical-cone-line',
+  'tropical-radii-fill',
+  'tropical-radii-line',
+  'tropical-arrival-earliest',
+  'tropical-arrival-likely',
+  'tropical-arrival-labels',
   'tropical-past',
   'tropical-track',
   'tropical-points',
@@ -17,6 +32,16 @@ const LAYERS = [
   'tropical-current',
   'tropical-current-labels',
 ]
+
+const RADII_COLOR_EXPR = [
+  'match',
+  ['get', 'radii'],
+  64,
+  RADII_COLORS[64],
+  50,
+  RADII_COLORS[50],
+  RADII_COLORS[34],
+] as const
 
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
 const HALO = 'rgba(0,0,0,0.75)'
@@ -31,9 +56,24 @@ const HALO = 'rgba(0,0,0,0.75)'
 export function TropicalLayer() {
   const showCone = useFeatureOption<boolean>('tropical', 'cone')
   const showPast = useFeatureOption<boolean>('tropical', 'pastTrack')
+  const showRadii = useFeatureOption<boolean>('tropical', 'windRadii')
+  const showArrival = useFeatureOption<boolean>('tropical', 'arrival')
   const data = useTropical()
   useEffect(() => acquireTropicalFeed(), [])
   const sources = useMemo(() => tropicalSources(data), [data])
+  // The radii follow the clock: one forecast hour's set per storm.
+  const hour = useValidHour()
+  const radiiNow = useMemo(() => {
+    const byStorm = new Map<string, GeoJSON.Feature[]>()
+    for (const f of sources.radii.features) {
+      const id = String(f.properties?.stormId)
+      byStorm.set(id, [...(byStorm.get(id) ?? []), f])
+    }
+    const features = [...byStorm.values()].flatMap((fs) => radiiAtTime(fs, hour))
+    // Widest first so the 64-kt core draws on top of the 34-kt envelope.
+    features.sort((a, b) => Number(a.properties?.radii) - Number(b.properties?.radii))
+    return { type: 'FeatureCollection' as const, features }
+  }, [sources.radii, hour])
 
   useMapLayer((m) => {
     for (const id of SOURCES) m.addSource(id, { type: 'geojson', data: EMPTY })
@@ -54,6 +94,70 @@ export function TropicalLayer() {
         type: 'line',
         source: 'tropical-cone',
         paint: { 'line-color': '#e8edf2', 'line-width': 1.2, 'line-opacity': 0.75 },
+      },
+      'tropical',
+    )
+    // Wind radii between the cone and the track: the field the forecast
+    // expects at the clock's hour, threshold-coloured, core over envelope.
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-radii-fill',
+        type: 'fill',
+        source: 'tropical-radii',
+        paint: { 'fill-color': RADII_COLOR_EXPR as never, 'fill-opacity': 0.22 },
+      },
+      'tropical',
+    )
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-radii-line',
+        type: 'line',
+        source: 'tropical-radii',
+        paint: { 'line-color': RADII_COLOR_EXPR as never, 'line-width': 1, 'line-opacity': 0.9 },
+      },
+      'tropical',
+    )
+    // Arrival-time isochrones for tropical-storm-force winds — present only
+    // when NHC issues them (a land threat). Earliest reasonable dashed,
+    // most likely solid, each labelled with its time along the line.
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-arrival-earliest',
+        type: 'line',
+        source: 'tropical-arrival',
+        filter: ['==', ['get', 'kind'], 'earliest'],
+        paint: { 'line-color': '#ffd54a', 'line-width': 1, 'line-dasharray': [3, 2], 'line-opacity': 0.8 },
+      },
+      'tropical',
+    )
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-arrival-likely',
+        type: 'line',
+        source: 'tropical-arrival',
+        filter: ['==', ['get', 'kind'], 'likely'],
+        paint: { 'line-color': '#ffd54a', 'line-width': 1.4, 'line-opacity': 0.9 },
+      },
+      'tropical',
+    )
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-arrival-labels',
+        type: 'symbol',
+        source: 'tropical-arrival',
+        layout: {
+          'symbol-placement': 'line',
+          'symbol-spacing': 260,
+          'text-field': ['get', 'label'],
+          'text-font': ['Noto Sans Regular'],
+          'text-size': 10,
+        },
+        paint: { 'text-color': '#ffe58a', 'text-halo-color': HALO, 'text-halo-width': 1.1 },
       },
       'tropical',
     )
@@ -158,12 +262,14 @@ export function TropicalLayer() {
         src?.setData(d)
       }
       set('tropical-cone', showCone ? sources.cone : EMPTY)
+      set('tropical-radii', showRadii ? radiiNow : EMPTY)
+      set('tropical-arrival', showArrival ? sources.arrival : EMPTY)
       set('tropical-past', showPast ? sources.past : EMPTY)
       set('tropical-track', sources.track)
       set('tropical-points', sources.points)
       set('tropical-current', sources.current)
     },
-    [sources, showCone, showPast],
+    [sources, radiiNow, showCone, showPast, showRadii, showArrival],
   )
 
   return null
