@@ -544,7 +544,8 @@ npm test           # vitest — decoder + atmospheric-science reference tests
 ## Data sources
 
 All free; keyless where possible. RainViewer · Iowa Environmental Mesonet
-(NEXRAD mosaic, MRMS, SPC products) · NEXRAD Level 2 (Unidata/AWS Open Data) ·
+(NEXRAD mosaic, MRMS, SPC products, road-weather and SYNOP currents, RAOBs) ·
+NEXRAD Level 2 (Unidata/AWS Open Data) ·
 NWS API (alerts, zones) · Open-Meteo (forecast, pressure levels, ensembles, air
 quality, geocoding) · NASA GIBS · Blitzortung.org · aviationweather.gov · NOMADS
 GFS · WPC · NDBC · NWPS · National Hurricane Center (storm list, tropical map
