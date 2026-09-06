@@ -90,23 +90,25 @@ dependency order. Check boxes as slices land.
 - Gotchas: maplibre's default blob worker dies silently in sandboxed webviews →
   CSP worker build with explicit `setWorkerUrl`; maplibre pinned to v5.
 
-## Phase 3 — Wind (built; PINNED BUG, layer off by default)
+## Phase 3 — Wind (built; FIXED, on by default) ✅
 
 - [x] Proxy: GFS via NOMADS **grib filter CGI** (OPeNDAP retired per SCN 25-81),
   decoded with grib2class, 0.5° int8 payload, run auto-discovery, 30-min cache.
 - [x] Client: WebGL2 GPGPU particle system (RG32F ping-pong sim, equirect →
   mercator draw through the map matrix), level select (10m→250hPa), particle
   count + opacity settings, health wiring.
-- [ ] **PINNED BUG — wind field corruption.** A rectangular garbage patch (e.g.
-  ~74 m/s mean speed at 250 hPa off Baja, ~22N 120W) renders as a salmon
-  particle "block" (user-reported; confirmed by wind-layer A/B toggle). Facts so
-  far: server-side |UGRD| in that region ≈ 45 m/s from BOTH 0p25 and 0p50 files
-  (consistent), but client speed ≈ 74 → the v-component adds ~59 m/s, so the
-  prime suspects are (a) grib2class mis-decoding VGRD messages, (b) a u/v
-  assembly/offset bug in server payload or client parse. Next step when
-  resumed: run the VGRD region spike (compare grib2class VGRD vs known-good
-  values, e.g. from Open-Meteo point queries at the same spot), then fix
-  decode or assembly accordingly. Layer defaultEnabled:false until fixed.
+- [x] **Field corruption — FIXED (2026-09-05).** The salmon "block" (~74 m/s
+  off Baja at 250 hPa) was the negative-reference-value decode bug: grib2class
+  read GRIB2 Section-5 reference values wrong for negative R, shifting every
+  value by ΔR/10^D. VGRD off Baja has a real R near −4000, so the whole v-field
+  jumped ~tens of m/s — a coherent block, not noise. The `grib2RefValue` reader
+  (server/gfsWind.mjs) re-reads octets 12–15 straight from the message and
+  corrects the shift. Spike verification against Open-Meteo GFS point values
+  (same run/valid hour): Baja 14.0 vs 14.18, Kansas 13.6 vs 13.5, jet 52.9 vs
+  52.84 m/s — all <0.2 m/s. Whole-field scan: zero horizontal jumps >25 m/s in
+  UGRD, max |value| 91 m/s (sane). Client decode round-trip re-derived and
+  confirmed. Layer is now defaultEnabled:true; live 250 hPa render shows a
+  clean jet with no artefact.
 
 ## Phase 4 — Sounding Suite (core complete)
 

@@ -12,7 +12,11 @@ registerFeature({
   layerIcon: IconWind,
   layerComponent: WindLayer,
   sourceIds: ['gfs-wind'],
-  defaultEnabled: false,
+  // On by default now the decode is fixed (the negative-reference bug that
+  // shifted every value by tens of m/s is corrected in the server's
+  // grib2RefValue path). Verified against Open-Meteo GFS point values to
+  // <0.2 m/s across the old artefact region and a strong jet.
+  defaultEnabled: true,
   settings: [
     {
       kind: 'boolean',
