@@ -454,3 +454,21 @@ Verified z3.5/z6/z9 screenshots before and after; clean compile on reload.
   key can use the same slot.
 Verified live: payload gzip 1440×721 step 0.25; legend "10 m wind · km/h"
 with 0–160 ticks; z9 streaks individually readable; 250 tests.
+
+## Phase 15 — User-saved presets (2026-09-05) ✅
+
+- **captureScene()** turns the current stack into the same minimal SceneSpec
+  the built-ins use — enabled scene features only, each carrying just the
+  options that differ from manifest defaults — so a saved preset reads like
+  a hand-written one and round-trips through applyPreset/sceneMatches.
+- **useUserPresets** (persist `synoptic.presets` v1): save(label) / remove(id);
+  `allPresets()` = built-ins then user's. Active-preset detection and
+  apply-by-id now search both. Saving also applies the new preset, which
+  only resets hidden options of layers that are off — the way the scene
+  matches its own preset the moment it is saved (chip lights up).
+- **UI**: PresetMenu gains a "Saved scenes" section (check + trash) and
+  "Save current scene…" → SavePresetModal (name, Enter to save).
+Verified live: saved "Pacific jet watch" → chip shows it, spec stored
+{graticule, level2, satellite ir-west, wind 250 + opacities}, delete
+removes it. 4 tests (capture minimality, `true` at defaults, round-trip
+match, remove).
