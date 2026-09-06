@@ -377,3 +377,11 @@ UI now reaches −48 h but most layers only have frames for the last hours.
   coverage — so they stay unbounded and 404 only in their gap quadrant.
   Verified: East GeoColor over Europe issues zero out-of-disk requests;
   three product switches over CONUS = 108/108 responses 200.
+- **Mobile pass** (follow-up): tapping a hazard row from the bottom sheet
+  now collapses it to the tab bar — on a phone the sheet covered the very
+  polygon the tap flew to (MobileSheet watches the camera-request store, so
+  features stay decoupled). The mobile playback bar swaps its static clock
+  text for the day/hour/minute steppers — the 6-h scrubber had left history
+  and forecast unreachable on phones — and stepper chevrons grew to a
+  usable touch size everywhere. Popups, settings (13-product select wraps),
+  and sheet scrolling verified at 375×812.

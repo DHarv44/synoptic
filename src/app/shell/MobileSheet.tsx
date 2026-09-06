@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { ActionIcon, Group, ScrollArea, Stack, Text, UnstyledButton } from '@mantine/core'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
+import { useCameraStore } from '@/map/cameraStore'
 import { useDock, type SheetState } from '@/app/shell/dockStore'
 import { RAIL_TABS } from '@/app/shell/DockRail'
 import { ContextHeader, DockContent } from '@/app/shell/AnalysisDock'
@@ -73,6 +75,16 @@ export function MobileSheet() {
   const tab = useDock((s) => s.tab)
   const sheet = useDock((s) => s.sheet)
   const setSheet = useDock((s) => s.setSheet)
+
+  // A panel row that flies the map wants the map SEEN. On desktop the dock
+  // sits beside the viewport; here it covers it, so any camera request from
+  // inside the sheet collapses it back to the tab bar.
+  const flyTarget = useCameraStore((s) => s.target)
+  const fitTarget = useCameraStore((s) => s.fit)
+  useEffect(() => {
+    if (flyTarget === null && fitTarget === null) return
+    if (useDock.getState().sheet !== 'peek') setSheet('peek')
+  }, [flyTarget, fitTarget, setSheet])
 
   const grow: Partial<Record<SheetState, SheetState>> = { half: 'full' }
   const shrink: Partial<Record<SheetState, SheetState>> = { full: 'half', half: 'peek' }

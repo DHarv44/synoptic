@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { ActionIcon, Badge, Group, Menu, Paper, Slider, Text, Tooltip } from '@mantine/core'
+import { ActionIcon, Badge, Group, Menu, Paper, Slider, Tooltip } from '@mantine/core'
 import { useHotkeys } from '@mantine/hooks'
 import { IconGauge, IconPlayerPause, IconPlayerPlay } from '@tabler/icons-react'
 import {
@@ -179,13 +179,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
             )}
           </ActionIcon>
         </Tooltip>
-        {isMobile ? (
-          <Text size="xs" ff="monospace" style={{ flexShrink: 0 }}>
-            {fmt.hm(simTime)}
-          </Text>
-        ) : (
-          <TimeStepper />
-        )}
+        <TimeStepper />
         <div style={{ flex: 1, minWidth: 60 }}>
           <Slider
             size="xs"

@@ -25,11 +25,11 @@ function Segment({
         <ActionIcon
           variant="subtle"
           color="gray"
-          size={14}
+          size={18}
           onClick={() => stepSimTime(stepMs)}
           aria-label={`Forward ${label}`}
         >
-          <IconChevronUp size={12} stroke={1.8} />
+          <IconChevronUp size={14} stroke={1.8} />
         </ActionIcon>
       </Tooltip>
       <Text size="xs" ff="monospace" lh={1.1}>
@@ -39,11 +39,11 @@ function Segment({
         <ActionIcon
           variant="subtle"
           color="gray"
-          size={14}
+          size={18}
           onClick={() => stepSimTime(-stepMs)}
           aria-label={`Back ${label}`}
         >
-          <IconChevronDown size={12} stroke={1.8} />
+          <IconChevronDown size={14} stroke={1.8} />
         </ActionIcon>
       </Tooltip>
     </div>
