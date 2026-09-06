@@ -57,6 +57,11 @@ export const CREDITS: Credit[] = [
     what: 'GFS gridded fields: winds, pressure, heights, temperature, CAPE.',
   },
   {
+    label: 'Surface currents · Iowa Environmental Mesonet',
+    href: 'https://mesonet.agron.iastate.edu/',
+    what: 'Road-weather (RWIS) and WMO SYNOP station observations.',
+  },
+  {
     label: 'RAOB archive · Iowa Environmental Mesonet',
     href: 'https://mesonet.agron.iastate.edu/',
     what: 'Observed 00Z/12Z balloon soundings, overlaid on the model skew-T.',

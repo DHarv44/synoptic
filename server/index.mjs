@@ -21,6 +21,7 @@ import { getWindPayloadEncoded } from './gfsWind.mjs'
 import { getGridPayload } from './gfsGrid.mjs'
 import { getADeck, getBDeck, getDiscussion } from './atcf.mjs'
 import { getBuoysJson } from './ndbc.mjs'
+import { getIemObs, parseBbox, parseTiers } from './iemObs.mjs'
 
 const PORT = process.env.PORT ?? 8080
 const DIST = fileURLToPath(new URL('../dist', import.meta.url))
@@ -184,6 +185,19 @@ app.use('/proxy/nhc-text', async (req, res) => {
   try {
     const product = new URL(req.url, 'http://x').searchParams.get('product') ?? ''
     const data = await getDiscussion(product)
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Cache-Control', 'public, max-age=300')
+    res.end(JSON.stringify(data))
+  } catch (e) {
+    fail(res, e)
+  }
+})
+
+/** Road-weather and SYNOP stations from IEM currents, trimmed to a bbox. */
+app.use('/proxy/iem-obs', async (req, res) => {
+  try {
+    const q = new URL(req.url, 'http://x').searchParams
+    const data = await getIemObs(parseTiers(q.get('tiers')), parseBbox(q.get('bbox')))
     res.setHeader('Content-Type', 'application/json')
     res.setHeader('Cache-Control', 'public, max-age=300')
     res.end(JSON.stringify(data))

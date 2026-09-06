@@ -31,7 +31,8 @@ export function stationImageId(s: Metar, scheme: 'dark' | 'light', tempUnit: 'C'
     s.fltCat ?? '',
     tempUnit,
   ].join('/')
-  return `metar-${s.icaoId}-${scheme}-${bits}`
+  // The tier is part of the id: an IEM station id can look like an ICAO one.
+  return `${s.kind ?? 'metar'}-${s.icaoId}-${scheme}-${bits}`
 }
 
 function draw(s: Metar, scheme: 'dark' | 'light', tempUnit: 'C' | 'F'): ImageData {

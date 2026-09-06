@@ -655,3 +655,28 @@ likely to be read as a promise), recon HDOB/dropsondes, satellite floater.
   bearing/pitch on `rotate`/`pitch`, not just moveend), and layers on top
   so its labelled menu opens over nothing but map. Legends sit beside the
   column with a max width and their rows wrap. Desktop untouched.
+
+## Phase 23 — IEM observation tiers on the surface plot (2026-09-06) ✅
+
+- **Probed first** (`api/1/currents.geojson`, open CORS): the everything
+  feed is 66 MB and 47 k stations, most of them DCP/COOP gauges with no
+  temperature; `networkclass=` alone is ignored, works with `country=`;
+  `network=` takes one network, a comma list returns nothing; `minutes=`
+  drops stale obs upstream. IEM's own ASOS/AWOS class is the same METARs
+  AWC already serves. The honest cut: **RWIS** road-weather stations
+  (`networkclass=RWIS&country=US`, 2.4 k, 3.6 MB) and **WMO SYNOP** land
+  stations (`network=WMO_BUFR_SRF`, 5.8 k, 8.4 MB, only ~250 inside CONUS —
+  the carpet everywhere else).
+- [x] `server/iemObs.mjs` (shared by both servers, 7 tests): keeps each
+  class feed warm for 10 min, serves `/proxy/iem-obs?tiers=road,synop&bbox=`
+  as METAR-shaped records (°F→°C, kt, hPa, WIGOS ids as-is) — 20–150 KB per
+  viewport instead of 12 MB. The first request waits; later ones serve the
+  warm set while a refresh runs; a failed refresh keeps the warm set.
+- [x] Surface-obs layer: two new settings (`road`, `synop`, both on),
+  fetched beside the METAR request with airports listed first so thinning
+  keeps them; an IEM outage cannot take the METARs down. Sprite ids carry
+  the tier. Card shows the tier badge, network, gust, pressure, weather and
+  sky; no raw line for stations that have no raw ob.
+- Verified live: Iowa view 34 METAR + 31 road stations; Europe view
+  24 METAR + 56 SYNOP (Cap Pertusato 1019.6 hPa, FEW). Fixture `iem-obs`
+  keeps demo mode offline. Catalog and credits entries added.

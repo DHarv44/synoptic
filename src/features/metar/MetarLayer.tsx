@@ -8,7 +8,16 @@ import { startPoller } from '@/core/data/scheduler'
 import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
-import { METAR_SOURCE, metarUrl, thinStations, type Metar } from '@/features/metar/service'
+import {
+  IEM_OBS_SOURCE,
+  METAR_SOURCE,
+  iemObsUrl,
+  metarUrl,
+  thinStations,
+  type Bbox,
+  type Metar,
+  type ObsTier,
+} from '@/features/metar/service'
 import { ensureStationImages, stationImageId } from '@/features/metar/stationImages'
 
 const MIN_ZOOM = 5
@@ -30,6 +39,8 @@ export function MetarLayer() {
   const scheme = useComputedColorScheme('dark')
   const tempUnit = useUnits().temp
   const density = useFeatureOption<string>('metar', 'density')
+  const road = useFeatureOption<boolean>('metar', 'road')
+  const synop = useFeatureOption<boolean>('metar', 'synop')
   const [stations, setStations] = useState<Metar[]>([])
   const [bboxKey, setBboxKey] = useState<string | null>(null)
   /** Sprite ids currently registered, so stale ones can be pruned. */
@@ -63,22 +74,31 @@ export function MetarLayer() {
     const wide = bboxKey.startsWith('wide:')
     const [latC, lonC] = bboxKey.slice(5).split(',').map(Number)
     const thinDeg = THIN_DEG[density] ?? THIN_DEG.normal
+    const bbox: Bbox = wide
+      ? [latC - 16, lonC - 27, latC + 16, lonC + 27]
+      : [latC - 7, lonC - 10, latC + 7, lonC + 10]
+    const tiers: ObsTier[] = [...(road ? (['road'] as const) : []), ...(synop ? (['synop'] as const) : [])]
     return startPoller({
       source: METAR_SOURCE,
       cadenceMs: POLL_MS,
       enabled: () => featureEnabled('metar'),
       run: async () => {
-        const data = await fetchJson<Metar[]>(
-          METAR_SOURCE,
-          wide
-            ? metarUrl(latC - 16, lonC - 27, latC + 16, lonC + 27)
-            : metarUrl(latC - 7, lonC - 10, latC + 7, lonC + 10),
-          { fixture: 'metar-bbox' },
+        // Airports first: thinning keeps the first station in a cell, and
+        // an IEM outage must not take the METARs down with it.
+        const [metar, extra] = await Promise.all([
+          fetchJson<Metar[]>(METAR_SOURCE, metarUrl(...bbox), { fixture: 'metar-bbox' }),
+          tiers.length === 0
+            ? Promise.resolve<Metar[]>([])
+            : fetchJson<Metar[]>(IEM_OBS_SOURCE, iemObsUrl(bbox, tiers), { fixture: 'iem-obs' }).catch(
+                () => [] as Metar[],
+              ),
+        ])
+        setStations(
+          thinStations([...metar, ...extra], wide ? thinDeg.wide : thinDeg.near, thinDeg.cap),
         )
-        setStations(thinStations(data, wide ? thinDeg.wide : thinDeg.near, thinDeg.cap))
       },
     })
-  }, [bboxKey, density])
+  }, [bboxKey, density, road, synop])
 
   // Source and layer exist for the life of the style. Rebuilding them per
   // fetch was tearing the layer down and back up on every pan across a
@@ -132,6 +152,12 @@ export function MetarLayer() {
             wdir: typeof s.wdir === 'number' ? s.wdir : null,
             wspd: s.wspd,
             fltCat: s.fltCat,
+            kind: s.kind ?? 'metar',
+            network: s.network ?? null,
+            gust: s.gust ?? null,
+            mslp: s.mslp ?? null,
+            wx: s.wx ?? null,
+            sky: s.sky ?? null,
           },
         })),
       })

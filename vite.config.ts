@@ -6,6 +6,7 @@ import { getWindPayloadEncoded } from './server/gfsWind.mjs'
 import { getGridPayload } from './server/gfsGrid.mjs'
 import { getADeck, getBDeck, getDiscussion } from './server/atcf.mjs'
 import { getBuoysJson } from './server/ndbc.mjs'
+import { getIemObs, parseBbox, parseTiers } from './server/iemObs.mjs'
 
 // Surfaced in the About panel, so a bug report can name a build.
 const { version } = createRequire(import.meta.url)('./package.json') as { version: string }
@@ -69,6 +70,19 @@ function windProxy(): Plugin {
       server.middlewares.use('/proxy/nhc-text', (req, res) => {
         const product = new URL(req.url ?? '', 'http://x').searchParams.get('product') ?? ''
         getDiscussion(product)
+          .then((data) => {
+            res.setHeader('Content-Type', 'application/json')
+            res.setHeader('Cache-Control', 'public, max-age=300')
+            res.end(JSON.stringify(data))
+          })
+          .catch((e: unknown) => {
+            res.statusCode = 502
+            res.end(String(e))
+          })
+      })
+      server.middlewares.use('/proxy/iem-obs', (req, res) => {
+        const q = new URL(req.url ?? '', 'http://x').searchParams
+        getIemObs(parseTiers(q.get('tiers')), parseBbox(q.get('bbox')))
           .then((data) => {
             res.setHeader('Content-Type', 'application/json')
             res.setHeader('Cache-Control', 'public, max-age=300')

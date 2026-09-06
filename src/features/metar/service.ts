@@ -1,6 +1,13 @@
 import type { SourceRef } from '@/core/data/types'
 
 export const METAR_SOURCE: SourceRef = { id: 'metar', label: 'METAR (aviationweather.gov)' }
+export const IEM_OBS_SOURCE: SourceRef = { id: 'iem-obs', label: 'IEM currents (road weather, SYNOP)' }
+
+/** Where a station plot came from; airports are the default and win a thinning cell. */
+export type ObsKind = 'metar' | 'road' | 'synop'
+export type ObsTier = Exclude<ObsKind, 'metar'>
+
+export const OBS_KIND_LABEL: Record<ObsTier, string> = { road: 'Road weather', synop: 'SYNOP' }
 
 export interface Metar {
   icaoId: string
@@ -15,12 +22,27 @@ export interface Metar {
   name: string
   rawOb: string
   obsTime: number // unix seconds
+  /** Absent on AWC METARs; the proxy stamps the IEM tiers. */
+  kind?: ObsKind
+  network?: string
+  gust?: number | null // kt
+  mslp?: number | null // hPa
+  wx?: string | null
+  sky?: string | null
 }
 
+export type Bbox = [latMin: number, lonMin: number, latMax: number, lonMax: number]
+
+const bboxParam = (b: Bbox): string => b.map((v) => v.toFixed(1)).join(',')
+
 export function metarUrl(latMin: number, lonMin: number, latMax: number, lonMax: number): string {
-  const bbox = [latMin, lonMin, latMax, lonMax].map((v) => v.toFixed(1)).join(',')
   // Served via the proxy (aviationweather.gov blocks browser CORS).
-  return `/proxy/metar?format=json&bbox=${bbox}`
+  return `/proxy/metar?format=json&bbox=${bboxParam([latMin, lonMin, latMax, lonMax])}`
+}
+
+/** The IEM tiers for the same box; the server holds the national sets warm. */
+export function iemObsUrl(bbox: Bbox, tiers: ObsTier[]): string {
+  return `/proxy/iem-obs?tiers=${tiers.join(',')}&bbox=${bboxParam(bbox)}`
 }
 
 /**

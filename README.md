@@ -59,7 +59,7 @@ desktop and mobile, in dark or light.
 |---|---|---|
 | NWS alerts | Warning polygons above every layer + viewport-filtered panel, filtered by severity and category; zone-based alerts outlined on demand (dashed) | ✅ |
 | Lightning | Live Blitzortung strikes, bolt icons with flash decay | ✅ |
-| Surface obs | METAR station models (temp/dewpoint/barb), decluttered | ✅ |
+| Surface obs | Station models (temp/dewpoint/barb), decluttered: airport METARs plus IEM road-weather stations across the US and WMO SYNOP land stations worldwide, each tier switchable | ✅ |
 | Satellite | NASA GIBS: GOES-East, GOES-West and Himawari bands every 10 min (~1 month archive), VIIRS daily; loop frames pre-warmed | ✅ |
 | Basemap | OpenFreeMap vector tiles — cities, roads, labels, dark/light | ✅ |
 | Wind particles | GPU flow: speed field wash with legend + streamline trails, native 0.25° GFS, surface → jet, follows the clock | ✅ |

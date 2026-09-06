@@ -56,7 +56,7 @@ off and on moves it to the top (this is how radar came to cover warnings).
 ## Where things stand (2026-09-06)
 
 Everything below is on `main` and deployed; SLICES.md Phases 10–21 carry the
-per-slice detail. Working tree clean. Tests: 299 green (`npm test`).
+per-slice detail. Working tree clean. Tests: 315 green (`npm test`).
 
 - **Everything hurricane** (Phase 21, H0–H4, `features/tropical/`): NHC
   storm list via `/proxy/nhc-storms` (named so it is not a prefix of
@@ -122,10 +122,22 @@ per-slice detail. Working tree clean. Tests: 299 green (`npm test`).
   layers. Legends wrap beside the column instead of running under it.
   Browser-pane trap: mobile emulation times out real drags — drive
   `useSheetDrag` with synthesized `PointerEvent`s on the tab bar / window.
+- **IEM observation tiers** (Phase 23, `server/iemObs.mjs`, 7 tests): the
+  surface-obs layer merges road-weather (RWIS, `networkclass=RWIS&country=US`)
+  and WMO SYNOP (`network=WMO_BUFR_SRF`) stations from IEM's currents API
+  into the METAR station models. The server keeps each class feed warm for
+  10 min (3.6 MB + 8.4 MB upstream) and serves `/proxy/iem-obs?tiers=&bbox=`
+  in the METAR record shape (°F→°C, kt, hPa); the layer fetches it beside
+  the METAR request, airports listed first so they win a thinning cell, and
+  an IEM failure leaves the METARs up. Do NOT fetch IEM's ASOS/AWOS class —
+  it is the same METARs AWC serves. The everything feed is 66 MB / 47 k
+  stations, mostly gauges without temperature; `networkclass` alone is
+  ignored (needs `country`), a comma list in `network=` returns nothing.
+  Sprite ids carry the tier (`road-`, `synop-`) since IEM ids can look ICAO.
 
 **Next**: the board in the queue below — surge/recon/floater when their
-pass is due; otherwise the IEM mesonet obs-blend tier, a shipped zone
-atlas, wind feel-tuning.
+pass is due; otherwise a shipped zone atlas, wind feel-tuning, real RAOB
+plots, the alert ticker.
 
 ## Where things stood (2026-08-15)
 
