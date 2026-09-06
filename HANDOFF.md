@@ -55,8 +55,28 @@ off and on moves it to the top (this is how radar came to cover warnings).
 
 ## Where things stand (2026-09-06)
 
-Everything below is on `main` and deployed; SLICES.md Phases 10–20 carry the
-per-slice detail. Working tree clean. Tests: 279 green (`npm test`).
+Everything below is on `main` and deployed; SLICES.md Phases 10–21 carry the
+per-slice detail. Working tree clean. Tests: 299 green (`npm test`).
+
+- **Everything hurricane** (Phase 21, H0–H4, `features/tropical/`): NHC
+  storm list via `/proxy/nhc-storms` (named so it is not a prefix of
+  `/proxy/nhc-gis` — Vite proxy keys match by prefix), NOAA tropical
+  MapServer GeoJSON via `/proxy/nhc-gis` (slot layer ids resolved by name
+  from the service's layer list), ATCF decks + discussion via
+  `server/atcf.mjs` (`/proxy/nhc-atcf`, `/proxy/nhc-text`; the a-deck is
+  trimmed server-side to the latest run and curated techs). Track, cone
+  (honesty card), radii following the clock (`radii.ts`), arrival
+  isochrones + arrival at home (`arrival.ts`, 120 km ≈ ±6 h), coastal
+  watches/warnings, Tropical preset (`tropical` is deliberately NOT a
+  scene feature), intensity sparkline (`ui/Sparkline`, shared with the
+  volcano plume trend), opt-in model tracks (poller gated on the setting),
+  discussion verbatim, overall + per-part opacities. Verified live on
+  Marie/Lowell/Karina incl. Lowell's Hawaii watches. Parked: surge, recon,
+  satellite floater.
+- **`LayerErrorBoundary`** (`map/LayerErrorBoundary.tsx`): every feature
+  layer renders inside one. A malformed product response once unmounted
+  the ENTIRE app; now the broken layer drops out and reports its source
+  red. Keep it.
 
 - **Volcanoes** (Phase 10, 16): GVP database via proxy, USGS alert levels,
   VAAC FV* bulletins parsed in-browser (`features/volcanoes/vaa.ts`) into
@@ -92,7 +112,9 @@ per-slice detail. Working tree clean. Tests: 279 green (`npm test`).
 - Mobile pass (11c): sheet yields to fly-to, steppers on phones, labeled
   layer menu.
 
-**Next: everything hurricane** (README roadmap item 8) — see the queue.
+**Next**: the board in the queue below — surge/recon/floater when their
+pass is due; otherwise mobile sheet drag-to-resize, the IEM mesonet
+obs-blend tier, a shipped zone atlas, wind feel-tuning.
 
 ## Where things stood (2026-08-15)
 
@@ -502,21 +524,16 @@ installs and update flow in a real Brave/Chrome window.
    quality, MRMS totals, volcanoes. Still open in the cluster: real RAOB
    soundings (adapter must return the existing `Sounding` shape; needs
    `/proxy/raob`), gridded severe/winter fields, ob-vs-model delta.
-9. **Everything hurricane — NEXT** (README roadmap item 8) — a tropical
-   mode in the same sense as the Chase HUD. Nearly all of it is free and
-   keyless from NHC. Core: active storms as selectable objects, track +
-   cone, 34/50/64 kt wind radii (which is what gives arrival time at the
-   home location), tropical watches/warnings, storm surge. Then
-   spaghetti/ensemble tracks, recon HDOB and dropsondes, a satellite
-   floater that follows the storm, and an intensity trace. Probe first:
-   NHC CurrentStorms.json, the NOAA tropical ArcGIS MapServer (GeoJSON
-   queries), ATCF a/b-decks on ftp.nhc.noaa.gov (CORS?). Two things to
-   settle before code: whether it is a mode or layers that appear when
-   storms are active, and how the 6-hourly advisory cadence sits on the
-   timeline. Two things to get right rather than fast: the cone shows where
-   the *centre* may go, not where the effects reach, and surge is the layer
-   most likely to be read as a promise. Reuse: shared feeds, presets,
-   legends slot, panel fly-to, zone-alert outlines for coastal watches.
+9. **Everything hurricane — CORE DONE** (README roadmap item 8; SLICES
+   Phase 21). Layers + preset + panel section, not a mode. Left, each
+   needing its own careful pass: **storm surge / inundation** (the map
+   service has "Inundation" and "Tidal Mask" per slot — decide what the
+   product claims before drawing it; it is the layer most likely to be read
+   as a promise), **recon** HDOB/dropsondes, **satellite floater**. Data
+   facts not to re-derive: the batch zone endpoint has no geometry; the
+   MapServer 400s for a wrong TileMatrixSet-style layer id; arrival
+   isochrones are POLYLINES labelled "Mon 8 am" ~6 h apart; a-deck is
+   7.6 MB per storm.
 10. Deferred science: virtual-temp CAPE correction, interactive parcel drag,
    radiosonde overlay, ML/MU parcels, dProg/dt, historical archive mode.
 

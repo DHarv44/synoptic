@@ -68,6 +68,7 @@ desktop and mobile, in dark or light.
 | Aviation hazards | SIGMETs (domestic + international volcanic ash), PIREPs | ✅ |
 | SPC | Day 1–3 outlooks, watch boxes, mesoscale discussions with text | ✅ |
 | Volcanoes | Smithsonian database, USGS alert levels, VAAC ash advisories parsed to observed + forecast polygons, plume-top history, nearby quakes on the card | ✅ |
+| Tropical cyclones | NHC active storms: track, cone (with its honesty card), category-coloured forecast points, 34/50/64 kt wind radii that follow the clock, TS-wind arrival lines and arrival at home, coastal watches/warnings, intensity trace, discussion, opt-in model tracks; per-part opacities | ✅ |
 | Precip totals | MRMS 1–72 h accumulations; zero accumulation transparent | ✅ |
 | Buoys + river gauges | NDBC marine obs; NWPS river stages | ✅ |
 | My location | Locate button → centre/zoom, remembered as home | ✅ |
@@ -82,7 +83,7 @@ desktop and mobile, in dark or light.
 | Analysis dock | Location / Nearby / Radar / Settings / Help — one scrolling column of collapsible sections | ✅ |
 | Section expansion | Collapse/expand per section, persisted | ✅ |
 | Settings | Registry-generated, searchable, with per-feature and global reset | ✅ |
-| Scene presets | Built-ins cut by task (Severe ops, Synoptic, Surface chart, Aviation, Volcanic, Marine, Hydro) plus user-saved scenes | ✅ |
+| Scene presets | Built-ins cut by task (Severe ops, Synoptic, Surface chart, Aviation, Volcanic, Tropical, Marine, Hydro) plus user-saved scenes; warnings and active storms never turn off with a scene change | ✅ |
 | Timeline | A steppable clock (day / hour / 10 min) with a fine 6-hour scrubber; play loops the last hour live or sweeps forward from history; `#t=` deep links | ✅ |
 | Loop prefetch | Radar and satellite frames warmed on play, gated on the slowest, so the first pass runs as smoothly as the rest | ✅ |
 | Legends | Wind speed key in the user's unit; model-field product label with run and forecast hour | ✅ |
@@ -430,50 +431,59 @@ desktop and mobile, in dark or light.
    - **Playback controls** distinct from live scrubbing: loop a window, step
      by volume, and export a frame or animation for sharing.
 
-8. **Everything hurricane** *(next up, 2026-09-06)* — a tropical mode, in the
-   way the Chase HUD is a severe-convective mode: the same map and timeline,
-   refocused on a storm rather than a county. Almost all of it is free and
-   keyless from the National Hurricane Center, and several pieces reuse
-   machinery that already exists here (feeds, presets, legends, panel
-   fly-to, the steppable clock, zone-alert outlines for coastal watches).
+8. **Everything hurricane** *(core shipped 2026-09-06; SLICES.md Phase 21)* —
+   built and verified live against three East Pacific storms (Marie,
+   Lowell, Karina), all free and keyless from the National Hurricane Center:
+   `CurrentStorms.json` for the list, NOAA's tropical map service for
+   per-storm GeoJSON products, and the ATCF decks for history and guidance —
+   all through the proxy, since none of them allow browser origins.
 
-   The core, in rough dependency order:
-   - **Active storms as first-class objects** — a list with position,
-     intensity (Vmax/MSLP), category, motion and advisory age, each selectable
-     to focus the map. NHC publishes current storms as GIS products; the
-     advisory cycle is 6-hourly with intermediate updates, which the timeline
-     already knows how to represent.
-   - **Track and cone** — past track, forecast points labelled by time and
-     intensity, and the forecast cone. Worth stating plainly in the UI that
-     the cone is where the *centre* may go, not where the effects reach —
-     that misreading is the single most consequential one in tropical
-     forecasting, and a display that doesn't address it is part of the problem.
-   - **Wind radii** — 34/50/64 kt quadrants from the forecast/advisory, which
-     are what actually answer "when do conditions get bad here". Combined with
-     the home location from *Make it personal*, this gives arrival time of
-     tropical-storm-force winds at a specific place.
-   - **Watches and warnings** — coastal segments. The alerts layer already
-     renders NWS polygons; tropical products need their own styling and
-     ordering so a hurricane warning doesn't read like a routine advisory.
-   - **Storm surge** — potential inundation. The highest-value and highest-risk
-     layer in the whole suite: it is what kills people, and it is the easiest
-     to render misleadingly. Needs a careful pass on what the product does and
-     does not claim before it ships.
+   **Shipped:**
+   - **Active storms as first-class objects** ✅ — a Tropical section in
+     Nearby: category dot, Vmax/MSLP in your units, motion, advisory number
+     and time; click flies to the storm and opens its details. Summary reads
+     "3 active · Lowell Cat 3".
+   - **Track and cone** ✅ — past track dashed, forecast track with
+     Saffir-Simpson-coloured points labelled by NHC's own date labels, the
+     current position named with its category, and the cone as a pale wash
+     whose **card says what it is and is not**: centre-track uncertainty,
+     not storm size.
+   - **Wind radii that follow the clock** ✅ — 34/50/64 kt quadrants per
+     forecast hour; the timeline picks the set valid at its hour, the last
+     set beyond +72 h rather than an invented one.
+   - **Arrival of tropical-storm-force winds** ✅ — NHC's isochrones
+     (earliest dashed, most likely solid, labelled), and for the home
+     point "TS-force winds at home ≈ Mon 8 am · earliest Sun 8 pm" from the
+     nearest labelled line within 120 km (about ±6 h from measured spacing);
+     nothing outside the drawn area.
+   - **Watches and warnings** ✅ — coastal segments above the labels, NHC's
+     colours, warnings solid and watches dashed. Verified on Lowell's
+     Hawaiian Islands watches.
+   - **Tropical preset** ✅ — GeoColor, worldwide radar, surface wind, buoys
+     under the storms. The storm layer is not a scene feature (like alerts),
+     so a hurricane never disappears with a preset change.
+   - **Intensity history** ✅ — a Vmax sparkline over the storm's life from
+     the best track, peak and current, in the expanded row.
+   - **Model tracks** ✅ (opt-in) — the a-deck trimmed server-side to the
+     latest run and a curated model set; official heavier and on top; the
+     legend says "spread is not probability".
+   - **Forecast discussion** ✅ — the forecaster's words, verbatim.
+   - **Opacity** ✅ — overall plus per-part (cone, radii, arrival, track,
+     watches, models).
 
-   Then the analysis layers:
-   - **Spaghetti / ensemble tracks** from ATCF a-deck guidance, with the
-     honest caveat that model spread is not probability.
-   - **Recon** — aircraft HDOB traces and dropsondes, the only direct
-     observations inside the core.
-   - **Satellite floater** — the existing GIBS layer retargeted to follow the
-     storm, with IR and visible loops.
-   - **Intensity history** — a Vmax/MSLP trace over the storm's life, which is
-     the meteogram in a different coordinate system.
+   **Parked for their own careful pass:**
+   - **Storm surge** — potential inundation. The highest-value and
+     highest-risk layer in the whole suite: it is what kills people, and it
+     is the easiest to render misleadingly. The map service carries it;
+     what it does and does not claim needs settling before it ships.
+   - **Recon** — aircraft HDOB traces and dropsondes.
+   - **Satellite floater** — the GIBS layer retargeted to follow a storm.
 
-   Open questions: whether tropical is a *mode* (like the Chase HUD) or just
-   layers that appear when storms are active; how the timeline handles the
-   6-hourly advisory cadence against continuous radar; and how to present
-   forecast uncertainty without either burying it or overstating it.
+   The open questions resolved: tropical is **layers plus a preset plus a
+   panel section**, not a mode; the 6-hourly cadence sits on the timeline
+   as nearest-valid-at-or-before, with the panel stating the advisory
+   number and time; uncertainty is shown where NHC draws it (cone, radii,
+   isochrones) with the cards and legend saying what each means.
 
 9. **Meteorological views — the synoptic gap** *(largely shipped; slices in
    SLICES.md Phases 8–19)*. The app was deep at storm scale and thin at
@@ -531,7 +541,8 @@ All free; keyless where possible. RainViewer · Iowa Environmental Mesonet
 (NEXRAD mosaic, MRMS, SPC products) · NEXRAD Level 2 (Unidata/AWS Open Data) ·
 NWS API (alerts, zones) · Open-Meteo (forecast, pressure levels, ensembles, air
 quality, geocoding) · NASA GIBS · Blitzortung.org · aviationweather.gov · NOMADS
-GFS · WPC · NDBC · NWPS · Smithsonian Global Volcanism Program · USGS Volcano
+GFS · WPC · NDBC · NWPS · National Hurricane Center (storm list, tropical map
+service, ATCF decks, discussions) · Smithsonian Global Volcanism Program · USGS Volcano
 Hazards and Earthquake Hazards Programs · VAACs via NOAA tgftp · OpenFreeMap /
 OpenMapTiles / OpenStreetMap basemap. Attribution is displayed in-app, with a
 per-source catalog under Help. **Not a substitute for official warnings.**
