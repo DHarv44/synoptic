@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react'
 import { ActionIcon, Tooltip } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
-import { IconCurrentLocation, IconCurrentLocationOff } from '@tabler/icons-react'
+import { IconCurrentLocation } from '@tabler/icons-react'
 import { mapChromeStyle } from '@/ui/mapChrome'
 import { useCameraStore } from '@/map/cameraStore'
 import { useHome } from '@/core/home/store'
@@ -12,9 +12,20 @@ const HOME_ZOOM = 9
 /**
  * Centres the map on the user and remembers where that is. The position is
  * kept locally and only ever leaves as the coordinates of a forecast
- * request — the same thing a click on the map already does.
+ * request — the same thing a click on the map already does. The icon is
+ * the plain locate glyph either way (a crossed-out one read as "disabled");
+ * it takes the accent colour once a location is known.
  */
-export function LocateButton({ size = 34, style }: { size?: number; style?: CSSProperties }) {
+export function LocateButton({
+  size = 34,
+  floating = true,
+  style,
+}: {
+  size?: number
+  /** Absolutely positioned by `style` (desktop corner) or laid out by a parent (mobile column). */
+  floating?: boolean
+  style?: CSSProperties
+}) {
   const [busy, setBusy] = useState(false)
   const home = useHome((s) => s.point)
 
@@ -62,17 +73,16 @@ export function LocateButton({ size = 34, style }: { size?: number; style?: CSSP
         onClick={locate}
         style={{
           ...mapChromeStyle,
-          position: 'absolute',
-          zIndex: 6,
+          ...(floating ? { position: 'absolute', zIndex: 6 } : {}),
           borderRadius: size / 2,
           ...style,
         }}
       >
-        {home ? (
-          <IconCurrentLocation size={Math.round(size * 0.55)} stroke={1.6} />
-        ) : (
-          <IconCurrentLocationOff size={Math.round(size * 0.55)} stroke={1.6} />
-        )}
+        <IconCurrentLocation
+          size={Math.round(size * 0.55)}
+          stroke={1.6}
+          style={home ? { color: 'var(--mantine-primary-color-filled)' } : undefined}
+        />
       </ActionIcon>
     </Tooltip>
   )

@@ -97,6 +97,12 @@ export function MapView() {
     }
     map.on('moveend', publishBounds)
     map.on('load', publishBounds)
+    // The compass follows the gesture, not just its end.
+    const publishOrientation = (): void =>
+      useMapView.getState().setOrientation(map.getBearing(), map.getPitch())
+    map.on('rotate', publishOrientation)
+    map.on('pitch', publishOrientation)
+    map.on('load', publishOrientation)
     // Tile/source loading is reported by the map, not by fetchJson.
     const setBusy = (busy: boolean) => () => useHealth.getState().setMapBusy(busy)
     map.on('dataloading', setBusy(true))

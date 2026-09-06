@@ -112,9 +112,20 @@ per-slice detail. Working tree clean. Tests: 299 green (`npm test`).
 - Mobile pass (11c): sheet yields to fly-to, steppers on phones, labeled
   layer menu.
 
+- **Mobile pass 3** (Phase 22): the sheet drags (`shell/useSheetDrag.ts`
+  + pure `sheetSnap.ts`, tested — live height, nearest detent, flick one
+  further, 6 px threshold so taps stay taps, the click after a drag is
+  swallowed on the root). The floating row of three round buttons became
+  `map/MobileMapControls.tsx`: a right-edge column of locate, a compass
+  (`map/CompassButton.tsx`, hidden while north-up and flat, needle follows
+  `useMapView.bearing` which MapView publishes on `rotate`/`pitch`) and
+  layers. Legends wrap beside the column instead of running under it.
+  Browser-pane trap: mobile emulation times out real drags — drive
+  `useSheetDrag` with synthesized `PointerEvent`s on the tab bar / window.
+
 **Next**: the board in the queue below — surge/recon/floater when their
-pass is due; otherwise mobile sheet drag-to-resize, the IEM mesonet
-obs-blend tier, a shipped zone atlas, wind feel-tuning.
+pass is due; otherwise the IEM mesonet obs-blend tier, a shipped zone
+atlas, wind feel-tuning.
 
 ## Where things stood (2026-08-15)
 
@@ -468,9 +479,9 @@ installs and update flow in a real Brave/Chrome window.
      switch, Esc), deferred polish (alert ticker, `.pal` tables, layer
      re-ordering, globe projection restore). Zone-alert geometry resolves on
      demand now; a shipped zone atlas would do it wholesale.
-   - **Mobile**: two passes done (bottom sheet, tab bar, labeled layer
-     menu, steppers, sheet-yields-to-fly-to). Left: drag-to-resize the
-     sheet, a mobile "Data sources" entry, a radar-bench touch pass.
+   - **Mobile**: three passes done (bottom sheet, tab bar, labeled layer
+     menu, steppers, sheet-yields-to-fly-to, drag-to-resize, control
+     column). Left: a mobile "Data sources" entry, a radar-bench touch pass.
 3. **"Make it personal" — DONE** (location button, forecast panels, warning
    notifications, verdict line, model confidence). Where the last two live:
    - `forecast/characterize.ts` — pure; returns tokens (`{timeMs}`,

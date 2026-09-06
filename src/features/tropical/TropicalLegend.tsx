@@ -29,7 +29,8 @@ export function TropicalLegend() {
   return (
     <Paper withBorder radius="sm" px={8} py={4} style={{ ...mapChromeStyle, pointerEvents: 'auto' }}>
       <Stack gap={3}>
-        <Group gap={6} wrap="nowrap">
+        {/* Rows wrap on a phone; each dot stays glued to its label. */}
+        <Group gap={6} style={{ rowGap: 2 }}>
           <Text size="xs" c="dimmed" lh={1.2}>
             Cyclone
           </Text>
@@ -51,7 +52,7 @@ export function TropicalLegend() {
           ))}
         </Group>
         {showRadii && (
-          <Group gap={6} wrap="nowrap">
+          <Group gap={6} style={{ rowGap: 2 }}>
             <Text size="xs" c="dimmed" lh={1.2}>
               Winds
             </Text>
@@ -82,7 +83,7 @@ export function TropicalLegend() {
           </Text>
         )}
         {hasWw && (
-          <Group gap={6} wrap="nowrap">
+          <Group gap={6} style={{ rowGap: 2 }}>
             <Text size="xs" c="dimmed" lh={1.2}>
               Coast
             </Text>

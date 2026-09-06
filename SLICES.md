@@ -626,3 +626,32 @@ watches/warnings + Tropical preset; H4 intensity trace (b-deck), spaghetti
   from the live Marie decks and discussion.
 Parked with their own pass: storm surge / inundation (the layer most
 likely to be read as a promise), recon HDOB/dropsondes, satellite floater.
+
+## Phase 22 — Mobile pass 3: drag the sheet, fix the buttons (2026-09-06) user-requested ✅
+
+- [x] **Drag-to-resize.** `shell/sheetSnap.ts` (pure, 9 tests) holds the
+  three detents once — as CSS for resting and as pixels for the drag — and
+  decides where a release settles: nearest detent, or one further in the
+  direction of a flick (> 0.4 px/ms over the last 100 ms), past whichever
+  detent the finger is still within 24 px of. `shell/useSheetDrag.ts` does
+  the pointer work with window listeners: 6 px before a press counts as a
+  drag (so the tab bar still taps), live height on the root while the
+  finger is down (the panel body is memoised so those frames cost
+  nothing), and the click a drag leaves behind is swallowed on the root in
+  the capture phase for one task. The header grew a grab pill; the tab bar
+  drags too, so the collapsed sheet opens with a pull. Verified with
+  synthesized pointer events (the pane's mobile emulation times out real
+  drags): follows the finger, slow release → half, flick up → full, flick
+  down → half, taps still switch tabs.
+- [x] **The three round buttons** (user-caught: "they don't make sense
+  there"). A horizontal strip hovering mid-map over the playback bar: a
+  crossed-out pin that read "location disabled", a target glyph for
+  "north up" that means nothing on a flat north-up map, and a stack that
+  doubled the top bar's. Now `map/MobileMapControls.tsx`: a right-edge
+  column the way phone maps do it — locate nearest the thumb with the
+  plain glyph (accent-coloured once a location is known), a **compass**
+  (`map/CompassButton.tsx`) that exists only while the map is rotated or
+  tilted, needle following `useMapView.bearing` (MapView now publishes
+  bearing/pitch on `rotate`/`pitch`, not just moveend), and layers on top
+  so its labelled menu opens over nothing but map. Legends sit beside the
+  column with a max width and their rows wrap. Desktop untouched.

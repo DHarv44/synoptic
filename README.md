@@ -141,8 +141,11 @@ desktop and mobile, in dark or light.
    control; map chrome is translucent with a user-adjustable opacity; a
    loading indicator reports both API fetches and tile loads; times follow a
    local/UTC preference (local by default). **Mobile** drops the rail for a
-   bottom tab bar with three panel heights, and the layers button expands
-   into a labeled, scrolling menu. The **radar bench left the map**: its
+   bottom tab bar with a sheet you drag (it follows the finger and snaps to
+   peek, half or full; a flick goes one stop further) and a right-edge
+   column of map controls the way phone maps do it — locate, a compass
+   that only appears while the map is turned, and layers expanding into a
+   labeled, scrolling menu. The **radar bench left the map**: its
    controls now lead the Radar panel where each can be labelled, with ↑/↓
    stepping tilts so walking a storm needs no panel, a searchable picker for
    all 159 WSR-88D sites, a button to centre the map on the chosen radar, and
@@ -260,11 +263,14 @@ desktop and mobile, in dark or light.
      panel heights, full-width playback, relocated radar bench, UTC-only
      clock), and a second pass fixed the sheet covering its own fly-to
      target, put the steppable clock on phones, and replaced the icon strip
-     with a labeled scrolling layer menu. Remaining: **drag-to-resize** the
-     panel with momentum and snap points (tap-to-cycle only today — needs
-     hand-rolled pointer handling or a small dep like `vaul`), a "Data
-     sources" entry to replace the footer that mobile hides, and a touch
-     pass on the radar bench. This is the groundwork the Chase HUD builds on.
+     with a labeled scrolling layer menu. A third pass made the sheet
+     **draggable** (hand-rolled pointer handling: live height, snap to the
+     nearest detent, flick goes one further, taps stay taps) and replaced
+     the floating row of three round buttons with a **right-edge control
+     column** (locate, compass only while rotated, layers). Remaining: a
+     "Data sources" entry to replace the footer that mobile hides, and a
+     touch pass on the radar bench. This is the groundwork the Chase HUD
+     builds on.
 3. **Make it personal** ✅ — shipped. The instrument now knows where you
    are and what that means for you:
    - **My location** ✅ — a locate button on the map centers and zooms to you,

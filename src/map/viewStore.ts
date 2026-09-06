@@ -6,13 +6,21 @@ export type Bbox = [number, number, number, number]
 
 interface ViewState {
   bounds: Bbox | null
+  /** Degrees clockwise from north-up; 0 with pitch 0 means the compass can hide. */
+  bearing: number
+  pitch: number
   setBounds: (b: Bbox) => void
+  setOrientation: (bearing: number, pitch: number) => void
 }
 
-/** Current map viewport bounds (updated on moveend by MapView). */
+/** Current map viewport: bounds on moveend, orientation live while rotating. */
 export const useMapView = create<ViewState>((set) => ({
   bounds: null,
+  bearing: 0,
+  pitch: 0,
   setBounds: (bounds) => set({ bounds }),
+  setOrientation: (bearing, pitch) =>
+    set((s) => (s.bearing === bearing && s.pitch === pitch ? s : { bearing, pitch })),
 }))
 
 export function bboxIntersects(a: Bbox, b: Bbox): boolean {
