@@ -1,4 +1,5 @@
 import type { AlertFeature } from '@/core/data/nws/alerts'
+import { polygonsOf } from '@/core/data/nws/zones'
 import type { HomePoint } from '@/core/home/store'
 
 // Severity ranking moved to core/data/nws/severity — both this feature and
@@ -36,10 +37,16 @@ export function pointInPolygon(coordinates: number[][][], lon: number, lat: numb
   return true
 }
 
-/** Active alerts whose polygon covers the point, severest first. */
+/**
+ * Active alerts whose geometry covers the point, severest first. A storm
+ * alert is one polygon; a resolved zone alert is a collection of them, and
+ * the point is covered if any zone contains it.
+ */
 export function alertsAtPoint(alerts: AlertFeature[], point: HomePoint): AlertFeature[] {
   return alerts.filter(
-    (a) => a.geometry !== null && pointInPolygon(a.geometry.coordinates, point.lon, point.lat),
+    (a) =>
+      a.geometry !== null &&
+      polygonsOf(a.geometry).some((p) => pointInPolygon(p.coordinates, point.lon, point.lat)),
   )
 }
 

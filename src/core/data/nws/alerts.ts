@@ -1,5 +1,5 @@
 import type { SourceRef } from '@/core/data/types'
-import type { Bbox } from '@/map/viewStore'
+import { geometryBbox, type Bbox } from '@/map/viewStore'
 
 export const NWS: SourceRef = { id: 'nws-alerts', label: 'NWS Alerts' }
 
@@ -7,7 +7,13 @@ export const ALERTS_URL = 'https://api.weather.gov/alerts/active?status=actual'
 
 export interface AlertFeature {
   id: string
-  geometry: { type: 'Polygon'; coordinates: number[][][] } | null
+  /**
+   * Storm-based alerts carry a Polygon from the feed. Zone-based ones carry
+   * null until their zones are resolved on demand, after which this holds
+   * the zones' polygons as a collection and `zoneResolved` is set.
+   */
+  geometry: GeoJSON.Geometry | null
+  zoneResolved?: boolean
   properties: {
     event: string
     severity: 'Extreme' | 'Severe' | 'Moderate' | 'Minor' | 'Unknown'
@@ -15,6 +21,8 @@ export interface AlertFeature {
     areaDesc: string
     expires: string
     description?: string
+    /** Zone URLs (api.weather.gov/zones/…) the alert applies to. */
+    affectedZones?: string[]
   }
 }
 
@@ -104,26 +112,12 @@ export function alertCategory(event: string): AlertCategory {
   return 'other'
 }
 
-/** Polygon-bearing alerts only (zone-referenced alerts render in the panel list). */
+/** Alerts that can be drawn: storm polygons, plus zone alerts once resolved. */
 export function withGeometry(features: AlertFeature[]): AlertFeature[] {
-  return features.filter((f) => f.geometry?.type === 'Polygon')
+  return features.filter((f) => f.geometry !== null)
 }
 
-/** Bounding box of an alert's polygon, or null for zone-referenced alerts. */
+/** Bounding box of an alert's geometry, or null while it is unmapped. */
 export function alertBbox(a: AlertFeature): Bbox | null {
-  const rings = a.geometry?.coordinates
-  if (!rings) return null
-  let w = 180
-  let s = 90
-  let e = -180
-  let n = -90
-  for (const ring of rings) {
-    for (const [lon, lat] of ring) {
-      w = Math.min(w, lon)
-      e = Math.max(e, lon)
-      s = Math.min(s, lat)
-      n = Math.max(n, lat)
-    }
-  }
-  return [w, s, e, n]
+  return geometryBbox(a.geometry)
 }

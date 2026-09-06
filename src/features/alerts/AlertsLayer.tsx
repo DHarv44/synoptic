@@ -42,6 +42,9 @@ export function AlertsLayer() {
           color: alertColor(a.properties.event),
           event: a.properties.event,
           weight: alertWeight(a.properties.event),
+          // Zone outlines are administrative boundaries, not the storm's
+          // shape — drawn dashed so nobody reads a county line as a track.
+          zone: a.zoneResolved === true,
           // Click-card fields — the popup explains the polygon in place.
           headline: a.properties.headline ?? '',
           areaDesc: a.properties.areaDesc,
@@ -87,6 +90,7 @@ export function AlertsLayer() {
           id: 'alerts-line',
           type: 'line',
           source: 'alerts',
+          filter: ['!=', ['get', 'zone'], true],
           layout: { 'line-join': 'round' },
           paint: {
             'line-color': ['get', 'color'],
@@ -95,8 +99,25 @@ export function AlertsLayer() {
         },
         'alerts-outline',
       )
+      // line-dasharray is not data-driven, hence a second outline layer.
+      addDataLayer(
+        map,
+        {
+          id: 'alerts-zone-line',
+          type: 'line',
+          source: 'alerts',
+          filter: ['==', ['get', 'zone'], true],
+          layout: { 'line-join': 'round' },
+          paint: {
+            'line-color': ['get', 'color'],
+            'line-width': strokeWidth(),
+            'line-dasharray': [3, 2],
+          },
+        },
+        'alerts-outline',
+      )
       return () => {
-        for (const id of ['alerts-fill', 'alerts-casing', 'alerts-line']) {
+        for (const id of ['alerts-fill', 'alerts-casing', 'alerts-line', 'alerts-zone-line']) {
           if (map.getLayer(id)) map.removeLayer(id)
         }
         if (map.getSource('alerts')) map.removeSource('alerts')

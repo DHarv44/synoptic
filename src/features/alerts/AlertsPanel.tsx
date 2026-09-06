@@ -2,22 +2,42 @@ import { useState } from 'react'
 import { Badge, Group, Paper, Stack, Switch, Text } from '@mantine/core'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useCameraStore } from '@/map/cameraStore'
-import type { Bbox } from '@/map/viewStore'
+import { geometryBbox, type Bbox } from '@/map/viewStore'
 import { alertColor, type AlertFeature } from '@/core/data/nws/alerts'
 import { useVisibleAlerts } from '@/features/alerts/useVisibleAlerts'
+import { useZoneAlerts } from '@/features/alerts/zoneStore'
 
 const MAX_LISTED = 40
 
 function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
   const requestFitBounds = useCameraStore((s) => s.requestFitBounds)
   const fmt = useTimeFormat()
+  const resolve = useZoneAlerts((s) => s.resolve)
+  const pending = useZoneAlerts((s) => s.pending[a.id])
+  const failed = useZoneAlerts((s) => s.failed[a.id])
+  const zones = a.properties.affectedZones?.length ?? 0
+
+  // Mapped: fly there. Unmapped with zones: fetch the outlines, then fly.
+  const onClick = (): void => {
+    if (bbox) {
+      requestFitBounds(bbox)
+      return
+    }
+    if (zones === 0 || pending) return
+    void resolve(a).then((g) => {
+      const b = g ? geometryBbox(g) : null
+      if (b) requestFitBounds(b)
+    })
+  }
+  const clickable = bbox !== null || zones > 0
+
   return (
     <Paper
       withBorder
       p={6}
       radius="sm"
-      onClick={bbox ? () => requestFitBounds(bbox) : undefined}
-      style={bbox ? { cursor: 'pointer' } : undefined}
+      onClick={clickable ? onClick : undefined}
+      style={clickable ? { cursor: 'pointer' } : undefined}
     >
       <Group gap={6} wrap="nowrap" align="flex-start">
         <div
@@ -43,6 +63,15 @@ function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
           <Text size="xs" c="dimmed" ff="monospace">
             until {fmt.dateTime(Date.parse(a.properties.expires))}
           </Text>
+          {bbox === null && zones > 0 && (
+            <Text size="xs" c={failed ? 'red' : 'dimmed'}>
+              {pending
+                ? `outlining ${pending.done}/${pending.total} zones…`
+                : failed
+                  ? failed
+                  : `${zones} zone${zones === 1 ? '' : 's'} · click to outline`}
+            </Text>
+          )}
         </div>
       </Group>
     </Paper>
@@ -52,7 +81,8 @@ function AlertCard({ a, bbox }: { a: AlertFeature; bbox: Bbox | null }) {
 /**
  * Active NWS alerts, most severe first, filtered to the current viewport.
  * Click a mapped (polygon) alert to zoom the map to it. Zone-based alerts
- * have no polygon — they're behind the "unmapped" switch and not clickable.
+ * have no polygon in the feed — they sit behind the "unmapped" switch, and
+ * a click fetches their zone outlines (~50 KB each, cached) and then flies.
  */
 export function AlertsPanel() {
   const [showUnmapped, setShowUnmapped] = useState(false)

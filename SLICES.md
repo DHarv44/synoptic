@@ -489,3 +489,24 @@ match, remove).
   deleted both); random tail added, pinned by test.
 Deferred: seeding from VAAC web archives (HTML, no CORS — would need a proxy
 scraper; parked with SO2).
+
+## Phase 17 — Zone outlines for unmapped alerts (2026-09-05) ✅ probe-first
+
+- **Probes**: 172 of 191 active alerts are zone-based, across 788 distinct
+  zones. api.weather.gov/zones/{type}/{id} is CORS-open and cacheable but a
+  zone averages ~52 KB of GeometryCollection (134 KB for a coastal one), so
+  wholesale resolution is ~40 MB — out. The batch endpoint ignores
+  include_geometry (0 geometries in 131 features) and carries no centroid.
+- **Design**: ON DEMAND. Clicking an unmapped card fetches that alert's
+  zones (4 lanes, IndexedDB cache `nws-zone:*` 14 days, progress on the
+  card), unions their polygons into a GeometryCollection, attaches it to
+  the alert (useFilteredAlerts → attachZones) so it draws, counts as "in
+  view", and flies like any storm polygon. Zone outlines draw DASHED
+  (second line layer — dasharray is not data-driven): a county line is not
+  a storm's shape. Offline (fixture) says "unavailable" honestly.
+- AlertFeature.geometry generalised to any GeoJSON geometry; alertBbox now
+  uses geometryBbox; home-location matching tests every polygon.
+Verified live: Extreme Heat Warning (3 zones) → 12 zone polygons dashed on
+the map, camera fit to Fort Smith, card hint cleared. 5 tests.
+Deferred: a shipped, simplified zone atlas (NWS shapefiles → TopoJSON via
+a build step) would make every zone alert mappable at once for ~1–2 MB.
