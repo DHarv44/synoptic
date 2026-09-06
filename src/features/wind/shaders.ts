@@ -1,5 +1,43 @@
 /** GLSL for the wind particle system (WebGL2). */
 
+/**
+ * Bicubic (B-spline, 4 bilinear taps) sample of the wind texture, decoded
+ * to m/s. Bilinear on a 0.5° grid is fine at continental zoom, but zoomed
+ * in one texel spans hundreds of pixels and each bilinear patch is a saddle
+ * — the colour ramp's low-speed steps turned those saddles into hard
+ * diagonal edges across the whole view, and particles marched in lockstep
+ * along them. Cubic weights give a C1-continuous field; the slight blur is
+ * a feature at this scale, since the data has no detail finer than the grid.
+ */
+const WIND_SAMPLE = /* glsl */ `
+uniform sampler2D u_wind;    // RG8: u,v quantized
+uniform float u_windScale;   // int8 → m/s
+
+vec2 windAt(vec2 uv) {
+  vec2 size = vec2(textureSize(u_wind, 0));
+  vec2 texel = 1.0 / size;
+  vec2 p = uv * size - 0.5;
+  vec2 f = fract(p);
+  p = floor(p) + 0.5;
+  vec2 f2 = f * f;
+  vec2 f3 = f2 * f;
+  vec2 w0 = (1.0 - 3.0 * f + 3.0 * f2 - f3) / 6.0;
+  vec2 w1 = (4.0 - 6.0 * f2 + 3.0 * f3) / 6.0;
+  vec2 w2 = (1.0 + 3.0 * f + 3.0 * f2 - 3.0 * f3) / 6.0;
+  vec2 w3 = f3 / 6.0;
+  vec2 g0 = w0 + w1;
+  vec2 g1 = w2 + w3;
+  vec2 h0 = (w1 / g0) - 1.0;
+  vec2 h1 = (w3 / g1) + 1.0;
+  vec2 p0 = (p + h0) * texel;
+  vec2 p1 = (p + h1) * texel;
+  vec2 raw =
+    g0.y * (g0.x * texture(u_wind, vec2(p0.x, p0.y)).rg + g1.x * texture(u_wind, vec2(p1.x, p0.y)).rg) +
+    g1.y * (g0.x * texture(u_wind, vec2(p0.x, p1.y)).rg + g1.x * texture(u_wind, vec2(p1.x, p1.y)).rg);
+  return (raw * 2.0 - 1.0) * 127.0 * u_windScale;
+}
+`
+
 export const QUAD_VERT = /* glsl */ `#version 300 es
 in vec2 a_pos;
 out vec2 v_uv;
@@ -13,15 +51,25 @@ void main() {
 export const SIM_FRAG = /* glsl */ `#version 300 es
 precision highp float;
 uniform sampler2D u_state;   // RGBA32F: x = lon [0,1], y = lat [0,1], z = age
-uniform sampler2D u_wind;    // RG8: u,v quantized
-uniform float u_windScale;   // int8 → m/s
+${WIND_SAMPLE}
 uniform float u_dt;          // sim seconds per frame
 uniform float u_seed;
 in vec2 v_uv;
 out vec4 o_state;
 
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+// Integer hash (PCG). The usual fract(sin(dot(..)) * 43758.5453) took
+// arguments in the hundreds of thousands here, where GPU sin() collapses to
+// a coarse set of values — spawn positions fell on a lattice that read as
+// random across a continent and as evenly spaced vertical streaks once the
+// spawn box was under a degree wide.
+uint pcg(uint v) {
+  uint s = v * 747796405u + 2891336453u;
+  uint w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
+  return (w >> 22u) ^ w;
+}
+float hash(vec2 p, float salt) {
+  uvec2 q = uvec2(p * 65535.0);
+  return float(pcg(q.x ^ pcg(q.y ^ pcg(uint(salt))))) / 4294967295.0;
 }
 
 uniform vec2 u_spawnMin;  // equirect [0,1]²: view box origin (lon may wrap)
@@ -31,8 +79,7 @@ void main() {
   vec4 st = texture(u_state, v_uv);
   vec2 pos = st.rg;
   float age = st.b;
-  vec2 windRaw = texture(u_wind, pos).rg;           // 0..1
-  vec2 wind = (windRaw * 2.0 - 1.0) * 127.0 * u_windScale; // m/s
+  vec2 wind = windAt(pos); // m/s
 
   // Motion uses a compressed speed: direction and ordering are true, but a
   // 3 m/s breeze gets a visual floor so low levels draw streaks instead of
@@ -63,8 +110,8 @@ void main() {
 
   if (age >= 1.0 || outside || pos.y < 0.03 || pos.y > 0.97) {
     pos = vec2(
-      fract(u_spawnMin.x + u_spawnSpan.x * hash(v_uv * 371.3 + u_seed)),
-      clamp(u_spawnMin.y + u_spawnSpan.y * hash(v_uv * 913.7 + u_seed * 1.7), 0.03, 0.97)
+      fract(u_spawnMin.x + u_spawnSpan.x * hash(v_uv, u_seed)),
+      clamp(u_spawnMin.y + u_spawnSpan.y * hash(v_uv, u_seed + 7919.0), 0.03, 0.97)
     );
     age = fract(age) * 0.05; // reborn young, slightly staggered
   }
@@ -82,8 +129,7 @@ export const DRAW_VERT = /* glsl */ `#version 300 es
 precision highp float;
 uniform sampler2D u_state;
 uniform sampler2D u_statePrev;
-uniform sampler2D u_wind;
-uniform float u_windScale;
+${WIND_SAMPLE}
 uniform mat4 u_matrix;
 uniform float u_stateRes;
 out float v_speed;
@@ -106,13 +152,16 @@ void main() {
   vec2 uv = (vec2(mod(idx, u_stateRes), floor(idx / u_stateRes)) + 0.5) / u_stateRes;
   vec4 cur = texture(u_state, uv);
   vec4 prev = texture(u_statePrev, uv);
-  // A jump (respawn or antimeridian wrap) must not draw as a streak.
-  bool jumped = distance(cur.rg, prev.rg) > 0.02;
+  // A jump must not draw as a streak. Age only ever decreases at respawn,
+  // so a reset is the respawn signal at ANY zoom — the old distance test
+  // alone (0.02 of the world, 7°) missed every respawn once the view was
+  // narrower than that, and each one drew a line clear across the screen.
+  // The distance test stays for the antimeridian wrap.
+  bool jumped = cur.b < prev.b || distance(cur.rg, prev.rg) > 0.02;
   vec4 st = head || jumped ? cur : prev;
   v_age = cur.b;
 
-  vec2 windRaw = texture(u_wind, cur.rg).rg;
-  v_speed = length((windRaw * 2.0 - 1.0) * 127.0 * u_windScale);
+  v_speed = length(windAt(cur.rg));
 
   vec2 merc = project(st.rg);
   gl_Position = u_matrix * vec4(merc, 0.0, 1.0);
@@ -167,8 +216,7 @@ void main() {
  */
 export const FIELD_FRAG = /* glsl */ `#version 300 es
 precision highp float;
-uniform sampler2D u_wind;
-uniform float u_windScale;
+${WIND_SAMPLE}
 uniform mat4 u_matrixInv;
 uniform float u_opacity;
 in vec2 v_uv;
@@ -205,8 +253,7 @@ void main() {
   float latR = 2.0 * atan(exp((0.5 - merc.y) * 2.0 * PI)) - PI * 0.5;
   float lat01 = (degrees(latR) + 90.0) / 180.0;
   if (lat01 < 0.0 || lat01 > 1.0) discard;
-  vec2 windRaw = texture(u_wind, vec2(lon01, lat01)).rg;
-  float speed = length((windRaw * 2.0 - 1.0) * 127.0 * u_windScale);
+  float speed = length(windAt(vec2(lon01, lat01)));
   o_color = vec4(ramp(speed), u_opacity);
 }
 `

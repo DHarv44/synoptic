@@ -416,3 +416,21 @@ UI now reaches −48 h but most layers only have frames for the last hours.
   scrubbed. The counts came from the tab's cumulative console buffer left by
   the earlier satellite-switching session (GIBS out-of-footprint 404s, since
   bounded for GOES-East). Nothing to fix; recorded so nobody chases it again.
+
+## Phase 13 — Wind visuals zoomed in (2026-09-05) ✅ user-caught
+
+- **Streaks**: not respawn lines after all. Spawn positions came from the
+  classic fract(sin(dot(p,·))·43758.5453) hash with arguments in the
+  hundreds of thousands, where GPU sin() collapses to a coarse value set —
+  a spawn LATTICE. Across a continent it passed for random; with the spawn
+  box under a degree wide the same few x-values became evenly spaced
+  vertical columns, every particle in a column tracing one line. Replaced
+  with an integer PCG hash (no range problem). The respawn detector also
+  became age-based (age only decreases at respawn) — the 0.02-of-the-world
+  distance test was zoom-blind.
+- **Blocky**: bilinear on the 0.5° grid; zoomed in one texel spans hundreds
+  of pixels and each bilinear patch is a saddle the colour ramp's low-speed
+  steps rendered as hard diagonals across the view. All three shaders now
+  sample through one bicubic B-spline `windAt()` (4 bilinear taps). Option
+  left open: serve the native 0.25° grid (4× payload) for true extra detail.
+Verified z3.5/z6/z9 screenshots before and after; clean compile on reload.
