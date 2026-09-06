@@ -42,31 +42,34 @@ const LAYERS = [
   'tropical-ww-watch',
 ]
 
+/** Opacity groups a user can dim independently; each also obeys the overall. */
+type OpacityGroup = 'cone' | 'radii' | 'arrival' | 'track' | 'watchWarn' | 'models'
+
 /**
- * Each layer's designed opacity; the user's Opacity % scales all of them
- * together, so the stack fades as one product rather than piece by piece.
- * Symbol and circle layers carry two properties each.
+ * Each layer's designed opacity and its group. The effective value is
+ * base × overall × group, so the stack fades as one product by default
+ * and any part of it can be pulled back on its own.
  */
-const BASE_OPACITY: Array<[layer: string, prop: string, base: number]> = [
-  ['tropical-cone-fill', 'fill-opacity', 0.1],
-  ['tropical-cone-line', 'line-opacity', 0.75],
-  ['tropical-radii-fill', 'fill-opacity', 0.22],
-  ['tropical-radii-line', 'line-opacity', 0.9],
-  ['tropical-arrival-earliest', 'line-opacity', 0.8],
-  ['tropical-arrival-likely', 'line-opacity', 0.9],
-  ['tropical-arrival-labels', 'text-opacity', 1],
-  ['tropical-past', 'line-opacity', 1],
-  ['tropical-track', 'line-opacity', 1],
-  ['tropical-points', 'circle-opacity', 1],
-  ['tropical-points', 'circle-stroke-opacity', 1],
-  ['tropical-point-labels', 'text-opacity', 1],
-  ['tropical-current', 'circle-opacity', 1],
-  ['tropical-current', 'circle-stroke-opacity', 1],
-  ['tropical-current-labels', 'text-opacity', 1],
-  ['tropical-ww-casing', 'line-opacity', 0.5],
-  ['tropical-ww-warning', 'line-opacity', 1],
-  ['tropical-ww-watch', 'line-opacity', 1],
-  ['tropical-model-labels', 'text-opacity', 1],
+const BASE_OPACITY: Array<[layer: string, prop: string, base: number, group: OpacityGroup]> = [
+  ['tropical-cone-fill', 'fill-opacity', 0.1, 'cone'],
+  ['tropical-cone-line', 'line-opacity', 0.75, 'cone'],
+  ['tropical-radii-fill', 'fill-opacity', 0.22, 'radii'],
+  ['tropical-radii-line', 'line-opacity', 0.9, 'radii'],
+  ['tropical-arrival-earliest', 'line-opacity', 0.8, 'arrival'],
+  ['tropical-arrival-likely', 'line-opacity', 0.9, 'arrival'],
+  ['tropical-arrival-labels', 'text-opacity', 1, 'arrival'],
+  ['tropical-past', 'line-opacity', 1, 'track'],
+  ['tropical-track', 'line-opacity', 1, 'track'],
+  ['tropical-points', 'circle-opacity', 1, 'track'],
+  ['tropical-points', 'circle-stroke-opacity', 1, 'track'],
+  ['tropical-point-labels', 'text-opacity', 1, 'track'],
+  ['tropical-current', 'circle-opacity', 1, 'track'],
+  ['tropical-current', 'circle-stroke-opacity', 1, 'track'],
+  ['tropical-current-labels', 'text-opacity', 1, 'track'],
+  ['tropical-ww-casing', 'line-opacity', 0.5, 'watchWarn'],
+  ['tropical-ww-warning', 'line-opacity', 1, 'watchWarn'],
+  ['tropical-ww-watch', 'line-opacity', 1, 'watchWarn'],
+  ['tropical-model-labels', 'text-opacity', 1, 'models'],
 ]
 
 const RADII_COLOR_EXPR = [
@@ -97,6 +100,14 @@ export function TropicalLayer() {
   const showWw = useFeatureOption<boolean>('tropical', 'watchWarn')
   const showModels = useFeatureOption<boolean>('tropical', 'models')
   const opacity = useFeatureOption<number>('tropical', 'opacity')
+  const groupOpacity: Record<OpacityGroup, number> = {
+    cone: useFeatureOption<number>('tropical', 'coneOpacity'),
+    radii: useFeatureOption<number>('tropical', 'radiiOpacity'),
+    arrival: useFeatureOption<number>('tropical', 'arrivalOpacity'),
+    track: useFeatureOption<number>('tropical', 'trackOpacity'),
+    watchWarn: useFeatureOption<number>('tropical', 'watchWarnOpacity'),
+    models: useFeatureOption<number>('tropical', 'modelsOpacity'),
+  }
   const data = useTropical()
   useEffect(() => acquireTropicalFeed(), [])
   useEffect(() => acquireModelTracks(), [])
@@ -414,23 +425,26 @@ export function TropicalLayer() {
     [sources, radiiNow, models, showCone, showPast, showRadii, showArrival, showWw, showModels],
   )
 
+  const { cone: gCone, radii: gRadii, arrival: gArrival, track: gTrack, watchWarn: gWw, models: gModels } =
+    groupOpacity
   useMapLayer(
     (m) => {
-      const k = opacity / 100
-      for (const [layer, prop, base] of BASE_OPACITY) {
-        if (m.getLayer(layer)) m.setPaintProperty(layer, prop, base * k)
+      const overall = opacity / 100
+      const k = (g: OpacityGroup): number => (overall * groupOpacity[g]) / 100
+      for (const [layer, prop, base, group] of BASE_OPACITY) {
+        if (m.getLayer(layer)) m.setPaintProperty(layer, prop, base * k(group))
       }
       // The model lines carry a data-driven opacity (official heavier).
       if (m.getLayer('tropical-models')) {
         m.setPaintProperty('tropical-models', 'line-opacity', [
           'case',
           ['get', 'official'],
-          0.95 * k,
-          0.7 * k,
+          0.95 * k('models'),
+          0.7 * k('models'),
         ])
       }
     },
-    [opacity],
+    [opacity, gCone, gRadii, gArrival, gTrack, gWw, gModels],
   )
 
   return null

@@ -47,16 +47,22 @@ registerFeature({
       defaultValue: 100,
     },
     { kind: 'boolean', key: 'cone', label: 'Forecast cone', defaultValue: true },
+    { kind: 'number', key: 'coneOpacity', label: 'Cone opacity %', min: 10, max: 100, step: 5, defaultValue: 100 },
     { kind: 'boolean', key: 'windRadii', label: 'Wind radii (34/50/64 kt, follow the clock)', defaultValue: true },
+    { kind: 'number', key: 'radiiOpacity', label: 'Wind radii opacity %', min: 10, max: 100, step: 5, defaultValue: 100 },
     { kind: 'boolean', key: 'arrival', label: 'TS-wind arrival-time lines', defaultValue: true },
-    { kind: 'boolean', key: 'watchWarn', label: 'Coastal watches and warnings', defaultValue: true },
+    { kind: 'number', key: 'arrivalOpacity', label: 'Arrival lines opacity %', min: 10, max: 100, step: 5, defaultValue: 100 },
     { kind: 'boolean', key: 'pastTrack', label: 'Past track', defaultValue: true },
+    { kind: 'number', key: 'trackOpacity', label: 'Track & points opacity %', min: 10, max: 100, step: 5, defaultValue: 100 },
+    { kind: 'boolean', key: 'watchWarn', label: 'Coastal watches and warnings', defaultValue: true },
+    { kind: 'number', key: 'watchWarnOpacity', label: 'Watches/warnings opacity %', min: 10, max: 100, step: 5, defaultValue: 100 },
     {
       kind: 'boolean',
       key: 'models',
       label: 'Model tracks (spaghetti — spread is not probability)',
       defaultValue: false,
     },
+    { kind: 'number', key: 'modelsOpacity', label: 'Model tracks opacity %', min: 10, max: 100, step: 5, defaultValue: 100 },
   ],
 })
 
