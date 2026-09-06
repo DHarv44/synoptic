@@ -8,6 +8,7 @@ import {
   type UsgsNotice,
   type VolcanoQuake,
 } from '@/features/volcanoes/service'
+import { usePlumeHistory } from '@/features/volcanoes/plumeHistory'
 import type { VolcanicAshAdvisory } from '@/features/volcanoes/vaa'
 
 /** Ash advisories and US alert notices feed the layer, panel and summary. */
@@ -27,6 +28,12 @@ const usgsFeed = createSharedFeed<UsgsNotice[]>({
 
 export const acquireAdvisoryFeed = advisoryFeed.acquire
 export const acquireUsgsFeed = usgsFeed.acquire
+
+// Every advisory that arrives adds its plume top to the history — the feed
+// is the only place new bulletins enter, so this is the one hook needed.
+advisoryFeed.useData.subscribe((s) => {
+  if (s.data) usePlumeHistory.getState().record(s.data)
+})
 
 export function useAdvisories(): VolcanicAshAdvisory[] {
   return advisoryFeed.useData((s) => s.data) ?? []

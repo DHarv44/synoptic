@@ -10,6 +10,8 @@ import {
   type VolcanoStatus,
 } from '@/features/volcanoes/service'
 import { useAdvisories, useInspect } from '@/features/volcanoes/store'
+import { usePlumeSeries } from '@/features/volcanoes/plumeHistory'
+import { PlumeTrend } from '@/features/volcanoes/PlumeTrend'
 import type { MapPopupProps } from '@/map/popups/registry'
 
 const STATUS_TEXT: Record<string, string> = {
@@ -25,6 +27,7 @@ export function VolcanoPopup({ properties }: MapPopupProps) {
   const status = String(properties.status ?? 'quiet') as VolcanoStatus
   const number = typeof properties.number === 'number' ? properties.number : null
   const advisory = useAdvisories().find((a) => a.volcanoNumber === number)
+  const plume = usePlumeSeries(number)
   const lastYear = properties.lastEruptionYear
 
   const lat = typeof properties.lat === 'number' ? properties.lat : null
@@ -76,6 +79,7 @@ export function VolcanoPopup({ properties }: MapPopupProps) {
             VAAC {advisory.vaac}
             {advisory.issuedMs !== null && ` · issued ${fmt.hm(advisory.issuedMs)}`}
           </Text>
+          <PlumeTrend points={plume} />
         </>
       )}
       {!advisory && properties.synopsis !== '' && (

@@ -472,3 +472,20 @@ Verified live: saved "Pacific jet watch" → chip shows it, spec stored
 {graticule, level2, satellite ir-west, wind 250 + opacities}, delete
 removes it. 4 tests (capture minimality, `true` at defaults, round-trip
 match, remove).
+
+## Phase 16 — Plume-height history (2026-09-05) ✅
+
+- **plumeTopFl**: ERUPTION DETAILS ("VA TO FL500") or the top of the
+  observed cloud's level bands, whichever is higher; forecast bands are
+  predictions and stay out. Carried on every parsed advisory as `topFl`.
+- **usePlumeHistory** (persist `synoptic.plumes` v1): one point per
+  advisory issue time per volcano, 7-day horizon, deduped on re-poll, fed by
+  a subscription on the advisory feed. Honest limit: tgftp exposes only the
+  latest bulletin per slot, so there is no archive to seed from — the series
+  builds while SYNOPTIC runs and persists across sessions.
+- **PlumeTrend**: card line "Plume top FL500 ↑ from FL300 at 05:30" and a
+  compact "FL500 ↑" on panel rows, sparkline once ≥2 points. 9 tests.
+- Also fixed: user-preset ids collided within one millisecond (deleting one
+  deleted both); random tail added, pinned by test.
+Deferred: seeding from VAAC web archives (HTML, no CORS — would need a proxy
+scraper; parked with SO2).

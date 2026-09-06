@@ -5,6 +5,8 @@ import { useCameraStore } from '@/map/cameraStore'
 import { pointsBbox } from '@/map/viewStore'
 import { STATUS_COLORS } from '@/features/volcanoes/service'
 import { acquireAdvisoryFeed, acquireUsgsFeed, useAdvisories, useUsgsNotices } from '@/features/volcanoes/store'
+import { usePlumeSeries } from '@/features/volcanoes/plumeHistory'
+import { PlumeTrend } from '@/features/volcanoes/PlumeTrend'
 import type { VolcanicAshAdvisory } from '@/features/volcanoes/vaa'
 
 function AdvisoryRow({ advisory }: { advisory: VolcanicAshAdvisory }) {
@@ -44,6 +46,7 @@ function AdvisoryRow({ advisory }: { advisory: VolcanicAshAdvisory }) {
         <Text size="xs" c="dimmed" truncate>
           {advisory.eruptionDetails.toLowerCase() || 'ash advisory'}
         </Text>
+        <PlumeTrend points={usePlumeSeries(advisory.volcanoNumber)} compact />
         {advisory.issuedMs !== null && (
           <Text size="xs" c="dimmed" ff="monospace" ml="auto" style={{ flexShrink: 0 }}>
             {fmt.hm(advisory.issuedMs)}

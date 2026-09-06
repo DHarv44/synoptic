@@ -36,7 +36,30 @@ export interface VolcanicAshAdvisory {
   eruptionDetails: string
   remarks: string
   timesteps: AshTimestep[]
+  /** Highest flight level ash is reported at (FL500 = 50,000 ft), if stated. */
+  topFl: number | null
   raw: string
+}
+
+/**
+ * The plume top: ERUPTION DETAILS ("VA TO FL500 MOV W") or the top of the
+ * observed cloud's level bands, whichever is higher. Forecast bands are a
+ * prediction, not a measurement, and stay out of it.
+ */
+export function plumeTopFl(eruptionDetails: string, timesteps: AshTimestep[]): number | null {
+  let top: number | null = null
+  const consider = (fl: number): void => {
+    if (top === null || fl > top) top = fl
+  }
+  for (const m of eruptionDetails.matchAll(/\bFL(\d{3})\b/g)) consider(Number(m[1]))
+  for (const t of timesteps) {
+    if (t.step !== 'OBS' && t.step !== 'EST') continue
+    for (const p of t.polygons) {
+      const m = /\/FL(\d{2,3})$/.exec(p.levels)
+      if (m) consider(Number(m[1]))
+    }
+  }
+  return top
 }
 
 /** S0806 → −8.1, E11255 → 112.9167 (degrees + minutes, variable width). */
@@ -134,15 +157,17 @@ export function parseVaa(raw: string): VolcanicAshAdvisory | null {
     if (polygons.length > 0) timesteps.push({ step: STEP_NAMES[m[1]], polygons })
   }
 
+  const eruptionDetails = headerField(raw, 'ERUPTION DETAILS')
   return {
     vaac: headerField(raw, 'VAAC'),
     volcanoName: volcanoField.replace(/\s*\d{6}\s*$/, '').trim(),
     volcanoNumber: numMatch ? Number(numMatch[1]) : null,
     position: lat !== null && lon !== null ? { lat, lon } : null,
     issuedMs: parseDtg(headerField(raw, 'DTG')),
-    eruptionDetails: headerField(raw, 'ERUPTION DETAILS'),
+    eruptionDetails,
     remarks: headerField(raw, 'RMK'),
     timesteps,
+    topFl: plumeTopFl(eruptionDetails, timesteps),
     raw,
   }
 }

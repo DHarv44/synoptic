@@ -41,8 +41,11 @@ export const useUserPresets = create<UserPresetsState>()(
     (set) => ({
       presets: [],
       save: (label) => {
+        // Time alone collided when two saves landed in one millisecond
+        // (and deleting one then deleted both); the random tail makes ids
+        // distinct without needing a persisted counter.
         const preset: Preset = {
-          id: `user-${Date.now().toString(36)}`,
+          id: `user-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
           label: label.trim(),
           description: 'Saved scene',
           scene: captureScene(),

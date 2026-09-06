@@ -46,9 +46,10 @@ describe('user presets', () => {
     expect(sceneMatches(saved)).toBe(true)
   })
 
-  it('removes by id', () => {
+  it('removes by id, and back-to-back saves never share one', () => {
     const a = useUserPresets.getState().save('A')
-    useUserPresets.getState().save('B')
+    const b = useUserPresets.getState().save('B')
+    expect(a.id).not.toBe(b.id)
     useUserPresets.getState().remove(a.id)
     expect(useUserPresets.getState().presets.map((p) => p.label)).toEqual(['B'])
   })
