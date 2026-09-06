@@ -8,6 +8,7 @@ import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { coveringTiles } from '@/map/tileMath'
 import {
+  gibsBounds,
   gibsMaxZoom,
   gibsTime,
   gibsTileTemplate,
@@ -42,7 +43,16 @@ export function SatelliteLayer() {
       const now = Date.now()
       const b = map.getBounds()
       const z = Math.max(0, Math.min(Math.floor(map.getZoom()), gibsMaxZoom(product)))
-      const cover = coveringTiles(b.getWest(), b.getSouth(), b.getEast(), b.getNorth(), z)
+      // Clip to the product's footprint like the source does — warming
+      // tiles GIBS will 404 wastes the whole sweep's request budget.
+      const fp = gibsBounds(product) ?? [-180, -85, 180, 85]
+      const cover = coveringTiles(
+        Math.max(b.getWest(), fp[0]),
+        Math.max(b.getSouth(), fp[1]),
+        Math.min(b.getEast(), fp[2]),
+        Math.min(b.getNorth(), fp[3]),
+        z,
+      )
       const urlsPerFrame = loopFrames(now).map((t) => {
         const tmpl = gibsTileTemplate(product, gibsTime(product, t, now))
         return cover.map((c) =>
@@ -80,6 +90,8 @@ export function SatelliteLayer() {
         tiles: [tiles],
         tileSize: 256,
         maxzoom: gibsMaxZoom(product),
+        // Skip requests outside the product's footprint — GIBS 404s them.
+        ...(gibsBounds(product) ? { bounds: gibsBounds(product) } : {}),
         attribution: 'Imagery © NASA GIBS',
       })
       addDataLayer(

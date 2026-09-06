@@ -21,4 +21,8 @@ describe('coveringTiles', () => {
   it('caps the tile count', () => {
     expect(coveringTiles(-180, -85, 180, 85, 8).length).toBeLessThanOrEqual(48)
   })
+
+  it('an inverted (fully clipped) box covers nothing', () => {
+    expect(coveringTiles(-50, -10, -60, 10, 4)).toEqual([])
+  })
 })

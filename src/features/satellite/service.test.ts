@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { gibsTime, gibsTileTemplate } from '@/features/satellite/service'
+import { gibsBounds, gibsTime, gibsTileTemplate } from '@/features/satellite/service'
 
 const NOW = Date.parse('2026-08-15T20:57:23Z')
 
@@ -54,5 +54,13 @@ describe('gibsTileTemplate', () => {
     expect(gibsTime('vis-himawari', Date.parse('2026-09-05T14:03:00Z'), NOW + 30 * 86_400_000)).toBe(
       '2026-09-05T14:00:00Z',
     )
+  })
+
+  it('bounds the East disk but not the antimeridian-wrapping satellites', () => {
+    expect(gibsBounds('geocolor')).toEqual([-157, -81, 6, 81])
+    // West and Himawari wrap 180° — one box would crop real coverage.
+    expect(gibsBounds('geocolor-west')).toBeUndefined()
+    expect(gibsBounds('ir-himawari')).toBeUndefined()
+    expect(gibsBounds('truecolor')).toBeUndefined()
   })
 })

@@ -368,3 +368,12 @@ UI now reaches −48 h but most layers only have frames for the last hours.
   channel. Satellite cuts crisp while playing (fade 0), cross-fades at
   rest. Verified: Volcanic preset loop warmed 13/13 frames, Himawari URL
   live, fade flips with transport.
+- **Footprint bounds** (follow-up): product switching measured at 1.0–1.6 s
+  to fully-painted — but every geostationary product was requesting the
+  whole viewport and eating 404s outside its disk (GIBS capabilities claim
+  world coverage; the columns were probed directly). GOES-East now carries
+  real bounds [−157,−81,6,81] on the source and the prefetcher clips to
+  them; West and Himawari wrap the antimeridian — one box would crop real
+  coverage — so they stay unbounded and 404 only in their gap quadrant.
+  Verified: East GeoColor over Europe issues zero out-of-disk requests;
+  three product switches over CONUS = 108/108 responses 200.

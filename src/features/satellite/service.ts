@@ -10,6 +10,16 @@ interface GibsProduct {
   ext: 'jpg' | 'png'
   maxZoom: number
   /**
+   * Real data footprint [west, south, east, north], where one box can say
+   * it. GIBS 404s every tile outside a geostationary disk (its capabilities
+   * claim the whole world — probed the columns directly, 2026-09-05), and
+   * bounds let MapLibre skip those requests. GOES-West and Himawari wrap
+   * the antimeridian, which a single box cannot express without silently
+   * cropping real coverage — they stay unbounded and 404 only in their gap
+   * quadrant.
+   */
+  bounds?: [number, number, number, number]
+  /**
    * Time step of the product. Daily products take a plain date; sub-daily
    * ones take a full ISO timestamp snapped to this cadence, or GIBS serves
    * nothing at all.
@@ -32,6 +42,9 @@ const TEN_MIN_MS = 600_000
  * across whole regions. 75 min trades a touch of freshness for whole frames.
  */
 const GOES_LAG_MS = 75 * 60_000
+
+/** GOES-East disk (sub-satellite 75.2°W ± ~81°), probed by tile column. */
+const GOES_EAST_BOUNDS: [number, number, number, number] = [-157, -81, 6, 81]
 
 /**
  * Layer ids, matrix sets and cadences verified against the live WMTS
@@ -65,6 +78,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     maxZoom: 7,
     stepMs: TEN_MIN_MS,
     lagMs: GOES_LAG_MS,
+    bounds: GOES_EAST_BOUNDS,
   },
   'goes-ir': {
     id: 'GOES-East_ABI_Band13_Clean_Infrared',
@@ -73,6 +87,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     maxZoom: 6,
     stepMs: TEN_MIN_MS,
     lagMs: GOES_LAG_MS,
+    bounds: GOES_EAST_BOUNDS,
   },
   'goes-vis': {
     id: 'GOES-East_ABI_Band2_Red_Visible_1km',
@@ -81,6 +96,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     maxZoom: 7,
     stepMs: TEN_MIN_MS,
     lagMs: GOES_LAG_MS,
+    bounds: GOES_EAST_BOUNDS,
   },
   airmass: {
     id: 'GOES-East_ABI_Air_Mass',
@@ -89,6 +105,7 @@ export const PRODUCTS: Record<string, GibsProduct> = {
     maxZoom: 6,
     stepMs: TEN_MIN_MS,
     lagMs: GOES_LAG_MS,
+    bounds: GOES_EAST_BOUNDS,
   },
   'geocolor-west': {
     id: 'GOES-West_ABI_GeoColor',
@@ -171,6 +188,11 @@ export function gibsTileTemplate(productKey: string, time: string): string {
 /** The zoom ceiling for a product, so MapLibre overzooms rather than 404s. */
 export function gibsMaxZoom(productKey: string): number {
   return (PRODUCTS[productKey] ?? PRODUCTS.truecolor).maxZoom
+}
+
+/** Data footprint when one box can say it; undefined = don't constrain. */
+export function gibsBounds(productKey: string): [number, number, number, number] | undefined {
+  return (PRODUCTS[productKey] ?? PRODUCTS.truecolor).bounds
 }
 
 /** Sync-mode timing: sub-daily products animate at their lag; daily don't. */

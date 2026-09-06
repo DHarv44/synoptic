@@ -39,6 +39,9 @@ export function coveringTiles(
   north: number,
   z: number,
 ): TileCoord[] {
+  // A caller clipping a viewport to a data footprint can hand us an
+  // inverted box; that means "no overlap", not "the tile they share".
+  if (west > east || south > north) return []
   const n = 2 ** z
   const x0 = Math.max(0, lonToX(west, z))
   const x1 = Math.min(n - 1, lonToX(east, z))
