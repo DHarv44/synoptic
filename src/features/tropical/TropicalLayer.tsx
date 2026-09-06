@@ -42,6 +42,33 @@ const LAYERS = [
   'tropical-ww-watch',
 ]
 
+/**
+ * Each layer's designed opacity; the user's Opacity % scales all of them
+ * together, so the stack fades as one product rather than piece by piece.
+ * Symbol and circle layers carry two properties each.
+ */
+const BASE_OPACITY: Array<[layer: string, prop: string, base: number]> = [
+  ['tropical-cone-fill', 'fill-opacity', 0.1],
+  ['tropical-cone-line', 'line-opacity', 0.75],
+  ['tropical-radii-fill', 'fill-opacity', 0.22],
+  ['tropical-radii-line', 'line-opacity', 0.9],
+  ['tropical-arrival-earliest', 'line-opacity', 0.8],
+  ['tropical-arrival-likely', 'line-opacity', 0.9],
+  ['tropical-arrival-labels', 'text-opacity', 1],
+  ['tropical-past', 'line-opacity', 1],
+  ['tropical-track', 'line-opacity', 1],
+  ['tropical-points', 'circle-opacity', 1],
+  ['tropical-points', 'circle-stroke-opacity', 1],
+  ['tropical-point-labels', 'text-opacity', 1],
+  ['tropical-current', 'circle-opacity', 1],
+  ['tropical-current', 'circle-stroke-opacity', 1],
+  ['tropical-current-labels', 'text-opacity', 1],
+  ['tropical-ww-casing', 'line-opacity', 0.5],
+  ['tropical-ww-warning', 'line-opacity', 1],
+  ['tropical-ww-watch', 'line-opacity', 1],
+  ['tropical-model-labels', 'text-opacity', 1],
+]
+
 const RADII_COLOR_EXPR = [
   'match',
   ['get', 'radii'],
@@ -69,6 +96,7 @@ export function TropicalLayer() {
   const showArrival = useFeatureOption<boolean>('tropical', 'arrival')
   const showWw = useFeatureOption<boolean>('tropical', 'watchWarn')
   const showModels = useFeatureOption<boolean>('tropical', 'models')
+  const opacity = useFeatureOption<number>('tropical', 'opacity')
   const data = useTropical()
   useEffect(() => acquireTropicalFeed(), [])
   useEffect(() => acquireModelTracks(), [])
@@ -384,6 +412,25 @@ export function TropicalLayer() {
       set('tropical-models', showModels ? models : EMPTY)
     },
     [sources, radiiNow, models, showCone, showPast, showRadii, showArrival, showWw, showModels],
+  )
+
+  useMapLayer(
+    (m) => {
+      const k = opacity / 100
+      for (const [layer, prop, base] of BASE_OPACITY) {
+        if (m.getLayer(layer)) m.setPaintProperty(layer, prop, base * k)
+      }
+      // The model lines carry a data-driven opacity (official heavier).
+      if (m.getLayer('tropical-models')) {
+        m.setPaintProperty('tropical-models', 'line-opacity', [
+          'case',
+          ['get', 'official'],
+          0.95 * k,
+          0.7 * k,
+        ])
+      }
+    },
+    [opacity],
   )
 
   return null

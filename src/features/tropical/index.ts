@@ -37,6 +37,15 @@ registerFeature({
   ],
   defaultEnabled: true,
   settings: [
+    {
+      kind: 'number',
+      key: 'opacity',
+      label: 'Opacity %',
+      min: 10,
+      max: 100,
+      step: 5,
+      defaultValue: 100,
+    },
     { kind: 'boolean', key: 'cone', label: 'Forecast cone', defaultValue: true },
     { kind: 'boolean', key: 'windRadii', label: 'Wind radii (34/50/64 kt, follow the clock)', defaultValue: true },
     { kind: 'boolean', key: 'arrival', label: 'TS-wind arrival-time lines', defaultValue: true },
