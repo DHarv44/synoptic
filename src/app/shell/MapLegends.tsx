@@ -3,7 +3,7 @@ import { listFeatures } from '@/core/settings/registry'
 import { useFeatureEnabled } from '@/core/settings/store'
 import { useAvailableTools } from '@/app/shell/toolRegistry'
 import { RAIL_WIDTH } from '@/app/shell/ToolRail'
-import { TAB_BAR_HEIGHT } from '@/app/shell/MobileSheet'
+import { MOBILE_CHROME_BOTTOM } from '@/app/shell/mobileLayout'
 import type { FeatureManifest } from '@/core/settings/types'
 
 function FeatureLegend({ manifest }: { manifest: FeatureManifest }) {
@@ -31,7 +31,7 @@ export function MapLegends({ isMobile }: { isMobile: boolean }) {
         position: 'absolute',
         left: railVisible ? RAIL_WIDTH + 15 : 15,
         // Clear the playback bar (desktop) or the tab bar + playback bar (mobile).
-        bottom: isMobile ? TAB_BAR_HEIGHT + 70 : 74,
+        bottom: isMobile ? MOBILE_CHROME_BOTTOM : 74,
         // Mobile: stop short of the 44 px control column on the right.
         maxWidth: isMobile ? 'calc(100% - 15px - 68px)' : undefined,
         zIndex: 4,

@@ -1,7 +1,8 @@
 import { MapView } from '@/map/MapView'
 import { DockRail } from '@/app/shell/DockRail'
 import { PlaybackControl } from '@/app/shell/PlaybackControl'
-import { MobileSheet, TAB_BAR_HEIGHT } from '@/app/shell/MobileSheet'
+import { MobileSheet } from '@/app/shell/MobileSheet'
+import { MOBILE_CHROME_BOTTOM } from '@/app/shell/mobileLayout'
 import { MobileMapControls } from '@/map/MobileMapControls'
 import { LoadingIndicator } from '@/ui/LoadingIndicator'
 import { ReorientButton } from '@/ui/ReorientButton'
@@ -10,9 +11,6 @@ import { useCameraStore } from '@/map/cameraStore'
 import { ToolRail } from '@/app/shell/ToolRail'
 import { MobileToolBar } from '@/app/shell/MobileToolBar'
 import { MapLegends } from '@/app/shell/MapLegends'
-
-/** Mobile: the control column sits just above the playback bar. */
-const MOBILE_CONTROLS_BOTTOM = TAB_BAR_HEIGHT + 70
 
 /**
  * Center viewport. Desktop: map with a persistent right-edge rail (tabs
@@ -29,7 +27,7 @@ export function Viewport({ isMobile }: { isMobile: boolean }) {
       <PlaybackControl isMobile={isMobile} />
       {isMobile ? (
         <>
-          <MobileMapControls bottom={MOBILE_CONTROLS_BOTTOM} />
+          <MobileMapControls bottom={MOBILE_CHROME_BOTTOM} />
           <LoadingIndicator top={12} right={12} />
           <MobileToolBar />
           <MobileSheet />

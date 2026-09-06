@@ -16,6 +16,7 @@ import { useSettings } from '@/core/settings/store'
 import { useTimeFormat } from '@/core/time/useTimeFormat'
 import { useAvailableTools } from '@/app/shell/toolRegistry'
 import { RAIL_WIDTH } from '@/app/shell/ToolRail'
+import { MOBILE_PLAYBACK_BOTTOM } from '@/app/shell/mobileLayout'
 import { mapChromeStyle } from '@/ui/mapChrome'
 
 const STEP_MS = 10 * 60_000 // ←/→ step: 10 min
@@ -145,7 +146,7 @@ export function PlaybackControl({ isMobile = false }: { isMobile?: boolean }) {
         ...mapChromeStyle,
         position: 'absolute',
         // Mobile: full width just above the sheet peek. Desktop: bottom-left.
-        bottom: isMobile ? 64 : 8,
+        bottom: isMobile ? MOBILE_PLAYBACK_BOTTOM : 8,
         left: railVisible ? RAIL_WIDTH + 15 : 15,
         right: isMobile ? 15 : undefined,
         zIndex: 5,
