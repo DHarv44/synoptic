@@ -9,15 +9,24 @@ import { getBuoysJson } from './server/ndbc.mjs'
 // Surfaced in the About panel, so a bug report can name a build.
 const { version } = createRequire(import.meta.url)('./package.json') as { version: string }
 
+/** `valid` query (ISO or epoch ms) → epoch ms; absent or unparsable = now. */
+function validParam(q: URLSearchParams): number {
+  const raw = q.get('valid')
+  if (raw === null) return Date.now()
+  const ms = /^\d+$/.test(raw) ? Number(raw) : Date.parse(raw)
+  return Number.isFinite(ms) ? ms : Date.now()
+}
+
 /** Dev implementation of the data-proxy routes the prod Express server owns. */
 function windProxy(): Plugin {
   return {
     name: 'synoptic-wind-proxy',
     configureServer(server) {
       server.middlewares.use('/proxy/gfs-wind', (req, res) => {
-        const level = new URL(req.url ?? '', 'http://x').searchParams.get('level') ?? '10m'
+        const q = new URL(req.url ?? '', 'http://x').searchParams
+        const level = q.get('level') ?? '10m'
         const gzip = /\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''))
-        getWindPayloadEncoded(level, gzip)
+        getWindPayloadEncoded(level, gzip, validParam(q))
           .then(({ buf, encoding }) => {
             res.setHeader('Content-Type', 'application/octet-stream')
             res.setHeader('Cache-Control', 'public, max-age=600')
@@ -42,8 +51,9 @@ function windProxy(): Plugin {
           })
       })
       server.middlewares.use('/proxy/gfs-grid', (req, res) => {
-        const field = new URL(req.url ?? '', 'http://x').searchParams.get('field') ?? 'mslp'
-        getGridPayload(field)
+        const q = new URL(req.url ?? '', 'http://x').searchParams
+        const field = q.get('field') ?? 'mslp'
+        getGridPayload(field, validParam(q))
           .then((payload) => {
             res.setHeader('Content-Type', 'application/octet-stream')
             res.setHeader('Cache-Control', 'public, max-age=600')

@@ -4,6 +4,7 @@ import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
 import { useFeatureOption } from '@/core/settings/store'
+import { useValidHour } from '@/core/time/validHour'
 import { invert4 } from '@/map/glUtils'
 import { ParticleSystem } from '@/features/wind/ParticleSystem'
 import { SpeedField } from '@/features/wind/SpeedField'
@@ -139,10 +140,12 @@ export function WindLayer() {
     [countK],
   )
 
-  // Wind data per level.
+  // Wind data per level and per hour the clock rests on — the field follows
+  // the timeline into the forecast and back through earlier analyses.
+  const validHour = useValidHour()
   useEffect(() => {
     let cancelled = false
-    void fetchWindField(level).then((field) => {
+    void fetchWindField(level, validHour).then((field) => {
       const layer = layerRef.current
       if (cancelled || !layer) return
       layer.pendingField = field
@@ -151,7 +154,7 @@ export function WindLayer() {
     return () => {
       cancelled = true
     }
-  }, [level, countK, map])
+  }, [level, countK, map, validHour])
 
   useEffect(() => {
     if (layerRef.current) layerRef.current.opacity = opacity / 100

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useComputedColorScheme } from '@mantine/core'
 import type { GeoJSONSource } from 'maplibre-gl'
 import { useFeatureOption } from '@/core/settings/store'
+import { useValidHour } from '@/core/time/validHour'
 import { fetchGridField } from '@/core/data/gfsGrid'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
@@ -22,16 +23,19 @@ export function FieldsLayer() {
   const mslpInterval = useFeatureOption<string>('fields', 'mslpInterval')
   const reduction = useFeatureOption<string>('fields', 'reduction')
   const [chart, setChart] = useState<FieldChart>(EMPTY_CHART)
+  // The chart follows the clock by the hour: forecast hours ahead, earlier
+  // cycles' analyses behind. The previous chart stays up until the next
+  // one is contoured, so stepping reads as the pattern evolving.
+  const validHour = useValidHour()
 
   useEffect(() => {
     let stale = false
-    setChart(EMPTY_CHART)
     const spec = FIELD_SPECS[field] ?? FIELD_SPECS.mslp
     const interval = field === 'mslp' ? Number(mslpInterval) || spec.interval : undefined
     // Both sea-level reductions stay available; the server serves each as
     // its own grid key.
     const gridKey = field === 'mslp' && reduction === 'prmsl' ? 'mslp_prmsl' : spec.key
-    fetchGridField(gridKey)
+    fetchGridField(gridKey, validHour)
       .then((grid) => {
         if (!stale) setChart(fieldChart(grid, spec, interval))
       })
@@ -41,7 +45,7 @@ export function FieldsLayer() {
     return () => {
       stale = true
     }
-  }, [field, mslpInterval, reduction])
+  }, [field, mslpInterval, reduction, validHour])
 
   useMapLayer((m) => {
     const ink = scheme === 'dark' ? '#cdb38a' : '#8a6d3b'

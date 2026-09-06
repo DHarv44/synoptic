@@ -1,4 +1,5 @@
 import { Paper, Text } from '@mantine/core'
+import { gfsRunLabel, useGfsRun } from '@/core/data/gfsRun'
 import { useFeatureOption } from '@/core/settings/store'
 import { useUnits } from '@/core/units/useUnitSystem'
 import { windUnitInfo } from '@/core/units/format'
@@ -27,6 +28,7 @@ export function WindLegend() {
   const showField = useFeatureOption<boolean>('wind', 'field')
   const level = useFeatureOption<string>('wind', 'level')
   const unit = useUnits().wind
+  const info = useGfsRun((s) => s.byProduct['wind'])
   if (!showField) return null
 
   const { factor, label } = windUnitInfo(unit)
@@ -44,7 +46,7 @@ export function WindLegend() {
       style={{ ...mapChromeStyle, width: BAR_W + 16, pointerEvents: 'auto' }}
     >
       <Text size="xs" c="dimmed" lh={1.2}>
-        {LEVEL_LABEL[level] ?? 'Wind'} · {label}
+        {LEVEL_LABEL[level] ?? 'Wind'} · {label} · {gfsRunLabel(info)}
       </Text>
       <div
         style={{

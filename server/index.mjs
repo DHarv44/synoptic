@@ -86,12 +86,21 @@ app.use('/proxy/nexrad', async (req, res) => {
   }
 })
 
+/** `valid` query (ISO or epoch ms) → epoch ms; absent or unparsable = now. */
+function validParam(q) {
+  const raw = q.get('valid')
+  if (raw === null) return Date.now()
+  const ms = /^\d+$/.test(raw) ? Number(raw) : Date.parse(raw)
+  return Number.isFinite(ms) ? ms : Date.now()
+}
+
 /** GFS winds, decoded from GRIB2 here because the client cannot. */
 app.use('/proxy/gfs-wind', async (req, res) => {
   try {
-    const level = new URL(req.url, 'http://x').searchParams.get('level') ?? '10m'
+    const q = new URL(req.url, 'http://x').searchParams
+    const level = q.get('level') ?? '10m'
     const gzip = /\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''))
-    const { buf, encoding } = await getWindPayloadEncoded(level, gzip)
+    const { buf, encoding } = await getWindPayloadEncoded(level, gzip, validParam(q))
     res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Cache-Control', 'public, max-age=600')
     if (encoding) res.setHeader('Content-Encoding', encoding)
@@ -104,8 +113,9 @@ app.use('/proxy/gfs-wind', async (req, res) => {
 /** Scalar GFS fields (MSLP, heights, temp, CAPE) for the contour layer. */
 app.use('/proxy/gfs-grid', async (req, res) => {
   try {
-    const field = new URL(req.url, 'http://x').searchParams.get('field') ?? 'mslp'
-    const payload = await getGridPayload(field)
+    const q = new URL(req.url, 'http://x').searchParams
+    const field = q.get('field') ?? 'mslp'
+    const payload = await getGridPayload(field, validParam(q))
     res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Cache-Control', 'public, max-age=600')
     res.end(payload)

@@ -1,4 +1,5 @@
 import { reportError, reportOk } from '@/core/data/healthStore'
+import { useGfsRun } from '@/core/data/gfsRun'
 import type { SourceRef } from '@/core/data/types'
 
 export const GFS_GRID: SourceRef = { id: 'gfs-grid', label: 'GFS fields (NOMADS)' }
@@ -14,6 +15,8 @@ export interface GridHeader {
   field: string
   unit: string
   run: string
+  fhour: number
+  valid: string
 }
 
 export interface GridField {
@@ -22,10 +25,16 @@ export interface GridField {
   values: Float32Array
 }
 
-/** Fetch + decode the proxy's uint16 grid payload (see server/gfsGrid.mjs). */
-export async function fetchGridField(field: string): Promise<GridField> {
+/**
+ * Fetch + decode the proxy's uint16 grid payload (see server/gfsGrid.mjs)
+ * for a valid time — the server picks the run and forecast hour.
+ */
+export async function fetchGridField(field: string, validMs: number): Promise<GridField> {
   try {
-    const res = await fetch(`/proxy/gfs-grid?field=${encodeURIComponent(field)}`)
+    const valid = new Date(validMs).toISOString()
+    const res = await fetch(
+      `/proxy/gfs-grid?field=${encodeURIComponent(field)}&valid=${encodeURIComponent(valid)}`,
+    )
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const buf = await res.arrayBuffer()
     const view = new DataView(buf)
@@ -38,6 +47,7 @@ export async function fetchGridField(field: string): Promise<GridField> {
     const values = new Float32Array(raw.length)
     for (let i = 0; i < raw.length; i++) values[i] = raw[i] * header.scale + header.offset
     reportOk(GFS_GRID)
+    useGfsRun.getState().note('fields', { run: header.run, fhour: header.fhour, valid: header.valid })
     return { header, values }
   } catch (e) {
     reportError(GFS_GRID, e instanceof Error ? e.message : String(e))

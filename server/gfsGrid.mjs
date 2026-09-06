@@ -8,11 +8,12 @@
  * its own scale/offset computed from the actual field, carried in the
  * header, so the client dequantizes without knowing anything per-variable.
  */
-import { OUT_H, OUT_W, SRC_H, SRC_W, discoverRun, fetchField, pad2 } from './gfsWind.mjs'
+import { OUT_H, OUT_W, SRC_H, SRC_W, cacheSet, fetchField, fetchForValid } from './gfsWind.mjs'
+import { runLabel } from './gfsValid.mjs'
 
 const CACHE_TTL_MS = 30 * 60_000
 
-/** field key → GRIB filter parameters. Analysis (f000) only, like wind. */
+/** field key → GRIB filter parameters; the run/hour come from the valid time. */
 const FIELDS = {
   // Two sea-level reductions, user-selectable: MSLET (Eta membrane) is the
   // terrain-sane default; PRMSL (Shuell) is the classic reduction, noisy
@@ -25,16 +26,17 @@ const FIELDS = {
   cape: { lev: 'lev_surface', var: 'CAPE', unit: 'J/kg' },
 }
 
-const cache = new Map() // field → { at, payload }
+const cache = new Map() // `${field}@${hourMs}` → { at, payload }
 
-/** 0.25° → 0.5° decimation into floats; output row 0 = south. */
+/** Row flip (and any decimation) into floats; output row 0 = south. */
 function decimate(field) {
   const { vals, northFirst } = field
+  const factor = SRC_W / OUT_W
   const out = new Float64Array(OUT_W * OUT_H)
   for (let j = 0; j < OUT_H; j++) {
-    const srcRow = northFirst ? SRC_H - 1 - j * 2 : j * 2
+    const srcRow = northFirst ? SRC_H - 1 - j * factor : j * factor
     for (let i = 0; i < OUT_W; i++) {
-      const v = vals[srcRow * SRC_W + i * 2]
+      const v = vals[srcRow * SRC_W + i * factor]
       out[j * OUT_W + i] = Number.isFinite(v) ? v : NaN
     }
   }
@@ -46,14 +48,18 @@ function decimate(field) {
  * of 4][uint16le values]. The padding keeps the value block 2-byte aligned
  * so the client can view it as a Uint16Array without copying.
  */
-export async function getGridPayload(fieldKey) {
+export async function getGridPayload(fieldKey, validMs = Date.now()) {
   const spec = FIELDS[fieldKey]
   if (!spec) throw new Error(`unknown field: ${fieldKey}`)
-  const hit = cache.get(fieldKey)
+  const hourMs = Math.floor(validMs / 3600_000) * 3600_000
+  const key = `${fieldKey}@${hourMs}`
+  const hit = cache.get(key)
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.payload
 
-  const run = await discoverRun()
-  const grid = decimate(await fetchField(run, spec.lev, spec.var))
+  const { run, fhour, result } = await fetchForValid(hourMs, (r, h) =>
+    fetchField(r, spec.lev, spec.var, h),
+  )
+  const grid = decimate(result)
 
   let min = Infinity
   let max = -Infinity
@@ -78,12 +84,14 @@ export async function getGridPayload(fieldKey) {
       height: OUT_H,
       lonMin: 0,
       latMin: -90,
-      step: 0.5,
+      step: (360 / OUT_W),
       scale,
       offset: min,
       field: fieldKey,
       unit: spec.unit,
-      run: `${run.ymd} ${pad2(run.cycle)}z`,
+      run: runLabel(run),
+      fhour,
+      valid: new Date(hourMs).toISOString(),
     }),
   )
   if (header.length % 4 !== 0) {
@@ -92,6 +100,6 @@ export async function getGridPayload(fieldKey) {
   const lenBuf = Buffer.alloc(4)
   lenBuf.writeUInt32LE(header.length)
   const payload = Buffer.concat([lenBuf, header, Buffer.from(values.buffer)])
-  cache.set(fieldKey, { at: Date.now(), payload })
+  cacheSet(cache, key, { at: Date.now(), payload })
   return payload
 }

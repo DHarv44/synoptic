@@ -5,9 +5,12 @@
  */
 import { gzipSync } from 'node:zlib'
 import GRIB2CLASS from 'grib2class'
+import { fhourStr, previousCycle, resolveForecast, runLabel } from './gfsValid.mjs'
 
 const FILTER = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl'
 const CACHE_TTL_MS = 30 * 60_000
+/** Payloads kept per server: stepping a 16-day clock must not eat memory. */
+export const CACHE_MAX_ENTRIES = 48
 
 // 0.25° grid, served at native resolution. It used to be decimated to 0.5°
 // to save payload (508 KB raw); gzipped, the full grid is 533 KB — the same
@@ -30,21 +33,44 @@ const LEVELS = {
   '250': 'lev_250_mb',
 }
 
-const cache = new Map() // level → { at, payload }
+const cache = new Map() // `${level}@${run}f${hour}` → { at, raw, gz }
 let runCache = null // { ymd, cycle, at }
 
 export function pad2(n) {
   return String(n).padStart(2, '0')
 }
 
-function filterUrl(ymd, cycle, levParam, varName) {
+/** Insert with a size cap: the oldest entry goes when the map is full. */
+export function cacheSet(map, key, value) {
+  map.set(key, value)
+  while (map.size > CACHE_MAX_ENTRIES) map.delete(map.keys().next().value)
+}
+
+function filterUrl(ymd, cycle, levParam, varName, fhour = 0) {
   const p = new URLSearchParams({
-    file: `gfs.t${pad2(cycle)}z.pgrb2.0p25.f000`,
+    file: `gfs.t${pad2(cycle)}z.pgrb2.0p25.f${fhourStr(fhour)}`,
     [levParam]: 'on',
     [`var_${varName}`]: 'on',
     dir: `/gfs.${ymd}/${pad2(cycle)}/atmos`,
   })
   return `${FILTER}?${p}`
+}
+
+/**
+ * Run + hour for a valid time, then a fetch that steps back one cycle when
+ * the newest run has not published that hour yet. `fetchAt(run, fhour)`
+ * does the actual work; the retry keeps the SAME valid time.
+ */
+export async function fetchForValid(validMs, fetchAt) {
+  const run = await discoverRun()
+  const first = resolveForecast(validMs, run)
+  try {
+    return { ...first, result: await fetchAt(first.run, first.fhour) }
+  } catch (e) {
+    if (!/NOMADS filter 404/.test(String(e))) throw e
+    const prev = previousCycle(first)
+    return { ...prev, result: await fetchAt(prev.run, prev.fhour) }
+  }
 }
 
 /** Latest cycle whose f000 exists: probe recent cycles with a tiny field. */
@@ -108,8 +134,8 @@ function decodeGrib(buf) {
   return { vals, northFirst: grib.La1 > 0 }
 }
 
-export async function fetchField(run, levParam, varName) {
-  const res = await fetch(filterUrl(run.ymd, run.cycle, levParam, varName))
+export async function fetchField(run, levParam, varName, fhour = 0) {
+  const res = await fetch(filterUrl(run.ymd, run.cycle, levParam, varName, fhour))
   if (!res.ok) throw new Error(`NOMADS filter ${res.status} for ${varName}`)
   const buf = Buffer.from(await res.arrayBuffer())
   if (buf.slice(0, 4).toString() !== 'GRIB') throw new Error('non-GRIB response')
@@ -134,9 +160,11 @@ function quantize(field) {
 /**
  * Binary payload: [u32le headerLen][header JSON][u int8s][v int8s].
  * Grid: lat -90..90 (row 0 = south), lon 0..360−step, both `step` degrees.
+ * `validMs` picks the run and forecast hour (see gfsValid.mjs); omitted,
+ * it means now.
  */
-export async function getWindPayload(level) {
-  return (await buildPayload(level)).raw
+export async function getWindPayload(level, validMs = Date.now()) {
+  return (await buildPayload(level, validMs)).raw
 }
 
 /**
@@ -144,22 +172,25 @@ export async function getWindPayload(level) {
  * ~4:1, and the compressed buffer is cached beside the raw one so a hit
  * costs nothing either way.
  */
-export async function getWindPayloadEncoded(level, acceptsGzip) {
-  const built = await buildPayload(level)
+export async function getWindPayloadEncoded(level, acceptsGzip, validMs = Date.now()) {
+  const built = await buildPayload(level, validMs)
   return acceptsGzip ? { buf: built.gz, encoding: 'gzip' } : { buf: built.raw, encoding: null }
 }
 
-async function buildPayload(level) {
+async function buildPayload(level, validMs) {
   const levParam = LEVELS[level]
   if (!levParam) throw new Error(`unknown level: ${level}`)
-  const hit = cache.get(level)
+  // Cache by the hour the clock lands on, not the exact ms: a scrub that
+  // stays within an hour is one payload.
+  const hourMs = Math.floor(validMs / 3600_000) * 3600_000
+  const key = `${level}@${hourMs}`
+  const hit = cache.get(key)
   if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit
 
-  const run = await discoverRun()
-  const [u, v] = await Promise.all([
-    fetchField(run, levParam, 'UGRD'),
-    fetchField(run, levParam, 'VGRD'),
-  ])
+  const { run, fhour, result } = await fetchForValid(hourMs, (r, h) =>
+    Promise.all([fetchField(r, levParam, 'UGRD', h), fetchField(r, levParam, 'VGRD', h)]),
+  )
+  const [u, v] = result
   const header = Buffer.from(
     JSON.stringify({
       width: OUT_W,
@@ -169,7 +200,9 @@ async function buildPayload(level) {
       step: STEP_DEG,
       scale: SCALE,
       level,
-      run: `${run.ymd} ${pad2(run.cycle)}z`,
+      run: runLabel(run),
+      fhour,
+      valid: new Date(hourMs).toISOString(),
     }),
   )
   const lenBuf = Buffer.alloc(4)
@@ -181,6 +214,6 @@ async function buildPayload(level) {
     Buffer.from(quantize(v).buffer),
   ])
   const entry = { at: Date.now(), raw, gz: gzipSync(raw, { level: 6 }) }
-  cache.set(level, entry)
+  cacheSet(cache, key, entry)
   return entry
 }

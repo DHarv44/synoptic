@@ -519,3 +519,24 @@ a build step) would make every zone alert mappable at once for ~1–2 MB.
   mosaic-protocol pattern: fetch → OffscreenCanvas → pixel pass → bitmap)
   clears exactly that colour to transparent; real values keep IEM's own
   palette. Verified live: the dry West shows the basemap, rain shows rain.
+
+## Phase 19 — Forecast-hour stepping (2026-09-06) ✅ probe-first
+
+- **Probes**: NOMADS filter serves f018 and f240 of the latest run and f003
+  of yesterday's cycle; f384 404s until a run finishes publishing (~4 h).
+- **Server** (`gfsValid.mjs`, shared by wind and fields): the client sends
+  `valid=`; the server resolves run + hour — future: latest run, hourly to
+  f120 then 3-hourly to f384; past: the 6-hourly cycle just before the
+  valid time at f000–f005, so scrubbing back walks real analyses. One
+  previous-cycle retry when the newest run has not published the hour.
+  Payload caches key on (product, hour), capped at 48 entries. Headers
+  carry run/fhour/valid.
+- **Client**: `useValidHour()` floors the clock to the hour and settles
+  400 ms so a stepper click or drag fires one fetch, not one per tick;
+  FieldsLayer and WindLayer refetch on it (the old chart stays until the
+  new one is contoured). A `useGfsRun` store carries run/hour to the
+  legends: "MSLP isobars · 2 hPa · GFS 00z +23 h" (new FieldsLegend via
+  the legendComponent slot) and the wind legend title.
+- Behaviour change worth knowing: "now" is the latest run's short-range
+  forecast for the current hour (+5 h here), not a 4–9-hour-old analysis.
+Verified live: requests carry valid=; +18 h step → fields legend +23 h.

@@ -1,17 +1,19 @@
 import { IconWaveSine } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { FieldsLayer } from '@/features/fields/FieldsLayer'
+import { FieldsLegend } from '@/features/fields/FieldsLegend'
 
-/** Contoured GFS analysis fields: isobars, heights, 850 temp, CAPE. */
+/** Contoured GFS fields that follow the clock: isobars, heights, 850 temp, CAPE. */
 registerFeature({
   id: 'fields',
   title: 'Model fields',
   description:
-    'Contoured GFS analysis: MSLP isobars, 500 mb heights, 850 mb temperature, CAPE. Conventional chart intervals.',
+    'Contoured GFS fields that follow the timeline — forecast hours ahead, earlier analyses behind: MSLP isobars, 500 mb heights, 850 mb temperature, CAPE. Conventional chart intervals.',
   layer: true,
   layerGroup: 'analysis',
   layerIcon: IconWaveSine,
   layerComponent: FieldsLayer,
+  legendComponent: FieldsLegend,
   sourceIds: ['gfs-grid'],
   defaultEnabled: false,
   settings: [
