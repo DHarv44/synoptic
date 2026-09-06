@@ -3,17 +3,22 @@
  * SCN 25-81), decoded with grib2class (pure JS). Shared by the Vite dev
  * middleware and the production Express proxy.
  */
+import { gzipSync } from 'node:zlib'
 import GRIB2CLASS from 'grib2class'
 
 const FILTER = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl'
 const CACHE_TTL_MS = 30 * 60_000
 
-// 0.25° grid
+// 0.25° grid, served at native resolution. It used to be decimated to 0.5°
+// to save payload (508 KB raw); gzipped, the full grid is 533 KB — the same
+// wire cost — and zoomed in it carries real detail the coarse grid had
+// thrown away. Measured 2026-09-05.
 export const SRC_W = 1440
 export const SRC_H = 721
-// served at 0.5°
-export const OUT_W = 720
-export const OUT_H = 361
+export const OUT_W = 1440
+export const OUT_H = 721
+const DECIMATE = SRC_W / OUT_W
+const STEP_DEG = 0.25 * DECIMATE
 const SCALE = 100 / 127 // int8 → m/s
 
 /** level key → filter CGI level parameter */
@@ -111,14 +116,14 @@ export async function fetchField(run, levParam, varName) {
   return decodeGrib(buf)
 }
 
-/** 0.25° → 0.5° decimation + int8 quantization; output row 0 = south. */
+/** int8 quantization (and any decimation); output row 0 = south. */
 function quantize(field) {
   const { vals, northFirst } = field
   const out = new Int8Array(OUT_W * OUT_H)
   for (let j = 0; j < OUT_H; j++) {
-    const srcRow = northFirst ? SRC_H - 1 - j * 2 : j * 2
+    const srcRow = northFirst ? SRC_H - 1 - j * DECIMATE : j * DECIMATE
     for (let i = 0; i < OUT_W; i++) {
-      let v = vals[srcRow * SRC_W + i * 2]
+      let v = vals[srcRow * SRC_W + i * DECIMATE]
       if (!Number.isFinite(v)) v = 0
       out[j * OUT_W + i] = Math.max(-127, Math.min(127, Math.round(v / SCALE)))
     }
@@ -128,13 +133,27 @@ function quantize(field) {
 
 /**
  * Binary payload: [u32le headerLen][header JSON][u int8s][v int8s].
- * Grid: lat -90..90 (row 0 = south), lon 0..359.5, both 0.5° steps.
+ * Grid: lat -90..90 (row 0 = south), lon 0..360−step, both `step` degrees.
  */
 export async function getWindPayload(level) {
+  return (await buildPayload(level)).raw
+}
+
+/**
+ * The payload gzipped when the client can take it. int8 wind compresses
+ * ~4:1, and the compressed buffer is cached beside the raw one so a hit
+ * costs nothing either way.
+ */
+export async function getWindPayloadEncoded(level, acceptsGzip) {
+  const built = await buildPayload(level)
+  return acceptsGzip ? { buf: built.gz, encoding: 'gzip' } : { buf: built.raw, encoding: null }
+}
+
+async function buildPayload(level) {
   const levParam = LEVELS[level]
   if (!levParam) throw new Error(`unknown level: ${level}`)
   const hit = cache.get(level)
-  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.payload
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit
 
   const run = await discoverRun()
   const [u, v] = await Promise.all([
@@ -147,7 +166,7 @@ export async function getWindPayload(level) {
       height: OUT_H,
       lonMin: 0,
       latMin: -90,
-      step: 0.5,
+      step: STEP_DEG,
       scale: SCALE,
       level,
       run: `${run.ymd} ${pad2(run.cycle)}z`,
@@ -155,12 +174,13 @@ export async function getWindPayload(level) {
   )
   const lenBuf = Buffer.alloc(4)
   lenBuf.writeUInt32LE(header.length)
-  const payload = Buffer.concat([
+  const raw = Buffer.concat([
     lenBuf,
     header,
     Buffer.from(quantize(u).buffer),
     Buffer.from(quantize(v).buffer),
   ])
-  cache.set(level, { at: Date.now(), payload })
-  return payload
+  const entry = { at: Date.now(), raw, gz: gzipSync(raw, { level: 6 }) }
+  cache.set(level, entry)
+  return entry
 }

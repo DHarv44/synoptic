@@ -61,7 +61,7 @@ probes that point. Works on desktop and mobile, in dark or light.
 | Surface obs | METAR station models (temp/dewpoint/barb), decluttered | ✅ |
 | Satellite | NASA GIBS imagery, timeline-dated | ✅ |
 | Basemap | OpenFreeMap vector tiles — cities, roads, labels, dark/light | ✅ |
-| Wind particles | GPU flow: speed field wash + streamline trails, surface → jet | ⚠️ working, polish ongoing (see roadmap) |
+| Wind particles | GPU flow: speed field wash with legend + streamline trails, native 0.25° GFS, surface → jet | ✅ |
 | My location | Locate button → centre/zoom, remembered as home | ✅ |
 | Notifications | Desktop alerts for warnings covering your location (rain nowcast still planned) | ✅ |
 | Alert ticker | Top-bar scrolling severe ticker | 🔭 |
@@ -93,18 +93,17 @@ probes that point. Works on desktop and mobile, in dark or light.
 
 **Next up**
 
-1. **Wind still needs work** *(2026-08-16: fixed and overhauled, not finished)* —
-   the old corruption was three stacked bugs (unrestored GL viewport, a
-   fetch/onAdd race, and `grib2class` misparsing negative GRIB reference
-   values), all fixed; the layer then gained a Windy-style speed-field wash,
-   screen-persistence streamline trails, line-segment strokes, viewport-local
-   particle spawning, zoom-constant pacing, and a compressed visual speed
-   floor so low levels flow like the jet. Remaining, in rough order:
-   - **Speed legend** — the field ramp has no colourbar; magnitudes are
-     unreadable without one.
-   - **Feel tuning** — pace, trail length, density and the 6 + 0.85s visual
-     speed mapping are first-pass constants; they need eyes-on tuning per
-     level, and possibly per-level ramp ranges (jet saturates the palette).
+1. **Wind** *(2026-09-05: finished and on by default)* — the old corruption
+   was three stacked bugs (unrestored GL viewport, a fetch/onAdd race, and
+   `grib2class` misparsing negative GRIB reference values), all fixed and
+   verified against Open-Meteo GFS point values to <0.2 m/s; the layer has a
+   Windy-style speed-field wash with a **legend** in the user's unit,
+   screen-persistence streamline trails, bicubic field sampling, a PCG spawn
+   hash (the sin hash made a lattice zoomed in), zoom-aware particle
+   density, and the native 0.25° grid served gzipped. Left, all optional:
+   - **Feel tuning** — pace, trail length and the 6 + 0.85s visual speed
+     mapping are first-pass constants; possibly per-level ramp ranges (the
+     jet saturates the palette).
    - **Level2/globe interplay** — custom GL layers still pin the map to
      mercator; globe projection waits on porting them.
    - **Gusts/streamline variants** — Windy-style gust layer and steadier

@@ -180,6 +180,7 @@ export class ParticleSystem {
     matrix: number[] | Float32Array,
     opacity: number,
     plain: boolean,
+    fraction: number,
   ): void {
     const { gl } = this
     gl.useProgram(this.drawProgram)
@@ -193,11 +194,15 @@ export class ParticleSystem {
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_opacity'), opacity)
     gl.uniform1f(gl.getUniformLocation(this.drawProgram, 'u_plain'), plain ? 1 : 0)
     gl.bindVertexArray(this.emptyVao)
-    gl.drawArrays(gl.LINES, 0, this.res * this.res * 2)
+    // Draw a prefix of the particle set: the spawn hash scatters particles
+    // independently of their index, so a prefix is a uniform thinning.
+    const count = Math.max(1, Math.round(this.res * this.res * fraction))
+    gl.drawArrays(gl.LINES, 0, count * 2)
     gl.bindVertexArray(null)
   }
 
-  draw(matrix: number[] | Float32Array, opacity: number, plain: boolean): void {
+  /** `fraction` (0..1) of the particle budget to draw this frame. */
+  draw(matrix: number[] | Float32Array, opacity: number, plain: boolean, fraction = 1): void {
     const { gl } = this
     const prevFbo = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null
     const prevViewport = gl.getParameter(gl.VIEWPORT) as Int32Array
@@ -218,7 +223,7 @@ export class ParticleSystem {
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.disable(gl.BLEND)
     this.drawTexture(prev, this.fade)
-    this.drawParticles(matrix, opacity, plain)
+    this.drawParticles(matrix, opacity, plain, fraction)
 
     // Composite the accumulated trails onto the map.
     gl.bindFramebuffer(gl.FRAMEBUFFER, prevFbo)

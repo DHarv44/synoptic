@@ -9,6 +9,7 @@ import { LocateButton } from '@/map/LocateButton'
 import { useCameraStore } from '@/map/cameraStore'
 import { ToolRail } from '@/app/shell/ToolRail'
 import { MobileToolBar } from '@/app/shell/MobileToolBar'
+import { MapLegends } from '@/app/shell/MapLegends'
 
 /**
  * Center viewport. Desktop: map with a persistent right-edge rail (tabs
@@ -21,6 +22,7 @@ export function Viewport({ isMobile }: { isMobile: boolean }) {
   return (
     <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
       <MapView />
+      <MapLegends isMobile={isMobile} />
       <PlaybackControl isMobile={isMobile} />
       {isMobile ? (
         <>

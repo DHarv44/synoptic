@@ -1,6 +1,7 @@
 import { IconWind } from '@tabler/icons-react'
 import { registerFeature } from '@/core/settings/registry'
 import { WindLayer } from '@/features/wind/WindLayer'
+import { WindLegend } from '@/features/wind/WindLegend'
 
 /** GPU particle wind field (GFS via NOMADS), selectable pressure level. */
 registerFeature({
@@ -11,6 +12,7 @@ registerFeature({
   layerGroup: 'analysis',
   layerIcon: IconWind,
   layerComponent: WindLayer,
+  legendComponent: WindLegend,
   sourceIds: ['gfs-wind'],
   // On by default now the decode is fixed (the negative-reference bug that
   // shifted every value by tens of m/s is corrected in the server's

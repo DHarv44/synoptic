@@ -434,3 +434,23 @@ UI now reaches −48 h but most layers only have frames for the last hours.
   sample through one bicubic B-spline `windAt()` (4 bilinear taps). Option
   left open: serve the native 0.25° grid (4× payload) for true extra detail.
 Verified z3.5/z6/z9 screenshots before and after; clean compile on reload.
+
+## Phase 14 — Wind finished (2026-09-05) ✅
+
+- **Native 0.25° grid**: the server fetched 0.25° GFS and decimated to 0.5°
+  to save payload (508 KB raw). Measured: the full grid gzips to 533 KB —
+  the same wire cost — so it now serves 1440×721 with gzip (Node zlib, no
+  dependency) on both the Express proxy and the Vite middleware, compressed
+  buffer cached beside the raw one. Client was already resolution-agnostic
+  (header width/height, textureSize in the shaders).
+- **Zoom-aware density**: the particle budget lives in the viewport, so
+  screen density was constant and street zoom read as noise. drawFraction
+  thins the drawn prefix (full to z5, halving ~every 1.4 zooms, floor 0.12).
+- **Speed legend**: WIND_RAMP (ramp.ts) is the single definition — it
+  generates the GLSL ramp AND the legend gradient, so the key cannot drift
+  from the wash. Ticks in the user's wind unit. Mounted through a new
+  registry slot `legendComponent` + shell MapLegends stack (bottom-left
+  above the playback bar; above the thumb buttons on mobile) — radar's dBZ
+  key can use the same slot.
+Verified live: payload gzip 1440×721 step 0.25; legend "10 m wind · km/h"
+with 0–160 ticks; z9 streaks individually readable; 250 tests.

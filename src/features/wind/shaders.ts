@@ -1,5 +1,7 @@
 /** GLSL for the wind particle system (WebGL2). */
 
+import { windRampGlsl } from '@/features/wind/ramp'
+
 /**
  * Bicubic (B-spline, 4 bilinear taps) sample of the wind texture, decoded
  * to m/s. Bilinear on a 0.5° grid is fine at continental zoom, but zoomed
@@ -224,18 +226,8 @@ out vec4 o_color;
 
 const float PI = 3.14159265358979;
 
-vec3 ramp(float s) {
-  // 0 → 40+ m/s: violet calm, blue, teal, green, yellow, orange, red, magenta.
-  vec3 c = vec3(0.42, 0.35, 0.62);
-  c = mix(c, vec3(0.28, 0.44, 0.76), smoothstep(1.0, 4.0, s));
-  c = mix(c, vec3(0.20, 0.65, 0.68), smoothstep(4.0, 8.0, s));
-  c = mix(c, vec3(0.34, 0.74, 0.35), smoothstep(8.0, 13.0, s));
-  c = mix(c, vec3(0.88, 0.82, 0.30), smoothstep(13.0, 19.0, s));
-  c = mix(c, vec3(0.92, 0.55, 0.24), smoothstep(19.0, 27.0, s));
-  c = mix(c, vec3(0.86, 0.26, 0.22), smoothstep(27.0, 36.0, s));
-  c = mix(c, vec3(0.80, 0.24, 0.62), smoothstep(36.0, 48.0, s));
-  return c;
-}
+// Generated from WIND_RAMP — the legend draws the same stops.
+${windRampGlsl()}
 
 void main() {
   // Fragment → mercator by ray-casting: unproject the near and far clip

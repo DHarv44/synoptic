@@ -24,6 +24,12 @@ export function fmtWind(ms: number, unit: WindUnit): string {
   return `${(ms * u.factor).toFixed(u.decimals)} ${u.label}`
 }
 
+/** Display units per m/s and the unit's label, for axes and colour keys. */
+export function windUnitInfo(unit: WindUnit): { factor: number; label: string } {
+  const u = WIND_PER_MS[unit]
+  return { factor: u.factor, label: u.label }
+}
+
 export function fmtPressure(hPa: number, unit: PressureUnit): string {
   if (unit === 'inHg') return `${(hPa * 0.02952998).toFixed(2)} inHg`
   return `${hPa.toFixed(1)} hPa`

@@ -18,6 +18,17 @@ import { fetchWindField, type WindField } from '@/features/wind/service'
  */
 const SIM_RATE_Z6 = 1800
 
+/**
+ * Particle budget drawn, by zoom. The budget lives in the viewport, so its
+ * DENSITY on screen is constant — which at street zoom turned 60k particles
+ * into fine-grained noise instead of readable flow. Thin as the view
+ * narrows: full budget to z5, halving roughly every 1.4 zoom levels, with
+ * a floor so a jet at z10 still has enough streaks to read.
+ */
+function drawFraction(zoom: number): number {
+  return Math.max(0.12, Math.min(1, Math.pow(2, (5 - zoom) * 0.7)))
+}
+
 interface WindCustomLayer extends CustomLayerInterface {
   system: ParticleSystem | null
   field: SpeedField | null
@@ -91,7 +102,7 @@ function makeLayer(particleCount: number): WindCustomLayer {
         }
       }
       // With the field carrying colour, particles go pale so motion reads.
-      this.system.draw(matrix as number[], this.opacity, this.showField)
+      this.system.draw(matrix as number[], this.opacity, this.showField, drawFraction(zoom))
     },
   }
   return layer

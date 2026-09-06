@@ -76,6 +76,12 @@ export interface FeatureManifest {
    * looking at them. Independent of the map, unlike `layerComponent`.
    */
   backgroundComponent?: ComponentType
+  /**
+   * A colour key or scale for the layer, drawn on the map while the feature
+   * is enabled — the shell stacks every enabled feature's legend in one
+   * corner. Renders nothing itself when its layer has no key to show.
+   */
+  legendComponent?: ComponentType
   /** Analysis dock panels this feature contributes. */
   panels?: PanelContribution[]
   /**

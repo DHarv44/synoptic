@@ -2,7 +2,7 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
-import { getWindPayload } from './server/gfsWind.mjs'
+import { getWindPayloadEncoded } from './server/gfsWind.mjs'
 import { getGridPayload } from './server/gfsGrid.mjs'
 import { getBuoysJson } from './server/ndbc.mjs'
 
@@ -16,11 +16,13 @@ function windProxy(): Plugin {
     configureServer(server) {
       server.middlewares.use('/proxy/gfs-wind', (req, res) => {
         const level = new URL(req.url ?? '', 'http://x').searchParams.get('level') ?? '10m'
-        getWindPayload(level)
-          .then((payload) => {
+        const gzip = /\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''))
+        getWindPayloadEncoded(level, gzip)
+          .then(({ buf, encoding }) => {
             res.setHeader('Content-Type', 'application/octet-stream')
             res.setHeader('Cache-Control', 'public, max-age=600')
-            res.end(payload)
+            if (encoding) res.setHeader('Content-Encoding', encoding)
+            res.end(buf)
           })
           .catch((e: unknown) => {
             res.statusCode = 502

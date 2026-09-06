@@ -17,7 +17,7 @@
  */
 import express from 'express'
 import { fileURLToPath } from 'node:url'
-import { getWindPayload } from './gfsWind.mjs'
+import { getWindPayloadEncoded } from './gfsWind.mjs'
 import { getGridPayload } from './gfsGrid.mjs'
 import { getBuoysJson } from './ndbc.mjs'
 
@@ -90,10 +90,12 @@ app.use('/proxy/nexrad', async (req, res) => {
 app.use('/proxy/gfs-wind', async (req, res) => {
   try {
     const level = new URL(req.url, 'http://x').searchParams.get('level') ?? '10m'
-    const payload = await getWindPayload(level)
+    const gzip = /\bgzip\b/.test(String(req.headers['accept-encoding'] ?? ''))
+    const { buf, encoding } = await getWindPayloadEncoded(level, gzip)
     res.setHeader('Content-Type', 'application/octet-stream')
     res.setHeader('Cache-Control', 'public, max-age=600')
-    res.end(payload)
+    if (encoding) res.setHeader('Content-Encoding', encoding)
+    res.end(buf)
   } catch (e) {
     fail(res, e)
   }
