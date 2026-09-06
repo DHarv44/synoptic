@@ -42,4 +42,17 @@ describe('gibsTileTemplate', () => {
   it('falls back to truecolor for an unknown key', () => {
     expect(gibsTileTemplate('nope', '2026-08-14')).toContain('VIIRS_SNPP')
   })
+
+  it('carries the West and Himawari layers verified 2026-09-05', () => {
+    expect(gibsTileTemplate('geocolor-west', '2026-09-05T23:30:00Z')).toContain(
+      'GOES-West_ABI_GeoColor/default/2026-09-05T23:30:00Z/GoogleMapsCompatible_Level7',
+    )
+    expect(gibsTileTemplate('ir-himawari', '2026-09-05T23:30:00Z')).toContain(
+      'Himawari_AHI_Band13_Clean_Infrared',
+    )
+    // Sub-daily like the East bands: snapped to 10 minutes.
+    expect(gibsTime('vis-himawari', Date.parse('2026-09-05T14:03:00Z'), NOW + 30 * 86_400_000)).toBe(
+      '2026-09-05T14:00:00Z',
+    )
+  })
 })

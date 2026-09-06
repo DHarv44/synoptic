@@ -35,9 +35,11 @@ const GOES_LAG_MS = 75 * 60_000
 
 /**
  * Layer ids, matrix sets and cadences verified against the live WMTS
- * capabilities on 2026-08-15. Notably: GIBS carries **no GOES water-vapor
- * band** — Air Mass is the closest thing, an RGB composite built from the
- * WV channels, and a better synoptic-pattern view than a single band anyway.
+ * capabilities on 2026-08-15 (East, VIIRS) and 2026-09-05 (West, Himawari).
+ * Notably: GIBS carries **no GOES water-vapor band** — Air Mass is the
+ * closest thing, an RGB composite built from the WV channels, and a better
+ * synoptic-pattern view than a single band anyway. Himawari has no GeoColor.
+ * The sub-daily archive is rolling, roughly a month deep.
  */
 export const PRODUCTS: Record<string, GibsProduct> = {
   truecolor: {
@@ -82,6 +84,62 @@ export const PRODUCTS: Record<string, GibsProduct> = {
   },
   airmass: {
     id: 'GOES-East_ABI_Air_Mass',
+    matrixSet: 'GoogleMapsCompatible_Level6',
+    ext: 'png',
+    maxZoom: 6,
+    stepMs: TEN_MIN_MS,
+    lagMs: GOES_LAG_MS,
+  },
+  'geocolor-west': {
+    id: 'GOES-West_ABI_GeoColor',
+    matrixSet: 'GoogleMapsCompatible_Level7',
+    ext: 'png',
+    maxZoom: 7,
+    stepMs: TEN_MIN_MS,
+    lagMs: GOES_LAG_MS,
+  },
+  'ir-west': {
+    id: 'GOES-West_ABI_Band13_Clean_Infrared',
+    matrixSet: 'GoogleMapsCompatible_Level6',
+    ext: 'png',
+    maxZoom: 6,
+    stepMs: TEN_MIN_MS,
+    lagMs: GOES_LAG_MS,
+  },
+  'vis-west': {
+    id: 'GOES-West_ABI_Band2_Red_Visible_1km',
+    matrixSet: 'GoogleMapsCompatible_Level7',
+    ext: 'png',
+    maxZoom: 7,
+    stepMs: TEN_MIN_MS,
+    lagMs: GOES_LAG_MS,
+  },
+  'airmass-west': {
+    id: 'GOES-West_ABI_Air_Mass',
+    matrixSet: 'GoogleMapsCompatible_Level6',
+    ext: 'png',
+    maxZoom: 6,
+    stepMs: TEN_MIN_MS,
+    lagMs: GOES_LAG_MS,
+  },
+  'ir-himawari': {
+    id: 'Himawari_AHI_Band13_Clean_Infrared',
+    matrixSet: 'GoogleMapsCompatible_Level6',
+    ext: 'png',
+    maxZoom: 6,
+    stepMs: TEN_MIN_MS,
+    lagMs: GOES_LAG_MS,
+  },
+  'vis-himawari': {
+    id: 'Himawari_AHI_Band3_Red_Visible_1km',
+    matrixSet: 'GoogleMapsCompatible_Level7',
+    ext: 'png',
+    maxZoom: 7,
+    stepMs: TEN_MIN_MS,
+    lagMs: GOES_LAG_MS,
+  },
+  'airmass-himawari': {
+    id: 'Himawari_AHI_Air_Mass',
     matrixSet: 'GoogleMapsCompatible_Level6',
     ext: 'png',
     maxZoom: 6,

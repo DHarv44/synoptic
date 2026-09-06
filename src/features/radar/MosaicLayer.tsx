@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import type { RasterTileSource } from 'maplibre-gl'
 import { useFeatureOption } from '@/core/settings/store'
 import { LOOP_FRAME_MS, loopFrames, useTimeline } from '@/core/time/timelineStore'
+import { createWarmthReporter } from '@/core/time/warmth'
 import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
@@ -43,18 +44,18 @@ export function MosaicLayer() {
   useEffect(() => {
     if (!playing) return
     const controller = new AbortController()
-    const { setWarmFrames } = useTimeline.getState()
+    const warmth = createWarmthReporter('radar-mosaic')
     const run = (): void => {
       const now = Date.now()
       const urls = loopFrames(now).map((t) => iemTileTemplate(iemValidTime(t, now)))
       // A new sweep re-warms from the oldest frame, so what was ready for the
       // previous viewport says nothing about this one.
-      setWarmFrames(0)
+      warmth.report(0)
       void prefetchFrames(
         (bbox, i) => urls[i].replace('{bbox-epsg-3857}', bbox),
         urls.length,
         controller.signal,
-        setWarmFrames,
+        warmth.report,
       )
     }
     // Debounced, and deliberately not immediate: every sweep is multiplied by
@@ -74,7 +75,7 @@ export function MosaicLayer() {
       map.off('moveend', schedule)
       clearInterval(id)
       // No sweep, no reporter — the loop must not wait on us.
-      setWarmFrames(null)
+      warmth.dispose()
     }
   }, [playing, map])
 

@@ -348,3 +348,23 @@ reach, client patterns not).
   share a noticeId across volcanoes (panel key now vnum+noticeId).
 Deferred: historical radar depth via IEM archive tiles (probe first) — the
 UI now reaches −48 h but most layers only have frames for the last hours.
+
+## Phase 11b — Satellite ring + loop warmth (2026-09-05) ✅
+
+- **Probes**: IEM n0q-t WMS archive serves 200s a full year back — CONUS
+  radar history needed no new work, the clock UI already unlocked it
+  (RainViewer global stays shallow; honest). GIBS carries GOES-West
+  (GeoColor/IR/vis/Air Mass) and Himawari (IR/vis/Air Mass, no GeoColor),
+  10-min cadence, ~1-month rolling archive — all verified against live
+  capabilities + real tiles.
+- **Products**: 7 new satellite options (West ×4, Himawari ×3), flat
+  workstation-style menu ordered by band. Volcanic preset upgraded from
+  daily VIIRS to Himawari Clean IR — 10-min plumes over the W Pacific,
+  readable at night.
+- **Loop warmth**: satellite now prefetches loop frames like radar
+  (coveringTiles slippy math + warmXyzFrames, viewport-capped), and a
+  warmth combiner (core/time/warmth.ts) lets multiple reporters gate the
+  loop on the slowest — previously two prefetchers would clobber one
+  channel. Satellite cuts crisp while playing (fade 0), cross-fades at
+  rest. Verified: Volcanic preset loop warmed 13/13 frames, Himawari URL
+  live, fade flips with transport.

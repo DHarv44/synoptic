@@ -1,16 +1,73 @@
+import { useEffect } from 'react'
 import type { RasterTileSource } from 'maplibre-gl'
 import { useFeatureOption } from '@/core/settings/store'
-import { useTimeline } from '@/core/time/timelineStore'
+import { LOOP_FRAME_MS, loopFrames, useTimeline } from '@/core/time/timelineStore'
+import { createWarmthReporter } from '@/core/time/warmth'
+import { useMapContext } from '@/map/MapView'
 import { useMapLayer } from '@/map/useMapLayer'
 import { addDataLayer } from '@/map/layerOrder'
-import { gibsMaxZoom, gibsTime, gibsTileTemplate } from '@/features/satellite/service'
+import { coveringTiles } from '@/map/tileMath'
+import {
+  gibsMaxZoom,
+  gibsTime,
+  gibsTileTemplate,
+  satelliteTimeMeta,
+} from '@/features/satellite/service'
+import { warmXyzFrames } from '@/features/satellite/prefetch'
+
+/** Cross-fade between frames while paused; crisp while looping. */
+const FADE_MS = 150
+
+/** Quiet period after a view change before prefetching the loop. */
+const SETTLE_MS = 500
 
 /** NASA GIBS satellite imagery under the radar layers. */
 export function SatelliteLayer() {
+  const { map } = useMapContext()
   const simTime = useTimeline((s) => s.simTime)
+  const playing = useTimeline((s) => s.playing)
   const product = useFeatureOption<string>('satellite', 'product')
   const opacity = useFeatureOption<number>('satellite', 'opacity')
   const tiles = gibsTileTemplate(product, gibsTime(product, simTime, Date.now()))
+
+  // Warm the loop's frames for the current viewport, like the radar mosaic
+  // does — without this the first pass through a satellite loop is a
+  // slideshow of cold 10-minute frames. Daily products have one frame per
+  // loop and nothing to warm.
+  useEffect(() => {
+    if (!playing || satelliteTimeMeta(product) === null) return
+    const controller = new AbortController()
+    const warmth = createWarmthReporter('satellite')
+    const run = (): void => {
+      const now = Date.now()
+      const b = map.getBounds()
+      const z = Math.max(0, Math.min(Math.floor(map.getZoom()), gibsMaxZoom(product)))
+      const cover = coveringTiles(b.getWest(), b.getSouth(), b.getEast(), b.getNorth(), z)
+      const urlsPerFrame = loopFrames(now).map((t) => {
+        const tmpl = gibsTileTemplate(product, gibsTime(product, t, now))
+        return cover.map((c) =>
+          tmpl.replace('{z}', String(c.z)).replace('{y}', String(c.y)).replace('{x}', String(c.x)),
+        )
+      })
+      warmth.report(0)
+      void warmXyzFrames(urlsPerFrame, controller.signal, warmth.report)
+    }
+    let pending = 0
+    const schedule = (): void => {
+      clearTimeout(pending)
+      pending = window.setTimeout(run, SETTLE_MS)
+    }
+    schedule()
+    map.on('moveend', schedule)
+    const id = setInterval(schedule, LOOP_FRAME_MS)
+    return () => {
+      controller.abort()
+      clearTimeout(pending)
+      map.off('moveend', schedule)
+      clearInterval(id)
+      warmth.dispose()
+    }
+  }, [playing, product, map])
 
   // Source lives as long as the product does. The sub-daily GOES frames step
   // every 10 minutes — with the timeline playing, rebuilding the source per
@@ -31,7 +88,7 @@ export function SatelliteLayer() {
           id: 'satellite',
           type: 'raster',
           source: 'satellite',
-          paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': 150 },
+          paint: { 'raster-opacity': opacity / 100, 'raster-fade-duration': FADE_MS },
         },
         'satellite',
       )
@@ -49,9 +106,13 @@ export function SatelliteLayer() {
       if (src) src.setTiles([tiles])
       if (map.getLayer('satellite')) {
         map.setPaintProperty('satellite', 'raster-opacity', opacity / 100)
+        // A cross-fade at loop speed leaves two frames dissolving into each
+        // other for most of each dwell, smearing the very motion the loop
+        // exists to show — crisp cuts while playing, fade at rest.
+        map.setPaintProperty('satellite', 'raster-fade-duration', playing ? 0 : FADE_MS)
       }
     },
-    [tiles, opacity],
+    [tiles, opacity, playing],
   )
 
   return null

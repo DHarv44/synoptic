@@ -106,8 +106,9 @@ export const BUILT_IN_PRESETS: Preset[] = [
     scene: {
       volcanoes: true,
       aviation: { sigmets: true, pireps: false },
-      // VIIRS true color is the global imagery — GOES-East can't see Sunda.
-      satellite: { product: 'truecolor', opacity: 70 },
+      // Himawari Clean IR: 10-minute cadence over Sunda and the W Pacific
+      // ring of fire, and plumes read day or night — what a VAAC watches.
+      satellite: { product: 'ir-himawari', opacity: 70 },
       wind: { level: '250', fieldOpacity: 30 },
       graticule: true,
     },
