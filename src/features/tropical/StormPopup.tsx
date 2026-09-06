@@ -71,6 +71,31 @@ export function RadiiPopup({ properties }: MapPopupProps) {
   )
 }
 
+/** A coastal watch or warning segment. */
+export function WatchWarnPopup({ properties }: MapPopupProps) {
+  return (
+    <Stack gap={4}>
+      <Group gap={6} wrap="nowrap">
+        <span
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: 2,
+            background: String(properties.color ?? '#888'),
+            flexShrink: 0,
+          }}
+        />
+        <Text size="sm" fw={600}>
+          {String(properties.label ?? 'Watch/warning')}
+        </Text>
+      </Group>
+      <Text size="xs" c="dimmed">
+        {String(properties.name ?? '')} · advisory {String(properties.advNum ?? '')} · NHC
+      </Text>
+    </Stack>
+  )
+}
+
 /** Clicking the cone itself explains what it is — and what it is not. */
 export function ConePopup({ properties }: MapPopupProps) {
   return (

@@ -1,5 +1,6 @@
 import type { TropicalData } from '@/features/tropical/store'
 import { radiiValidMs, type RadiiKt } from '@/features/tropical/radii'
+import { WW_STYLES, isWwCode } from '@/features/tropical/watchWarn'
 import {
   CATEGORY_COLORS,
   motionText,
@@ -23,6 +24,7 @@ export interface TropicalSources {
   /** Every forecast hour's radii; the layer picks the hour for the clock. */
   radii: GeoJSON.FeatureCollection
   arrival: GeoJSON.FeatureCollection
+  watchWarn: GeoJSON.FeatureCollection
 }
 
 export function tropicalSources(data: TropicalData | null): TropicalSources {
@@ -34,6 +36,7 @@ export function tropicalSources(data: TropicalData | null): TropicalSources {
     current: fc([]),
     radii: fc([]),
     arrival: fc([]),
+    watchWarn: fc([]),
   })
   if (!data) return empty()
   const cone: GeoJSON.Feature[] = []
@@ -43,6 +46,7 @@ export function tropicalSources(data: TropicalData | null): TropicalSources {
   const current: GeoJSON.Feature[] = []
   const radii: GeoJSON.Feature[] = []
   const arrival: GeoJSON.Feature[] = []
+  const watchWarn: GeoJSON.Feature[] = []
 
   for (const s of data.storms) {
     const cat = stormCategory(s.classification, s.intensityKt)
@@ -124,6 +128,23 @@ export function tropicalSources(data: TropicalData | null): TropicalSources {
         })
       }
     }
+    for (const f of feats(g.watchWarn)) {
+      const code = String((f.properties as Record<string, unknown> | null)?.tcww ?? '').toUpperCase()
+      if (!isWwCode(code)) continue
+      const style = WW_STYLES[code]
+      watchWarn.push({
+        ...f,
+        properties: {
+          stormId: s.id,
+          name: s.name,
+          code,
+          label: style.label,
+          color: style.color,
+          warning: style.warning,
+          advNum: s.advNum,
+        },
+      })
+    }
   }
   return {
     cone: fc(cone),
@@ -133,5 +154,6 @@ export function tropicalSources(data: TropicalData | null): TropicalSources {
     current: fc(current),
     radii: fc(radii),
     arrival: fc(arrival),
+    watchWarn: fc(watchWarn),
   }
 }

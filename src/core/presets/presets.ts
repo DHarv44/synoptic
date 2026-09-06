@@ -5,8 +5,8 @@ import type { SettingValue } from '@/core/settings/types'
 /**
  * The features a preset governs — the map scene. Identity settings (units,
  * notifications, interface) are the user's own and no preset touches them.
- * `alerts` is deliberately absent: warnings never turn off with a scene
- * change, whatever the preset says.
+ * `alerts` and `tropical` are deliberately absent: warnings and active
+ * hurricanes never turn off with a scene change, whatever the preset says.
  */
 export const SCENE_FEATURES = [
   'radar',
@@ -110,6 +110,20 @@ export const BUILT_IN_PRESETS: Preset[] = [
       // ring of fire, and plumes read day or night — what a VAAC watches.
       satellite: { product: 'ir-himawari', opacity: 70 },
       wind: { level: '250', fieldOpacity: 30 },
+      graticule: true,
+    },
+  },
+  {
+    id: 'tropical',
+    label: 'Tropical',
+    description: 'GeoColor satellite, worldwide radar, surface wind and buoys under the active storms.',
+    // The storms themselves are not a scene feature — they stay on
+    // regardless — so this preset sets what belongs UNDER them.
+    scene: {
+      satellite: { product: 'geocolor', opacity: 80 },
+      radar: { source: 'global' },
+      wind: { level: '10m', fieldOpacity: 25 },
+      buoys: true,
       graticule: true,
     },
   },

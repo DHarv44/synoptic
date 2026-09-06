@@ -23,6 +23,8 @@ export const STORM_LAYERS = {
   /** Isochrones (polylines, `arrival_time`); present only with a land threat. */
   arrivalLikely: 'Most Likely Arrival Time',
   arrivalEarliest: 'Earliest Reasonable Arrival Time',
+  /** Coastal segments (polylines, `tcww` HWA/HWR/TWA/TWR); schema verified, no live sample. */
+  watchWarn: 'Watch-Warning',
 } as const
 
 export type StormLayerKey = keyof typeof STORM_LAYERS
@@ -72,6 +74,7 @@ export async function fetchStormGis(storm: ActiveStorm): Promise<StormGis> {
     windRadii: EMPTY_FC,
     arrivalLikely: EMPTY_FC,
     arrivalEarliest: EMPTY_FC,
+    watchWarn: EMPTY_FC,
   })
   if (fixtureActive()) {
     const all = await loadFixture<Record<string, Partial<StormGis>>>('nhc-gis')

@@ -598,3 +598,14 @@ watches/warnings + Tropical preset; H4 intensity trace (b-deck), spaghetti
   within 120 km (about ±6 h), and nothing outside the drawn area. Verified
   live: radii tau 0 → 24 → 72 (clamped at +200 h), card correct, home on
   the "Mon 8 am" line reads "≈ Mon 8 am". 9 tests.
+- [x] **H3 — Watches/warnings + Tropical preset.** The map service's
+  Watch-Warning layer is coastal polylines coded `tcww` (HWR/HWA/TWR/TWA);
+  drawn above the labels with a dark casing, warnings solid, watches
+  dashed, NHC's colours, a card per segment, and a "Coast" legend row that
+  appears only when segments exist. Verified on a synthetic Cabo segment
+  and then LIVE: Hurricane Lowell's Hurricane Watch + two TS Watches for
+  the Hawaiian Islands rendered as issued. **Tropical preset** sets what
+  belongs under the storms — GeoColor, worldwide radar, surface wind,
+  buoys, graticule. `tropical` is deliberately NOT a scene feature (like
+  `alerts`): an active hurricane never disappears with a preset change;
+  pinned by test.

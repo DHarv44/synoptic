@@ -16,6 +16,7 @@ const SOURCES = [
   'tropical-track',
   'tropical-points',
   'tropical-current',
+  'tropical-ww',
 ]
 const LAYERS = [
   'tropical-cone-fill',
@@ -31,6 +32,9 @@ const LAYERS = [
   'tropical-point-labels',
   'tropical-current',
   'tropical-current-labels',
+  'tropical-ww-casing',
+  'tropical-ww-warning',
+  'tropical-ww-watch',
 ]
 
 const RADII_COLOR_EXPR = [
@@ -58,6 +62,7 @@ export function TropicalLayer() {
   const showPast = useFeatureOption<boolean>('tropical', 'pastTrack')
   const showRadii = useFeatureOption<boolean>('tropical', 'windRadii')
   const showArrival = useFeatureOption<boolean>('tropical', 'arrival')
+  const showWw = useFeatureOption<boolean>('tropical', 'watchWarn')
   const data = useTropical()
   useEffect(() => acquireTropicalFeed(), [])
   const sources = useMemo(() => tropicalSources(data), [data])
@@ -249,6 +254,42 @@ export function TropicalLayer() {
       },
       'tropical-points',
     )
+    // Coastal watches and warnings above the labels, like NWS warning
+    // outlines: a dark casing, warnings solid, watches dashed.
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-ww-casing',
+        type: 'line',
+        source: 'tropical-ww',
+        layout: { 'line-cap': 'round' },
+        paint: { 'line-color': '#000000', 'line-opacity': 0.5, 'line-width': 7 },
+      },
+      'tropical-points',
+    )
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-ww-warning',
+        type: 'line',
+        source: 'tropical-ww',
+        filter: ['==', ['get', 'warning'], true],
+        layout: { 'line-cap': 'round' },
+        paint: { 'line-color': ['get', 'color'], 'line-width': 4.5 },
+      },
+      'tropical-points',
+    )
+    addDataLayer(
+      m,
+      {
+        id: 'tropical-ww-watch',
+        type: 'line',
+        source: 'tropical-ww',
+        filter: ['==', ['get', 'warning'], false],
+        paint: { 'line-color': ['get', 'color'], 'line-width': 4, 'line-dasharray': [2, 1.5] },
+      },
+      'tropical-points',
+    )
     return () => {
       for (const id of LAYERS) if (m.getLayer(id)) m.removeLayer(id)
       for (const id of SOURCES) if (m.getSource(id)) m.removeSource(id)
@@ -268,8 +309,9 @@ export function TropicalLayer() {
       set('tropical-track', sources.track)
       set('tropical-points', sources.points)
       set('tropical-current', sources.current)
+      set('tropical-ww', showWw ? sources.watchWarn : EMPTY)
     },
-    [sources, radiiNow, showCone, showPast, showRadii, showArrival],
+    [sources, radiiNow, showCone, showPast, showRadii, showArrival, showWw],
   )
 
   return null

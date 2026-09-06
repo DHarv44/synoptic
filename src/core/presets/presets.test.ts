@@ -18,8 +18,9 @@ describe('built-in presets', () => {
     }
   })
 
-  it('never touch alerts — warnings cannot be preset off', () => {
+  it('never touch alerts or tropical — warnings and hurricanes cannot be preset off', () => {
     expect(SCENE_FEATURES).not.toContain('alerts')
+    expect(SCENE_FEATURES).not.toContain('tropical')
   })
 })
 
